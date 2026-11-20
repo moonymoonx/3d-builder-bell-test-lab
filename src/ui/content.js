@@ -15,7 +15,7 @@ export const DEPTH_DRAWERS = {
     ],
   },
   merminRandom: {
-    title: 'How do we know? — Why random dials hit 50%',
+    title: 'How do we know? — Why random dials hit ~50%',
     plain: 'When both dials match (3 of 9 pairs), the lamps always agree. When dials differ (6 of 9 pairs), quantum spins give matching lamps only 1/4 of the time.',
     detail: 'Each round draws fresh, unpredictable questions from your device\'s built-in cryptographic random generator — never pre-scripted, never nudged.',
     math: 'P(same) = (3/9)·1 + (6/9)·cos²(120°/2) = 1/3 + (2/3)·(1/4) = 1/2 (50%).',
@@ -26,7 +26,7 @@ export const DEPTH_DRAWERS = {
   },
   merminCard: {
     title: 'How do we know? — Why every hidden card scores ≥ 5/9',
-    plain: 'To guarantee agreement whenever both dials match, both particles must carry the same 3-colour hidden card — and every 3-colour card matches on at least 5 of the 9 dial pairs.',
+    plain: 'Because matching dials agreed 100%, both particles must carry the same 3-colour hidden card — and every 3-colour card matches on at least 5 of the 9 dial pairs.',
     detail: 'All-same cards (▲▲▲ or ●●●) match 9/9 (100%). Any 2-and-1 card (like ▲▲●) matches on 2² + 1² = 5 of 9 pairs (55.6%). Mixing cards at random only averages ≥ 55.6%.',
     math: '8 deterministic cards → matches ∈ {9/9, 5/9}. Any convex mixture obeys P(same) ≥ 5/9 ≈ 55.56% > 50%.',
     sources: [
@@ -54,13 +54,13 @@ export const DEPTH_DRAWERS = {
     ],
   },
   breakthrough: {
-    title: 'How do we know? — Ruling out luck & measuring S',
+    title: 'How do we know? — Ruling out luck & what Bell proves',
     plain: 'This shatter means less than a one-in-a-million chance any hidden card — even one adapting on the fly — reached here by luck.',
-    detail: 'Alice measures at 0° / 90° and Bob at 45° / −45° (photons use half: 0° / 45° and 22.5° / −22.5°). Each round updates an exact betting score: ×(2+√2)/3 per win, ×(2−√2) per loss. Under any local plan, expected multiplier ≤ 1, so Ville\'s inequality guarantees P(ever ≥ 10⁶) ≤ 10⁻⁶.',
-    math: 'P_win = cos²(π/8) = (2+√2)/4 ≈ 85.36% · S = E₀₀+E₀₁+E₁₀−E₁₁ = 8·P_win − 4 · Classical S ≤ 2 · Tsirelson bound S ≤ 2√2 ≈ 2.828.',
+    detail: 'What Bell tests rule out: all local hidden-variable plans (answers pre-packed inside particles with no faster-than-light link). What they do NOT rule out: nonlocal hidden-variable theories (such as Bohmian mechanics), Many-Worlds, or superdeterminism. Alice measures at 0°/90° and Bob at 45°/−45° (photons use half).',
+    math: 'P_win = cos²(π/8) = (2+√2)/4 ≈ 85.36% · S = E₀₀+E₀₁+E₁₀−E₁₁ = 8·P_win − 4 · Classical S ≤ 2 · Tsirelson bound S ≤ 2√2 ≈ 2.828 · Betting factors (2+√2)/3 & 2−√2 satisfy Ville\'s inequality P(ever ≥ 10⁶) ≤ 10⁻⁶.',
     sources: [
       'Cirel\'son / Tsirelson, Lett. Math. Phys. 4, 93 (1980) — doi:10.1007/bf00417500',
-      'Shafer et al. (2011) — arxiv.org/abs/0912.4269 · Zhang, Glancy, & Knill (2011) — arxiv.org/abs/1108.2468',
+      'Shafer et al. (2011) — arxiv.org/abs/0912.4269 · SEP "Bell\'s Theorem" — plato.stanford.edu/entries/bell-theorem/',
     ],
   },
   noSignal: {

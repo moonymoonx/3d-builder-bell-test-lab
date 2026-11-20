@@ -24,27 +24,29 @@ export function createApp({ stage, audio, root }) {
     step: 0,
     teacher: window.location.hash === '#teacher',
     peeled: false,
-    // Step 1-2 Mermin
     dialA: 0,
     dialB: 0,
     merminSameCount: 0,
     merminSameMatches: 0,
     merminRandCount: 0,
     merminRandMatches: 0,
-    // Step 3 Mermin hidden card (default Coral, Coral, Jade -> 5/9)
     merminCard: [0, 0, 1],
-    // Step 5-6 CHSH
     chshCard: { a0: 0, a1: 0, b0: 0, b1: 0 },
-    chshMode: 'card', // 'card' | 'entangled'
+    chshMode: 'card',
     chshRun: createChshRun(),
     chshSettled: false,
     wallHitBy75: false,
     classVoted: false,
     burstRunning: false,
-    // Step 7 Bob alone (no-signaling)
-    alicePolicy: '0',
-    bobRun: { n0: 0, b0WhenA0: 0, n1: 0, b0WhenA1: 0, nOff: 0, b0WhenOff: 0, total: 0, wins: 0, compared: false },
-    // UI
+    alicePolicy: '0', // '0' | '1' | 'random' | 'off'
+    bobRun: {
+      n0: 0, b0WhenA0: 0,
+      n1: 0, b0WhenA1: 0,
+      nRand: 0, b0WhenRand: 0,
+      nOff: 0, b0WhenOff: 0,
+      total: 0, wins: 0, compared: false,
+      recent: [], // last 24 rounds: { b, win }
+    },
     depthKey: null,
     idleHint: '',
     lastInteract: performance.now(),
@@ -104,7 +106,6 @@ export function createApp({ stage, audio, root }) {
 
   function syncCardStageVisual() {
     stage.setCardStrip(state.merminCard);
-    // Show Alice on dial 1 and Bob on dial 3 so both colours on the card are visibly demonstrated on stage!
     state.dialA = 0;
     state.dialB = 2;
     stage.setDial('left', 0, 'mermin');
@@ -139,8 +140,8 @@ export function createApp({ stage, audio, root }) {
       state.peeled = false;
       stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
-      stage.setDial('left', state.dialA, 'mermin');
-      stage.setDial('right', state.dialB, 'mermin');
+      stage.setDial('left', 0, 'mermin');
+      stage.setDial('right', 0, 'mermin');
     } else if (s === 2) {
       state.peeled = false;
       stage.setPeel(false, { snap: true });
@@ -157,7 +158,6 @@ export function createApp({ stage, audio, root }) {
         duration: 0.45,
       });
     } else if (s === 4) {
-      // Default to DIFFERENT angles (Alice 0°, Bob 120°) so tilted magnets read in 1 second!
       state.dialA = 0;
       state.dialB = 1;
       state.peeled = true;
@@ -176,12 +176,12 @@ export function createApp({ stage, audio, root }) {
       stage.setSourceEntangled(false);
       stage.setWallState('intact');
       const stats = computeChshS(state.chshRun);
-      stage.setArenaProgress(state.chshRun.rounds > 0 ? stats.winRate : 0, { isQuantum: false, se: stats.seWin, snap: true });
+      stage.setArenaProgress(state.chshRun.rounds > 0 ? stats.winRate : 0, { isQuantum: false, snap: true });
       stage.setDial('left', 0, 'chsh');
       stage.setDial('right', 0, 'chsh');
     } else if (s === 6) {
       state.chshMode = 'entangled';
-      state.peeled = false; // Keep clean solid boxes on Step 6 so 0/1 dials read crisply
+      state.peeled = false;
       stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
       stage.setDial('left', 0, 'chsh');
@@ -194,12 +194,12 @@ export function createApp({ stage, audio, root }) {
       state.peeled = false;
       stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
-      stage.setAliceDimmed(!state.bobRun.compared);
+      stage.setAlicePartition(!state.bobRun.compared);
     } else if (s === 8) {
       state.peeled = true;
       stage.setPeel(true);
       stage.setSourceEntangled(true);
-      stage.setAliceDimmed(false);
+      stage.setAlicePartition(false);
     }
 
     render();
@@ -220,7 +220,10 @@ export function createApp({ stage, audio, root }) {
     state.chshSettled = false;
     state.wallHitBy75 = false;
     state.classVoted = false;
-    state.bobRun = { n0: 0, b0WhenA0: 0, n1: 0, b0WhenA1: 0, nOff: 0, b0WhenOff: 0, total: 0, wins: 0, compared: false };
+    state.bobRun = {
+      n0: 0, b0WhenA0: 0, n1: 0, b0WhenA1: 0, nRand: 0, b0WhenRand: 0, nOff: 0, b0WhenOff: 0,
+      total: 0, wins: 0, compared: false, recent: [],
+    };
     stage.setWallState('intact');
     stage.setArenaProgress(0, { isQuantum: false, snap: true });
     goto(0);
@@ -275,6 +278,7 @@ export function createApp({ stage, audio, root }) {
         stage.bloomLampRight(last.colorB);
       }
       render();
+      requestAnimationFrame(() => stage.resize());
       return;
     }
 
@@ -348,15 +352,13 @@ export function createApp({ stage, audio, root }) {
       let last = null;
       for (let i = 0; i < n; i++) last = stepOne(n === 1);
       if (isQuantum && state.chshRun.brokenAt === null) {
-        for (let extra = 0; extra < 1500 && state.chshRun.brokenAt === null; extra++) {
-          last = stepOne(false);
-        }
+        for (let extra = 0; extra < 1500 && state.chshRun.brokenAt === null; extra++) last = stepOne(false);
       }
       if (isQuantum && state.chshRun.rounds >= 1500 && state.chshRun.brokenAt !== null) {
         state.chshSettled = true;
       }
       const stats = computeChshS(state.chshRun);
-      stage.setArenaProgress(stats.winRate, { isQuantum, se: stats.seWin, snap: instant });
+      stage.setArenaProgress(stats.winRate, { isQuantum, snap: instant });
       if (!isQuantum && evaluateChshCard(state.chshCard).wins === 3 && state.chshRun.rounds >= 100) {
         state.wallHitBy75 = true;
       }
@@ -376,6 +378,7 @@ export function createApp({ stage, audio, root }) {
         }
       }
       render();
+      requestAnimationFrame(() => stage.resize());
       return;
     }
 
@@ -398,7 +401,7 @@ export function createApp({ stage, audio, root }) {
       }
 
       const stats = computeChshS(state.chshRun);
-      stage.setArenaProgress(stats.winRate, { isQuantum, se: stats.seWin });
+      stage.setArenaProgress(stats.winRate, { isQuantum });
       if (last) {
         stage.setDial('left', last.x, 'chsh');
         stage.setDial('right', last.y, 'chsh');
@@ -434,18 +437,20 @@ export function createApp({ stage, audio, root }) {
       }
       const st = computeChshS(state.chshRun);
       stage.setWallState('shattered', { settled: false });
-      stage.setArenaProgress(st.winRate, { isQuantum: true, se: st.seWin, snap: true });
+      stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true });
       stage.bloomLampLeft(0);
       stage.bloomLampRight(0);
       render();
+      requestAnimationFrame(() => stage.resize());
     } else {
       fireChsh(targetRounds, { instant });
       if (settled) {
         state.chshSettled = true;
         const st = computeChshS(state.chshRun);
         stage.setWallState('shattered', { settled: true });
-        stage.setArenaProgress(st.winRate, { isQuantum: true, se: st.seWin, snap: true });
+        stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true });
         render();
+        requestAnimationFrame(() => stage.resize());
       }
     }
   }
@@ -454,7 +459,7 @@ export function createApp({ stage, audio, root }) {
     touchInteraction();
     stopTimers();
     state.bobRun.compared = false;
-    stage.setAliceDimmed(true);
+    stage.setAlicePartition(true);
 
     const runChunk = k => {
       let last = null;
@@ -466,6 +471,9 @@ export function createApp({ stage, audio, root }) {
         if (state.alicePolicy === 'off') {
           state.bobRun.nOff++;
           if (r.b === 0) state.bobRun.b0WhenOff++;
+        } else if (state.alicePolicy === 'random') {
+          state.bobRun.nRand++;
+          if (r.b === 0) state.bobRun.b0WhenRand++;
         } else if (ax === 0) {
           state.bobRun.n0++;
           if (r.b === 0) state.bobRun.b0WhenA0++;
@@ -473,6 +481,8 @@ export function createApp({ stage, audio, root }) {
           state.bobRun.n1++;
           if (r.b === 0) state.bobRun.b0WhenA1++;
         }
+        state.bobRun.recent.push({ b: r.b, win: r.win });
+        if (state.bobRun.recent.length > 24) state.bobRun.recent.shift();
         last = r;
       }
       return last;
@@ -482,6 +492,7 @@ export function createApp({ stage, audio, root }) {
       const last = runChunk(n);
       if (last) stage.bloomLampRight(last.b);
       render();
+      requestAnimationFrame(() => stage.resize());
       return;
     }
 
@@ -512,7 +523,7 @@ export function createApp({ stage, audio, root }) {
     if (state.bobRun.total === 0) fireBobAlone(1000, { instant: true });
     stage.triggerComparePulse(() => {
       state.bobRun.compared = true;
-      stage.setAliceDimmed(false);
+      stage.setAlicePartition(false);
       audio.playCompareArrive();
       render();
     });
@@ -527,14 +538,14 @@ export function createApp({ stage, audio, root }) {
     if (key === 'breakthrough' && state.chshRun.rounds > 0) {
       const st = computeChshS(state.chshRun);
       const odds = state.chshRun.maxLog10B >= 6
-        ? 'less than 1 in 1,000,000'
+        ? '< 1 in 1,000,000'
         : state.chshRun.maxLog10B >= 3
-          ? 'less than 1 in 1,000'
+          ? '< 1 in 1,000'
           : `about 1 in ${Math.max(1, Math.round(Math.pow(10, Math.max(0, state.chshRun.maxLog10B)))).toLocaleString()}`;
       liveExtra = `
         <div class="depth-live">
           <div><strong>This run (${state.chshRun.rounds.toLocaleString()} rounds):</strong> ${(st.winRate * 100).toFixed(2)}% wins</div>
-          <div><strong>Measured S:</strong> ${st.S.toFixed(3)} ± ${st.seS.toFixed(3)} <span class="muted">(classical ≤ 2.000 · nature's limit 2√2 ≈ 2.828)</span></div>
+          <div><strong>Measured S:</strong> ${st.S.toFixed(3)} ± ${st.seS.toFixed(3)} <span class="muted">(classical ≤ 2.000 · Tsirelson 2√2 ≈ 2.828)</span></div>
           <div><strong>Chance of luck:</strong> ${odds} <span class="muted">(log₁₀ B = ${state.chshRun.log10B.toFixed(2)})</span></div>
         </div>
       `;
@@ -553,10 +564,10 @@ export function createApp({ stage, audio, root }) {
     elDepthBackdrop.hidden = false;
   }
 
-  function formatLuckProof(log10B) {
-    if (log10B >= EVIDENCE_BREAK_LOG10) return { label: '1 in 1,000,000+ proof', cls: 'gold' };
-    if (log10B >= EVIDENCE_CRACK_LOG10) return { label: '1 in 1,000+ (cracking)', cls: 'warn' };
-    return { label: 'Not proven (could be luck)', cls: 'low' };
+  function formatLuckChance(log10B) {
+    if (log10B >= EVIDENCE_BREAK_LOG10) return { label: 'Chance of luck: < 1 in 1,000,000', cls: 'gold' };
+    if (log10B >= EVIDENCE_CRACK_LOG10) return { label: 'Chance of luck: < 1 in 1,000', cls: 'warn' };
+    return { label: 'Chance of luck: still possible', cls: 'low' };
   }
 
   function renderTopBar() {
@@ -587,7 +598,7 @@ export function createApp({ stage, audio, root }) {
 
     if (isHero) {
       elHeroOverlay.innerHTML = `
-        <h1 class="hero-headline">Two boxes. No wires.<br>How do they always agree?</h1>
+        <h1 class="hero-headline">Two boxes. No wires.<br>How do they always&nbsp;agree?</h1>
         <div class="hero-actions">
           <button class="btn-primary" id="btn-investigate">Investigate</button>
         </div>
@@ -603,7 +614,7 @@ export function createApp({ stage, audio, root }) {
       const samePct = tested ? Math.round((state.merminSameMatches / state.merminSameCount) * 100) : 0;
       bodyHtml += `
         <div class="step-kicker">Step 1 · The mystery boxes</div>
-        <h2 class="step-question">Same dial, same colour. Every time. How?</h2>
+        <h2 class="step-question">Same dial, same colour. Every time.</h2>
         <p class="step-sub">Match Alice and Bob's dials and fire. Einstein thought each pair's answers must be settled before they part — like a hidden card.</p>
         <div class="dial-pair">
           <div class="dial-col">
@@ -636,8 +647,7 @@ export function createApp({ stage, audio, root }) {
       footerHtml = `
         ${tested
           ? `<button class="btn-primary" data-next="2">Let the dials spin →</button>`
-          : `<button class="btn-primary" id="btn-fire-50-same">Fire 50 same-dial pairs</button>
-             <button class="btn-quiet-sm" data-next="2">Skip to spinning dials →</button>`}
+          : `<button class="btn-primary" id="btn-fire-50-same">Fire 50 same-dial pairs</button>`}
         <button class="btn-depth" data-depth="merminSame">How do we know?</button>
       `;
     } else if (state.step === 2) {
@@ -663,7 +673,7 @@ export function createApp({ stage, audio, root }) {
         </div>
         ${hasRun ? `
           <div class="callout-box">
-            <strong>Here's the catch:</strong> 100% when dials match, yet only <strong>50%</strong> overall. Can any hidden card pull that off?
+            <strong>Here's the puzzle:</strong> 100% when dials match, yet <strong>~50%</strong> overall — sounds simple until you try to fake it with a hidden card.
           </div>
           <div class="inline-actions">
             <button class="btn-secondary" id="btn-fire-1000-rand" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 more</button>
@@ -673,7 +683,7 @@ export function createApp({ stage, audio, root }) {
       footerHtml = `
         ${!hasRun
           ? `<button class="btn-primary" id="btn-fire-1000-rand" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 random pairs</button>`
-          : `<button class="btn-primary" data-next="3">Test a hidden card →</button>`}
+          : `<button class="btn-primary" data-next="3">Try faking it with a hidden card →</button>`}
         <button class="btn-depth" data-depth="merminRandom">How do we know?</button>
       `;
     } else if (state.step === 3) {
@@ -682,7 +692,7 @@ export function createApp({ stage, audio, root }) {
       bodyHtml += `
         <div class="step-kicker">Step 3 · Test a hidden card</div>
         <h2 class="step-question">Could a hidden card hit 50%?</h2>
-        <p class="step-sub">Tap each dial to write a hidden card for both particles. Every pair of Alice &amp; Bob dials is scored below.</p>
+        <p class="step-sub">Because matching dials agreed 100%, both particles must carry the same hidden card. Tap a dial to flip ▲ Coral or ● Jade.</p>
         <div class="card-switches">
           ${[0, 1, 2].map(i => {
             const c = state.merminCard[i];
@@ -718,7 +728,7 @@ export function createApp({ stage, audio, root }) {
           </div>
         </div>
         <div class="callout-box">
-          <strong>Impossible!</strong> Every hidden card matches at least <strong>5 of 9 (55.6%)</strong> — yet the real boxes hit <strong>50%</strong>.
+          <strong>Stuck at 55.6%!</strong> Every hidden card matches at least <strong>5 of 9</strong> — yet the real boxes hover near <strong>50%</strong>.
         </div>
       `;
       footerHtml = `
@@ -728,8 +738,8 @@ export function createApp({ stage, audio, root }) {
     } else if (state.step === 4) {
       bodyHtml += `
         <div class="step-kicker">Step 4 · Inside the boxes</div>
-        <h2 class="step-question">No wires. No hidden cards. Just tilted magnets.</h2>
-        <p class="step-sub">Each box holds a magnet tilted to 0°, 120°, or 240°. Turn Alice or Bob's dial to rotate the N/S poles inside.</p>
+        <h2 class="step-question">No wires. No cards. Just tilted magnets.</h2>
+        <p class="step-sub">Each particle meets a tilted magnet (0°, 120°, or 240°) and triggers ▲ Coral or ● Jade. Turn Alice or Bob's dial to rotate the poles.</p>
         <div class="dial-pair">
           <div class="dial-col">
             <div class="dial-label">Alice (${MERMIN_SPIN_ANGLES[state.dialA]}°)</div>
@@ -750,7 +760,7 @@ export function createApp({ stage, audio, root }) {
         </div>
       `;
       footerHtml = `
-        <button class="btn-primary" data-next="5">Now put those magnets to a real test →</button>
+        <button class="btn-primary" data-next="5">Sharpen this into a 75% team game →</button>
         <button class="btn-depth" data-depth="peelOff">How do we know?</button>
       `;
     } else if (state.step === 5) {
@@ -759,18 +769,18 @@ export function createApp({ stage, audio, root }) {
       const hasRun = state.chshRun.rounds > 0;
       const pct = hasRun ? st.winRate * 100 : 0;
       const isLuckyStreak = hasRun && st.winRate > 0.75;
-      const luckInfo = formatLuckProof(state.chshRun.maxLog10B);
+      const luckInfo = formatLuckChance(state.chshRun.maxLog10B);
       const leverReady = state.teacher ? state.classVoted : state.wallHitBy75;
 
       bodyHtml += `
         ${state.teacher ? `
           <div class="teacher-pin">
-            <strong>Game rule:</strong> Alice &amp; Bob each get 0 or 1 · <strong>Match</strong> unless both get 1 (then <strong>differ</strong>) · No talking
+            <strong>Rule:</strong> Both get 0 or 1 · <strong>Match</strong> unless both get 1 (<strong>differ</strong>) · No talking
           </div>
         ` : ''}
         <div class="step-kicker">Step 5 · The team game</div>
-        <h2 class="step-question">Can any hidden card beat 75%?</h2>
-        ${!state.teacher ? `<p class="step-sub">Alice and Bob each get a random 0 or 1. Win if they match — unless both got 1, then they must differ. No talking.</p>` : ''}
+        <h2 class="step-question">${state.teacher ? 'Can any card beat 75%?' : 'Can any hidden card beat 75%?'}</h2>
+        ${!state.teacher ? `<p class="step-sub">The 3-dial gap was tiny (50% vs 55.6%). This 2-question game raises the stakes: Alice &amp; Bob must match — unless both get 1, then differ.</p>` : ''}
 
         <div class="chsh-switches">
           <div class="sw-row">
@@ -785,34 +795,30 @@ export function createApp({ stage, audio, root }) {
           </div>
         </div>
 
-        <div class="chsh-tiles">
+        <div class="rule-strip" aria-label="4 question pairs">
           ${ev.tiles.map(t => `
-            <div class="c-tile ${t.win ? 'win' : 'lose'}">
-              <div class="t-q">${t.x} &amp; ${t.y}</div>
-              <div class="t-rule">${t.x && t.y ? 'differ' : 'match'}</div>
-              <div class="t-mark">${t.win ? '✓' : '✗'}</div>
-            </div>
+            <span class="r-chip ${t.win ? 'win' : 'lose'}">${t.x}&amp;${t.y} ${t.win ? '✓' : '✗'}</span>
           `).join('')}
         </div>
 
         <div class="tally-card compact">
           <div class="tally-header">
-            <span>Hidden card (${ev.wins} of 4 = ${Math.round(ev.rate * 100)}%)</span>
-            <span class="big-num">${hasRun ? `${pct.toFixed(1)}%` : '—'}</span>
+            <span>Hidden card (${ev.wins}/4 = ${Math.round(ev.rate * 100)}%)</span>
+            <span class="big-num hero-score">${hasRun ? `${pct.toFixed(1)}%` : '—'}</span>
           </div>
           <div class="tally-sub">
             ${hasRun
               ? isLuckyStreak
-                ? `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} — a lucky streak! Keep firing and luck fades back to 75%.`
-                : `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins — stuck at the 75% ceiling.`
-              : 'Every card leaves at least one red ✗ tile. Test it against the glass wall.'}
+                ? `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} — a lucky streak! Keep firing, luck fades to 75%.`
+                : `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins — stuck at the 75% wall.`
+              : 'Every card leaves a red ✗. Test it against the glass wall.'}
           </div>
-          ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">Proof against luck: ${luckInfo.label}</div>` : ''}
+          ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>` : ''}
         </div>
 
         <div class="inline-actions">
-          <button class="btn-secondary" data-fire="1" ${state.burstRunning ? 'disabled' : ''}>×1</button>
-          <button class="btn-secondary" data-fire="100" ${state.burstRunning ? 'disabled' : ''}>×100</button>
+          ${!state.teacher ? `<button class="btn-secondary" data-fire="1" ${state.burstRunning ? 'disabled' : ''}>×1</button>` : ''}
+          ${!state.teacher ? `<button class="btn-secondary" data-fire="100" ${state.burstRunning ? 'disabled' : ''}>×100</button>` : ''}
           <button class="btn-secondary" data-fire="1000" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
           ${hasRun ? `<button class="btn-quiet-sm" id="btn-clear-chsh">Clear</button>` : ''}
         </div>
@@ -832,16 +838,16 @@ export function createApp({ stage, audio, root }) {
       const cracked = state.chshRun.crackedAt !== null;
       const broken = state.chshRun.brokenAt !== null;
       const settled = state.chshSettled && broken;
-      const luckInfo = formatLuckProof(state.chshRun.maxLog10B);
+      const luckInfo = formatLuckChance(state.chshRun.maxLog10B);
 
       const headline = settled
-        ? '85.4% — past the impossible wall.'
+        ? 'Past the 75% wall — ~85.4%.'
         : broken
           ? 'The 75% glass wall just shattered!'
           : 'Entangled pairs vs. the 75% wall…';
 
       const statusText = settled
-        ? `Wall shattered at round ${state.chshRun.brokenAt}. After ${state.chshRun.rounds.toLocaleString()} rounds, the score hovers right around nature's 85.4% limit.`
+        ? `Wall shattered at round ${state.chshRun.brokenAt}. After ${state.chshRun.rounds.toLocaleString()} rounds, the score hovers around quantum nature's 85.4% limit.`
         : broken
           ? `Wall shattered at round ${state.chshRun.brokenAt}! Less than a 1-in-a-million chance any hidden card did this by luck.`
           : cracked
@@ -853,25 +859,20 @@ export function createApp({ stage, audio, root }) {
         <h2 class="step-question">${headline}</h2>
         <p class="step-sub">${statusText}</p>
 
-        <div class="tally-card compact">
+        <div class="tally-card">
           <div class="tally-header">
             <span>Entangled score</span>
-            <span class="big-num gold-txt">${state.chshRun.rounds > 0 ? `${pct.toFixed(1)}%` : '—'}</span>
-          </div>
-          <div class="bar-track spaced-ticks">
-            <div class="bar-fill gold" style="width:${Math.min(100, pct)}%"></div>
-            <div class="bar-wall below-lbl ${broken ? 'shattered' : cracked ? 'cracked' : ''}" style="left:75%"><span>75%</span></div>
-            ${broken ? `<div class="bar-gold-mark lit" style="left:85.36%"><span>85.4%</span></div>` : ''}
+            <span class="big-num hero-score gold-txt">${state.chshRun.rounds > 0 ? `${pct.toFixed(1)}%` : '—'}</span>
           </div>
           <div class="tally-sub">
             ${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins
           </div>
-          <div class="luck-pill ${luckInfo.cls}">Proof against luck: ${luckInfo.label}</div>
+          <div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>
         </div>
 
         ${broken ? `
           <div class="callout-box">
-            <strong>What nature just proved:</strong> no hidden card could ever do this. The particles truly wait until you measure.
+            <strong>No hidden card — no plan made in advance — can do this.</strong> Nature just did.
           </div>
         ` : ''}
 
@@ -887,16 +888,21 @@ export function createApp({ stage, audio, root }) {
       const br = state.bobRun;
       const pct0 = br.n0 > 0 ? `${((br.b0WhenA0 / br.n0) * 100).toFixed(1)}%` : '—';
       const pct1 = br.n1 > 0 ? `${((br.b0WhenA1 / br.n1) * 100).toFixed(1)}%` : '—';
+      const pctR = br.nRand > 0 ? `${((br.b0WhenRand / br.nRand) * 100).toFixed(1)}%` : '—';
       const pctOff = br.nOff > 0 ? `${((br.b0WhenOff / br.nOff) * 100).toFixed(1)}%` : '—';
-      const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : (br.n0 + br.n1 > 0 ? `${(((br.b0WhenA0 + br.b0WhenA1) / (br.n0 + br.n1)) * 100).toFixed(1)}%` : '—');
+      const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : pctR;
       const winPct = br.total > 0 ? ((br.wins / br.total) * 100).toFixed(1) : '—';
+
+      // Visual strip of recent 24 Bob lamps: random coin flips alone -> sorted golden wins when notes meet!
+      const dots = br.compared
+        ? [...br.recent].sort((a, b) => Number(b.win) - Number(a.win))
+        : br.recent;
 
       bodyHtml += `
         <div class="step-kicker">Step 7 · No faster-than-light texting</div>
         <h2 class="step-question">Can Alice send Bob an instant message?</h2>
-        <p class="step-sub">Switch what Alice does behind the veil and watch Bob's lamp alone. Does his 50/50 coin flip ever change?</p>
+        <p class="step-sub">Switch Alice behind the frosted screen and watch Bob's lamp alone. Does his 50/50 stream ever budge?</p>
 
-        <div class="dial-label">Alice's choice (hidden from Bob)</div>
         <div class="seg-group four">
           <button class="seg-btn ${state.alicePolicy === '0' ? 'active' : ''}" data-apol="0">Always 0</button>
           <button class="seg-btn ${state.alicePolicy === '1' ? 'active' : ''}" data-apol="1">Always 1</button>
@@ -906,29 +912,29 @@ export function createApp({ stage, audio, root }) {
 
         <div class="tally-card compact">
           <div class="tally-header">
-            <span>Bob alone (▲ Coral share)</span>
+            <span>Bob's ▲ Coral rate</span>
             <span class="big-num">${curPct}</span>
           </div>
-          <div class="bar-track">
-            <div class="bar-fill coral" style="width:${curPct === '—' ? 50 : parseFloat(curPct)}%"></div>
-            <div class="bar-mark" style="left:50%"><span>50%</span></div>
-          </div>
-          <div class="bob-slots">
-            <div class="bob-slot ${br.n0 > 0 ? 'filled' : ''}"><span>Alice: 0</span><strong>${pct0}</strong></div>
-            <div class="bob-slot ${br.n1 > 0 ? 'filled' : ''}"><span>Alice: 1</span><strong>${pct1}</strong></div>
-            <div class="bob-slot ${br.nOff > 0 ? 'filled' : ''}"><span>Alice: Off</span><strong>${pctOff}</strong></div>
+          ${dots.length > 0 ? `
+            <div class="dot-strip-label">${br.compared ? `Notes combined — ${winPct}% winning pairs (gold):` : 'Bob\'s last 24 flashes (pure coin flips):'}</div>
+            <div class="dot-strip">
+              ${dots.map(d => br.compared
+                ? `<span class="h-dot ${d.win ? 'win' : 'miss'}">${d.win ? '✓' : '·'}</span>`
+                : `<span class="h-dot c${d.b}">${COLOR_SYMS[d.b]}</span>`
+              ).join('')}
+            </div>
+          ` : ''}
+          <div class="bob-slots four">
+            <div class="bob-slot ${br.n0 > 0 ? 'filled' : ''}"><span>A: 0</span><strong>${pct0}</strong></div>
+            <div class="bob-slot ${br.n1 > 0 ? 'filled' : ''}"><span>A: 1</span><strong>${pct1}</strong></div>
+            <div class="bob-slot ${br.nRand > 0 ? 'filled' : ''}"><span>A: Rand</span><strong>${pctR}</strong></div>
+            <div class="bob-slot ${br.nOff > 0 ? 'filled' : ''}"><span>A: Off</span><strong>${pctOff}</strong></div>
           </div>
         </div>
 
-        ${br.compared ? `
-          <div class="callout-box">
-            <strong>Notes met at normal speed:</strong> together they won <strong>${winPct}%</strong> — yet Bob alone only ever saw 50/50 coin flips.
-          </div>
-        ` : ''}
-
         <div class="inline-actions">
-          <button class="btn-secondary" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 rounds</button>
-          <button class="btn-secondary" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Bring notes together (normal speed)</button>
+          <button class="btn-secondary" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
+          <button class="btn-secondary" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Bring notes together</button>
         </div>
       `;
       footerHtml = `
@@ -967,7 +973,6 @@ export function createApp({ stage, audio, root }) {
     elPanelFooter.innerHTML = footerHtml;
   }
 
-  // ---- Event Delegation ----
   root.addEventListener('click', e => {
     const t = e.target.closest('button');
     if (!t) return;
@@ -1081,17 +1086,10 @@ export function createApp({ stage, audio, root }) {
   });
 
   window.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !elDepthBackdrop.hidden) {
-      elDepthBackdrop.hidden = true;
-      return;
-    }
+    if (e.key === 'Escape' && !elDepthBackdrop.hidden) { elDepthBackdrop.hidden = true; return; }
     if (e.key === 'ArrowRight' && state.step < STEP_COUNT - 1) goto(state.step + 1);
     else if (e.key === 'ArrowLeft' && state.step > 0) goto(state.step - 1);
-    else if (e.key === 't' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      state.teacher = !state.teacher;
-      render();
-    }
+    else if (e.key === 't' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); state.teacher = !state.teacher; render(); }
   });
 
   const HINTS = {
@@ -1100,7 +1098,7 @@ export function createApp({ stage, audio, root }) {
     3: 'Tap any Dial button to flip the hidden card and watch the 3×3 grid.',
     4: 'Tap 0°, 120°, or 240° to watch Alice or Bob\'s magnet rotate inside.',
     5: 'Tap "Fire 1,000 rounds" to see the best hidden card hit the 75% glass wall.',
-    7: 'Switch Alice between "Always 0" and "Always 1" and watch Bob stay at 50%.',
+    7: 'Switch Alice between "Always 0" and "Always 1", then tap "Bring notes together".',
   };
   setInterval(() => {
     if (state.teacher || state.burstRunning || state.depthKey) return;
@@ -1153,8 +1151,9 @@ export function createApp({ stage, audio, root }) {
       render();
     },
     compareNotes() {
+      if (state.bobRun.total === 0) fireBobAlone(1000, { instant: true });
       state.bobRun.compared = true;
-      stage.setAliceDimmed(false);
+      stage.setAlicePartition(false);
       render();
     },
     openDepth,

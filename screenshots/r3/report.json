@@ -1,0 +1,16 @@
+{
+  "desk": {
+    "fps_swiftshader": 4,
+    "errors": [],
+    "externalRequests": []
+  },
+  "phone": {
+    "fps_swiftshader": 6,
+    "errors": [],
+    "externalRequests": []
+  },
+  "proj1280": {
+    "errors": [],
+    "externalRequests": []
+  }
+}
