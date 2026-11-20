@@ -1,3 +1,5 @@
 # LOG — Bell test lab (times Asia/Bangkok)
 - 21 Nov 01:50 Folder, BRIEF, DECISIONS created from Gemini scout.
 - 21 Nov 01:45 moony switched builder to Gemini after Claude's current step (D5).
+- 21 Nov 02:03 SPEC.md (first slice) and PLAN.md (M1–M4) written; Q1–Q11 added to QUESTIONS.md; D6–D10 logged. Physics numbers were checked with a scratch script (not in repo): the Born rule matches the closed forms; there are 8 box cards (min 5/9) and 16 game cards (8 at 75%, 8 at 25%); entangled P(win) = 0.853553, S = 2.828427, Bob's marginal is ½. In 100k simulated entangled runs the wall cracked at a median of round 193 and broke at a median of 405 (95% by 718); 75% cards never broke it in 70k runs. No app code yet; STYLE.md waits for Gemini's references.
+  - Handoff note for Gemini (sandboxed to this folder): PLAN.md points outside the folder in three places: `../periodic-table/node_modules/three/build/three.module.min.js`, the build-script pattern in `../periodic-table/tools/build.mjs`, and Playwright in `../tools-env`. Copy three.js into `vendor/` before M1; nothing was copied in this writing-only step.
