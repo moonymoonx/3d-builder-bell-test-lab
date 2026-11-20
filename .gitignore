@@ -1,0 +1,12 @@
+node_modules/
+*.log
+.env*
+# private / third-party, kept local only
+claude-sessions/
+.claude/
+*.jsonl
+ref/*.png
+ref/*.jpg
+ref/*.webp
+ref/*.mp4
+screenshots/raw/
