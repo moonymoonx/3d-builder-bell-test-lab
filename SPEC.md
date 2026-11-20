@@ -42,7 +42,7 @@ Why care: particles can be more in tune than any plan allows, yet can't carry a 
 - **S** = E₀₀ + E₀₁ + E₁₀ − E₁₁, E = P(match) − P(differ); S = 8·P_win − 4 for uniform questions. Cards ≤ 2; entangled 2√2, Tsirelson's bound /*Q5*/.
 - **Bob alone:** P(b = 0) = ½ for all x, y /*Q8*/. Photons use half the angles /*Q4*/.
 - **Sampling:** crypto.getRandomValues /*Q11*/, fresh each round. Born rule on the state vector → joint probabilities (unit-tested) → one draw. Raw counts, never seeded, smoothed or nudged.
-- **Wall = evidence:** B = 1 at the start of each run, ×1.1381 per win, ×0.5858 per loss. A card wins a round with chance ≤ ¾, so by Ville's inequality P(B ever ≥ 10ᵏ) ≤ 10⁻ᵏ /*Q7*/. Cracks at 10³, breaks at 10⁶. In 100k simulations, entangled runs broke it near round 400 (95% by 720); 75% cards never.
+- **Wall = evidence:** B = 1 at the start of each run, multiplied by the exact likelihood ratios f_win = P_q / (3/4) = (2+√2)/3 (≈ 1.1381) per win and f_loss = (1−P_q) / (1/4) = 2−√2 (≈ 0.5858) per loss (computed exactly in float, never from rounded 4-digit literals). A card wins a round with chance ≤ ¾, so by Ville's inequality P(B ever ≥ 10ᵏ) ≤ 10⁻ᵏ /*Q7*/. Cracks at 10³, breaks at 10⁶. In 100k simulations, entangled runs broke it near round 400 (95% by 720); 75% cards never.
 
 ## 5. Tech
 - `tools/build.mjs` makes one `index.html`, inlining `vendor/three.module.min.js` (r170, 0.69 MB, from `../periodic-table/node_modules/three/build/`), `src/` and CSS. No CDN, network, fonts, images or models; shapes in code.
