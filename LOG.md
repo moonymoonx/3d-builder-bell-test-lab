@@ -26,3 +26,5 @@
 - 03:45 G08 myth-buster build started in parallel with R5 review (R5 reads screenshots/r5 only).
 - 03:50 R5 scores: clarity 4, ease 4, beauty 4, smooth 4, delight 4 — all ≥ 4, polish loop stops. Remaining nits logged in ref/REVIEW-R5.md.
 - 03:50 Note: R5 commit also snapshotted Gemini's in-progress G08 files (WIP).
+- 03:58 G08 myth-buster done (e4f86f4, pushed; 10/10 tests, 864 KB, 0 errors). R6 cold review started. Orchestrator spotted: gloves sample 55.2% shown beside '≥ 55.6%' label (sampling noise vs bound) → to fix.
+- 03:58 Gemini quota: weekly 65.6%, 5-hour 32.3% (refresh ~07:20). Plan: one final fix round after R6, then stop.

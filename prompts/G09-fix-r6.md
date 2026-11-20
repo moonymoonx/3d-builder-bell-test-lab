@@ -1,0 +1,8 @@
+# Gemini brief 09 — final fix round (R6: whole page 3/4/4/4/4; Myth-buster alone 3/3/4/4/3)
+Same sandbox rules. Read ALL of ref/REVIEW-R6.md. Quota is limited: this is the last polish round, so prioritise; do the high-impact items well rather than everything.
+1. **Numbers vs labels, everywhere (one rule):** a sampled value must never sit next to a bound it seems to break. Wherever a sample is compared with a limit (gloves ≥ 55.6%, entangled ~50%, ~85.4% in story steps 6–7 and myth 3), show the limit as the exact computed value (e.g. "Best gloves can do: 55.6% or more") and the sample with an honest luck band (≈ 2 standard errors, √(p(1−p)/n)) or the words "about … (luck ±x%)". Extend the "luck can dent the glass" idea consistently. Unit-test any helper.
+2. **Myth 1 payoff:** after Alice's notes arrive at light speed, show what the comparison actually reveals — e.g. Alice's notes list sliding in next to Bob's dots, pairs lighting up as they line up, and the decoded letters appearing FROM THE NOTES — with the plain line that the message travelled in the notes, not the particles. Remove "FTL" jargon in the tab ("Instant text").
+3. **Myth 2:** explain "two gloves" in one line (the left/right glove packed in advance), remove the redundant button, fix phone clipping of the bottom callout and the desktop orphan "→" wrap.
+4. **Myth 3:** remove duplicate button, fix colliding limit badges on phone.
+5. Phone floating 3D badges never collide with labels/bars (hide or reposition in portrait) on steps 04, 05, 07, 09, 12.
+Then tests, build, `node tools/shots.mjs index.html --out=screenshots/r7 --steps=tools/steps.json`, open every PNG, iterate. Commit (no push), log DECISIONS.md + LOG.md. 6-line summary.
