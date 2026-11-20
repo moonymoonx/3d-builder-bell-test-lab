@@ -307,6 +307,29 @@ export function computeChshS(run) {
   };
 }
 
+/**
+ * Honest 2-standard-error luck band (≈ 95% interval) for a binomial sample.
+ * Ensures every sampled readout shown beside a theoretical bound communicates finite-sample noise honestly.
+ */
+export function formatSampleWithLuck(wins, rounds, refProb = null) {
+  if (!rounds || rounds <= 0) {
+    return { rate: 0, pct: '—', marginPct: '—', se: 0, text: '—' };
+  }
+  const rate = wins / rounds;
+  const pSe = refProb !== null ? refProb : rate;
+  const se = Math.sqrt(Math.max(0, pSe * (1 - pSe)) / rounds);
+  const margin = 2 * se;
+  const pct = `${(rate * 100).toFixed(1)}%`;
+  const marginPct = `${(margin * 100).toFixed(1)}%`;
+  return {
+    rate,
+    pct,
+    marginPct,
+    se,
+    text: `${pct} (luck ±${marginPct})`,
+  };
+}
+
 // ---- Myth-Buster Physics (100% genuine singlet Born rule & classical glove models — zero faking!) ----
 
 // The 6 optimal non-trivial Mermin "glove" cards (all achieve 100% on same dial and 5/9 ≈ 55.56% on random dials)
@@ -325,7 +348,7 @@ export const OPTIMAL_GLOVE_CARDS = [
  */
 export function sampleFtlMessage({
   message = ['0', '1', '0'],
-  pairsPerLetter = 600,
+  pairsPerLetter = 1200,
   rng = cryptoUniform,
   intRng = cryptoInt,
 } = {}) {
@@ -335,15 +358,15 @@ export function sampleFtlMessage({
     let y1Same = 0;
     let wins = 0;
     const bobStrip = [];
+    const notePairs = []; // First 6 y=1 pairs showing Alice & Bob notes lining up on reveal!
 
     for (let i = 0; i < pairsPerLetter; i++) {
       const y = intRng(2);
       if (choice === 'off') {
-        // Alice does not measure: Bob measures on reduced state rho_B = I/2 (equivalent to tracing out Alice)
         const draw = sampleSinglet(0, CHSH_BOB_SPIN_ANGLES[y], rng);
         const b = draw.spinB === -1 ? 0 : 1;
         if (b === 0) bobCoral++;
-        if (i >= pairsPerLetter - 8) bobStrip.push(b);
+        if (i >= pairsPerLetter - 6) bobStrip.push(b);
       } else {
         const x = choice === '1' ? 1 : 0;
         const r = sampleChshRound({ mode: 'entangled', x, y, rng, intRng });
@@ -352,8 +375,9 @@ export function sampleFtlMessage({
         if (y === 1) {
           y1Total++;
           if (r.a === r.b) y1Same++;
+          if (notePairs.length < 6) notePairs.push({ a: r.a, b: r.b, match: r.a === r.b });
         }
-        if (i >= pairsPerLetter - 8) bobStrip.push(r.b);
+        if (i >= pairsPerLetter - 6) bobStrip.push(r.b);
       }
     }
 
@@ -367,10 +391,13 @@ export function sampleFtlMessage({
       n: pairsPerLetter,
       bobCoral,
       bobCoralRate: bobCoral / pairsPerLetter,
+      y1Total,
+      y1Same,
       y1MatchRate,
       winRate: choice === 'off' ? null : wins / pairsPerLetter,
       decoded,
       bobStrip,
+      notePairs,
     };
   });
 

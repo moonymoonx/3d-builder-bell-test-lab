@@ -25,6 +25,7 @@ import {
   sampleFtlMessage,
   sampleGlovesVsEntangled,
   sampleObserverVsRecorder,
+  formatSampleWithLuck,
 } from '../src/physics.js';
 
 test('Singlet Born rule matches (1 - A*B*cos(Delta))/4 across 0-360° and marginals = 1/2', () => {
@@ -197,4 +198,21 @@ test('Myth 3 (Observer vs sealed recorder): both violate S > 2 identically aroun
   assert.ok(Math.abs(rec.winRate - P_QUANTUM_OPT) < 0.025, `rec=${rec.winRate}`);
   assert.ok(human.S > 2.5 && rec.S > 2.5, `S_human=${human.S}, S_rec=${rec.S}`);
   assert.ok(human.brokenAt !== null && rec.brokenAt !== null);
+});
+
+test('formatSampleWithLuck computes exact 2-SE luck margin cleanly', () => {
+  const empty = formatSampleWithLuck(0, 0);
+  assert.equal(empty.pct, '—');
+  assert.equal(empty.text, '—');
+
+  // 2,000 rounds at p = 0.5 -> 2*SE = 2*sqrt(0.25/2000) ≈ 2.236%
+  const half = formatSampleWithLuck(1000, 2000, 0.5);
+  assert.equal(half.pct, '50.0%');
+  assert.equal(half.marginPct, '2.2%');
+  assert.equal(half.text, '50.0% (luck ±2.2%)');
+
+  // 4,800 rounds at p = 5/9 -> 2*SE ≈ 1.434%
+  const gloves = formatSampleWithLuck(2667, 4800, 5 / 9);
+  assert.equal(gloves.pct, '55.6%');
+  assert.equal(gloves.marginPct, '1.4%');
 });

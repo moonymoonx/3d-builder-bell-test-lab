@@ -13,6 +13,7 @@ import {
   sampleFtlMessage,
   sampleGlovesVsEntangled,
   sampleObserverVsRecorder,
+  formatSampleWithLuck,
 } from '../physics.js';
 import { STEP_COUNT, DEPTH_DRAWERS } from './content.js';
 
@@ -122,11 +123,11 @@ export function createApp({ stage, audio, root }) {
         colorA: draw.colorA,
         colorB: draw.colorB,
         entangled: true,
-        duration: 1.05,
+        duration: 0.76,
       });
     };
-    setTimeout(fireOnce, 180);
-    idlePairTimer = setInterval(fireOnce, 1250);
+    setTimeout(fireOnce, 220);
+    idlePairTimer = setInterval(fireOnce, 1650);
   }
 
   function syncLeverVisibility({ snap = true } = {}) {
@@ -227,7 +228,7 @@ export function createApp({ stage, audio, root }) {
 
   function runMythFtlSend() {
     touchInteraction();
-    state.mythFtl.result = sampleFtlMessage({ message: state.mythFtl.message, pairsPerLetter: 600 });
+    state.mythFtl.result = sampleFtlMessage({ message: state.mythFtl.message, pairsPerLetter: 1200 });
     state.mythFtl.sent = true;
     state.mythFtl.revealed = false;
     stage.setAlicePartition(true);
@@ -242,7 +243,7 @@ export function createApp({ stage, audio, root }) {
   function runMythFtlReveal({ instant = false } = {}) {
     touchInteraction();
     if (!state.mythFtl.sent) {
-      state.mythFtl.result = sampleFtlMessage({ message: state.mythFtl.message, pairsPerLetter: 600 });
+      state.mythFtl.result = sampleFtlMessage({ message: state.mythFtl.message, pairsPerLetter: 1200 });
       state.mythFtl.sent = true;
     }
     const finish = () => {
@@ -280,7 +281,7 @@ export function createApp({ stage, audio, root }) {
     if (!state.mythGloves.sameRes) {
       state.mythGloves.sameRes = sampleGlovesVsEntangled({ rounds: 1200, sameDial: true });
     }
-    state.mythGloves.randRes = sampleGlovesVsEntangled({ rounds: 2400, sameDial: false });
+    state.mythGloves.randRes = sampleGlovesVsEntangled({ rounds: 4800, sameDial: false });
     stage.setSourceEntangled(true);
     stage.setCardStandVisible(false);
     const le = state.mythGloves.randRes.lastEnt;
@@ -835,17 +836,26 @@ export function createApp({ stage, audio, root }) {
     document.documentElement.classList.toggle('teacher-mode', state.teacher);
     stage.setTeacherMode(state.teacher);
 
-    elStepDots.innerHTML = Array.from({ length: STEP_COUNT }, (_, i) => {
-      const cls = !state.mythMode && i === state.step ? 'dot active' : (!state.mythMode && i < state.step) ? 'dot done' : 'dot';
-      return `<button class="${cls}" data-goto="${i}" aria-label="Step ${i + 1}"></button>`;
-    }).join('') + `<button class="dot-myths ${state.mythMode ? 'active' : ''}" id="btn-myths-mobile" aria-label="Myth-buster challenges">${state.mythMode ? 'Story' : 'Myths'}</button>`;
+    elStepDots.classList.toggle('in-myth', state.mythMode);
+    if (state.mythMode) {
+      const mythTabs = ['ftl', 'gloves', 'observer'];
+      elStepDots.innerHTML = mythTabs.map(mt => {
+        const cls = state.mythTab === mt ? 'dot active' : 'dot';
+        return `<button class="${cls}" data-mythtab="${mt}" aria-label="Myth ${mt}"></button>`;
+      }).join('') + `<button class="dot-myths active" id="btn-myths-mobile" aria-label="Back to story">Story</button>`;
+    } else {
+      elStepDots.innerHTML = Array.from({ length: STEP_COUNT }, (_, i) => {
+        const cls = i === state.step ? 'dot active' : i < state.step ? 'dot done' : 'dot';
+        return `<button class="${cls}" data-goto="${i}" aria-label="Step ${i + 1}"></button>`;
+      }).join('') + `<button class="dot-myths" id="btn-myths-mobile" aria-label="Myth-buster challenges">Myths</button>`;
+    }
   }
 
   function renderMythPanel() {
     const tab = state.mythTab;
     const tabsHtml = `
       <div class="myth-tabs" role="tablist" aria-label="Myth-buster challenges">
-        <button class="myth-tab ${tab === 'ftl' ? 'active' : ''}" data-mythtab="ftl" role="tab">1 · FTL Text</button>
+        <button class="myth-tab ${tab === 'ftl' ? 'active' : ''}" data-mythtab="ftl" role="tab">1 · Instant text</button>
         <button class="myth-tab ${tab === 'gloves' ? 'active' : ''}" data-mythtab="gloves" role="tab">2 · Gloves</button>
         <button class="myth-tab ${tab === 'observer' ? 'active' : ''}" data-mythtab="observer" role="tab">3 · Watcher</button>
       </div>
@@ -857,9 +867,9 @@ export function createApp({ stage, audio, root }) {
       const mf = state.mythFtl;
       const slots = mf.result ? mf.result.slots : null;
       const choiceLabel = c => (c === '0' ? 'Dial 0' : c === '1' ? 'Dial 1' : 'Box Off');
-      const letterLabel = (c, i) => (c === '0' ? 'S' : c === '1' ? 'O' : '—');
+      const letterLabel = c => (c === '0' ? 'S' : c === '1' ? 'O' : '—');
       bodyHtml += `
-        <div class="step-kicker">Myth 1 · Faster-than-light texting</div>
+        <div class="step-kicker">Myth 1 · Instant messaging</div>
         <h2 class="step-question">Text Bob faster than light.</h2>
         ${state.teacher && !mf.revealed ? `<div class="predict-banner">Predict first: when Alice taps S · O · S, can Bob read it from his lamp alone?</div>` : ''}
         <p class="step-sub">Tap any slot to set Alice's message (0, 1, or Off), send it, and try reading Bob's lamp alone.</p>
@@ -867,7 +877,7 @@ export function createApp({ stage, audio, root }) {
         <div class="myth-msg-row" aria-label="Alice's 3-slot message">
           ${mf.message.map((c, idx) => `
             <button class="msg-slot ${c === 'off' ? 'is-off' : ''}" data-ftlslot="${idx}">
-              <span class="ms-ltr">Letter ${idx + 1} (${letterLabel(c, idx)})</span>
+              <span class="ms-ltr">Letter ${idx + 1} (${letterLabel(c)})</span>
               <strong class="ms-val">${choiceLabel(c)}</strong>
             </button>
           `).join('')}
@@ -875,28 +885,48 @@ export function createApp({ stage, audio, root }) {
 
         <div class="tally-card compact">
           <div class="tally-header">
-            <span>${mf.revealed ? 'After notes meet at light speed' : 'Bob\'s lamp alone (600 pairs / slot)'}</span>
-            <span class="myth-tag ${mf.revealed ? 'gold' : ''}">${mf.revealed ? 'Decoded!' : mf.sent ? '50/50 noise' : 'Ready'}</span>
+            <span>${mf.revealed ? 'Alice + Bob notes' : 'Bob\'s lamp alone (1,200 / slot)'}</span>
+            <span class="myth-tag ${mf.revealed ? 'gold' : ''}">${mf.revealed ? 'Decoded from notes!' : mf.sent ? '50/50 noise' : 'Ready'}</span>
           </div>
           ${slots ? `
             <div class="ftl-slots">
-              ${slots.map((s, idx) => `
-                <div class="ftl-col ${mf.revealed && s.decoded !== '—' ? 'decoded' : ''}">
-                  <div class="ftl-lbl">Slot ${idx + 1}</div>
-                  <div class="ftl-rate">${(s.bobCoralRate * 100).toFixed(1)}% ▲</div>
-                  <div class="ftl-mini-dots">
-                    ${s.bobStrip.slice(0, 6).map(b => `<span class="m-dot c${b}"></span>`).join('')}
+              ${slots.map((s, idx) => {
+                const bobLuck = formatSampleWithLuck(s.bobCoral, s.n, 0.5);
+                if (!mf.revealed) {
+                  return `
+                    <div class="ftl-col">
+                      <div class="ftl-lbl">Slot ${idx + 1}</div>
+                      <div class="ftl-rate">${bobLuck.pct} ▲</div>
+                      <div class="ftl-luck">luck ±${bobLuck.marginPct}</div>
+                      <div class="ftl-mini-dots">
+                        ${s.bobStrip.slice(0, 6).map(b => `<span class="m-glyph c${b}">${COLOR_SYMS[b]}</span>`).join('')}
+                      </div>
+                      <div class="ftl-noise">Can't tell</div>
+                    </div>
+                  `;
+                }
+                const matchPct = s.y1MatchRate !== null ? `${(s.y1MatchRate * 100).toFixed(0)}% match` : 'No notes';
+                const isHigh = s.y1MatchRate !== null && s.y1MatchRate > 0.5;
+                return `
+                  <div class="ftl-col ${s.decoded !== '—' ? 'decoded' : ''}">
+                    <div class="ftl-lbl">Slot ${idx + 1} · Bob ${bobLuck.pct}</div>
+                    <div class="ftl-match-pct ${s.decoded === '—' ? '' : isHigh ? 'gold-txt' : 'coral-txt'}">${matchPct}</div>
+                    ${s.notePairs.length > 0 ? `
+                      <div class="ftl-pair-row" title="Alice & Bob paired outcomes">
+                        ${s.notePairs.map(p => `<span class="p-chip ${p.match ? 'hi' : 'lo'}">${p.match ? '✓' : '≠'}</span>`).join('')}
+                      </div>
+                    ` : `<div class="ftl-noise">Alice off</div>`}
+                    <div class="ftl-dec">${s.decoded === '—' ? 'Blank' : `→ ${letterLabel(s.decoded)} (${s.decoded})`}</div>
                   </div>
-                  ${mf.revealed ? `<div class="ftl-dec">${s.decoded === '—' ? 'No notes' : `Decoded: ${letterLabel(s.decoded)} (${s.decoded})`}</div>` : `<div class="ftl-noise">Can't tell</div>`}
-                </div>
-              `).join('')}
+                `;
+              }).join('')}
             </div>
-          ` : `<div class="tally-sub">Tap "Send message" to fire 1,800 entangled pairs to Bob behind Alice's screen.</div>`}
+          ` : `<div class="tally-sub">Tap "Send S · O · S" to fire 3,600 entangled pairs while Alice stays behind her screen.</div>`}
         </div>
 
         ${mf.revealed ? `
           <div class="callout-box">
-            <strong>Entanglement links results, not messages.</strong> Bob's local stream stayed ~50/50; the pattern only appeared after Alice's notes arrived at light speed.
+            <strong>The message travelled in Alice's notes, not the particles.</strong> Entanglement links results, not messages.
           </div>
         ` : `
           <div class="inline-actions">
@@ -909,115 +939,123 @@ export function createApp({ stage, audio, root }) {
           ? `<button class="btn-primary" id="btn-myth-ftl-send">Send S · O · S to Bob</button>`
           : !mf.revealed
             ? `<button class="btn-primary pulse-gold" id="btn-myth-ftl-reveal">Send Alice's notes at light speed →</button>`
-            : `<button class="btn-primary" data-mythtab="gloves">Next myth: Two gloves in two boxes →</button>`}
+            : `<button class="btn-primary" data-mythtab="gloves">Next myth: Two gloves in two boxes&nbsp;→</button>`}
         <button class="btn-depth" data-depth="mythFtl">How do we know?</button>
       `;
     } else if (tab === 'gloves') {
       const mg = state.mythGloves;
       const hasSame = !!mg.sameRes;
       const hasRand = !!mg.randRes;
+      const gloveLuck = hasRand ? formatSampleWithLuck(mg.randRes.gloveMatches, mg.randRes.rounds, 5 / 9) : null;
+      const entLuck = hasRand ? formatSampleWithLuck(mg.randRes.entMatches, mg.randRes.rounds, 0.5) : null;
+
       bodyHtml += `
-        <div class="step-kicker">Myth 2 · Pre-packed hidden instructions</div>
+        <div class="step-kicker">Myth 2 · Pre-packed instructions</div>
         <h2 class="step-question">"It's just two gloves in two boxes."</h2>
         ${state.teacher && !hasRand ? `<div class="predict-banner">Predict first: gloves match 100% on same dials — what happens on random dials?</div>` : ''}
-        <p class="step-sub">Compare random pre-packed glove cards against real entangled pairs in the 3-dial boxes.</p>
+        <p class="step-sub">Like sealing a left and right glove in boxes before parting — do entangled pairs just carry fixed pre-packed cards?</p>
 
-        <div class="tally-card compact">
-          <div class="tally-header">
-            <span>1. Matching dials (1,200 pairs)</span>
-            <span class="myth-tag">${hasSame ? 'Identical!' : 'Step 1'}</span>
+        ${hasRand ? `
+          <div class="cmp-mini-strip">
+            <span>Matching dials (1,200):</span>
+            <strong>Gloves 100% · Entangled 100%</strong>
           </div>
-          <div class="cmp-pair">
-            <div class="cmp-box"><span>Glove pairs</span><strong>${hasSame ? `${(mg.sameRes.gloveRate * 100).toFixed(1)}%` : '—'}</strong></div>
-            <div class="cmp-box gold"><span>Entangled</span><strong>${hasSame ? `${(mg.sameRes.entRate * 100).toFixed(1)}%` : '—'}</strong></div>
+        ` : `
+          <div class="tally-card compact">
+            <div class="tally-header">
+              <span>1. Matching dials (1,200 pairs)</span>
+              <span class="myth-tag">${hasSame ? 'Identical!' : 'Step 1'}</span>
+            </div>
+            <div class="cmp-pair">
+              <div class="cmp-box"><span>Glove pairs</span><strong>${hasSame ? `${(mg.sameRes.gloveRate * 100).toFixed(1)}%` : '—'}</strong></div>
+              <div class="cmp-box gold"><span>Entangled</span><strong>${hasSame ? `${(mg.sameRes.entRate * 100).toFixed(1)}%` : '—'}</strong></div>
+            </div>
           </div>
-        </div>
+        `}
 
         <div class="tally-card compact ${hasRand ? 'highlight-gold' : ''}">
           <div class="tally-header">
-            <span>2. Random dials (2,400 pairs)</span>
+            <span>2. Random dials (4,800 pairs)</span>
             <span class="myth-tag ${hasRand ? 'gold' : ''}">${hasRand ? 'Gap revealed!' : 'Step 2'}</span>
           </div>
           ${hasRand ? `
             <div class="cmp-bars">
               <div class="cmp-bar-row">
-                <div class="cmp-bar-lbl"><span>Glove pairs (≥ 55.6%)</span><strong>${(mg.randRes.gloveRate * 100).toFixed(1)}%</strong></div>
-                <div class="bar-track slim"><div class="bar-fill ivory" style="width:${mg.randRes.gloveRate * 100}%"></div><div class="bar-mark" style="left:55.56%"></div></div>
+                <div class="cmp-bar-lbl"><span>Best gloves (≥ 55.6%)</span><strong>${gloveLuck.pct} <small>(luck ±${gloveLuck.marginPct})</small></strong></div>
+                <div class="bar-track slim"><div class="bar-fill ivory" style="width:${mg.randRes.gloveRate * 100}%"></div><div class="bar-mark" style="left:55.56%"><span>55.6%</span></div></div>
               </div>
               <div class="cmp-bar-row">
-                <div class="cmp-bar-lbl"><span class="gold-txt">Entangled (~50.0%)</span><strong class="gold-txt">${(mg.randRes.entRate * 100).toFixed(1)}%</strong></div>
-                <div class="bar-track slim"><div class="bar-fill gold" style="width:${mg.randRes.entRate * 100}%"></div><div class="bar-mark" style="left:55.56%"></div></div>
+                <div class="cmp-bar-lbl"><span class="gold-txt">Entangled (50.0% avg)</span><strong class="gold-txt">${entLuck.pct} <small>(luck ±${entLuck.marginPct})</small></strong></div>
+                <div class="bar-track slim"><div class="bar-fill gold" style="width:${mg.randRes.entRate * 100}%"></div><div class="bar-mark" style="left:50%"><span>50%</span></div></div>
               </div>
             </div>
-          ` : `<div class="tally-sub">${hasSame ? 'On matching dials, gloves look perfect! Now test random dials.' : 'Test matching dials first to see why the glove myth sounds so convincing.'}</div>`}
+          ` : `<div class="tally-sub">${hasSame ? 'On matching dials, pre-packed gloves look perfect! Now test random dials.' : 'Test matching dials first to see why the glove analogy sounds so convincing.'}</div>`}
         </div>
 
         ${hasRand ? `
           <div class="callout-box">
-            <strong>Gloves carry instructions. Entangled pairs don't — and the numbers prove it.</strong>
+            <strong>Gloves carry fixed local instructions.</strong> No pre-packed card like that — without talking — can match entangled pairs.
           </div>
-        ` : `
-          <div class="inline-actions">
-            <button class="btn-secondary" id="btn-myth-gloves-same">Test same dials</button>
-          </div>
-        `}
+        ` : ''}
       `;
       footerHtml = `
         ${!hasSame
           ? `<button class="btn-primary" id="btn-myth-gloves-same">Test matching dials first</button>`
           : !hasRand
-            ? `<button class="btn-primary pulse-gold" id="btn-myth-gloves-rand">Now test random dials →</button>`
-            : `<button class="btn-primary" data-mythtab="observer">Next myth: Someone has to be watching →</button>`}
+            ? `<button class="btn-primary pulse-gold" id="btn-myth-gloves-rand">Now test random dials&nbsp;→</button>`
+            : `<button class="btn-primary" data-mythtab="observer">Next myth: Must someone watch?&nbsp;→</button>`}
         <button class="btn-depth" data-depth="mythGloves">How do we know?</button>
       `;
     } else if (tab === 'observer') {
       const mo = state.mythObserver;
       const hasHuman = !!mo.humanRes;
       const hasRec = !!mo.recorderRes;
+      const hLuck = hasHuman ? formatSampleWithLuck(mo.humanRes.wins, mo.humanRes.rounds, 0.853553) : null;
+      const rLuck = hasRec ? formatSampleWithLuck(mo.recorderRes.wins, mo.recorderRes.rounds, 0.853553) : null;
+
       bodyHtml += `
         <div class="step-kicker">Myth 3 · Human consciousness</div>
         <h2 class="step-question">"Someone has to be watching."</h2>
-        ${state.teacher && !hasRec ? `<div class="predict-banner">Predict first: if we seal both lamps under dark time-taggers with no human watching, will the score drop to 75%?</div>` : ''}
-        <p class="step-sub">Run 2,000 entangled rounds watched live, then cap both lamps with sealed electronic recorders and compare.</p>
+        ${state.teacher && !hasRec ? `<div class="predict-banner">Predict first: if we seal both lamps under dark counters with no human watching, will the score drop to 75%?</div>` : ''}
+        <p class="step-sub">Run 2,000 entangled rounds watched live, then cap both lamps with sealed electronic counters and compare.</p>
 
         <div class="tally-card compact">
           <div class="cmp-pair">
             <div class="cmp-box ${hasHuman ? 'filled' : ''}">
               <span>Human watching</span>
-              <strong>${hasHuman ? `${(mo.humanRes.winRate * 100).toFixed(1)}%` : '—'}</strong>
-              <small>${hasHuman ? `${mo.humanRes.wins.toLocaleString()} / 2,000` : 'Open lamps'}</small>
+              <strong>${hasHuman ? hLuck.pct : '—'}</strong>
+              <small>${hasHuman ? `luck ±${hLuck.marginPct} (${mo.humanRes.wins.toLocaleString()} / 2,000)` : 'Open lamps'}</small>
             </div>
             <div class="cmp-box gold ${hasRec ? 'filled' : ''}">
               <span>Sealed recorder</span>
-              <strong class="${hasRec ? 'gold-txt' : ''}">${hasRec ? `${(mo.recorderRes.winRate * 100).toFixed(1)}%` : '—'}</strong>
-              <small>${hasRec ? `${mo.recorderRes.wins.toLocaleString()} / 2,000` : 'No human eyes'}</small>
+              <strong class="${hasRec ? 'gold-txt' : ''}">${hasRec ? rLuck.pct : '—'}</strong>
+              <small>${hasRec ? `luck ±${rLuck.marginPct} (${mo.recorderRes.wins.toLocaleString()} / 2,000)` : 'No human eyes'}</small>
             </div>
           </div>
           <div class="tally-sub">
             ${hasRec
-              ? 'Both runs shatter 75% identically — real Bell tests log every click automatically with electronic time-taggers.'
+              ? `Watched live (${hLuck.pct}) vs. sealed recorder (${rLuck.pct}, luck ±${rLuck.marginPct}) — both beat 75% right around nature's 85.4% limit.`
               : hasHuman
-                ? 'Watched live: ~85.4%. Now cap both lamps with sealed recorders and run unattended.'
-                : 'Start with open lamps watched live, then swap to sealed dark-box recorders.'}
+                ? `Watched live: ${hLuck.pct} (luck ±${hLuck.marginPct}) — right around nature's 85.4% limit. Now cap both lamps with sealed recorders.`
+                : 'Start with open lamps watched live, then swap to sealed dark-box counters.'}
           </div>
         </div>
 
         ${hasRec ? `
           <div class="callout-box">
-            <strong>Detectors log the same ~85.4% whether anyone is watching or not.</strong> No human consciousness is required.
+            <strong>Electronic detectors log the same ~85.4% pattern automatically</strong> — no human eyes need to watch the lamps.
+          </div>
+          <div class="inline-actions">
+            <button class="btn-secondary ${mo.mode === 'human' ? 'strong' : ''}" id="btn-myth-obs-human">Re-run watched</button>
+            <button class="btn-secondary ${mo.mode === 'recorder' ? 'reveal-outline' : ''}" id="btn-myth-obs-rec">Re-run sealed</button>
           </div>
         ` : ''}
-
-        <div class="inline-actions">
-          <button class="btn-secondary ${mo.mode === 'human' && hasHuman ? 'strong' : ''}" id="btn-myth-obs-human">Human watching</button>
-          <button class="btn-secondary reveal-outline" id="btn-myth-obs-rec">Sealed recorder</button>
-        </div>
       `;
       footerHtml = `
         ${!hasHuman
           ? `<button class="btn-primary" id="btn-myth-obs-human">Run 2,000 (human watching)</button>`
           : !hasRec
-            ? `<button class="btn-primary pulse-gold" id="btn-myth-obs-rec">Swap to sealed recorder →</button>`
+            ? `<button class="btn-primary pulse-gold" id="btn-myth-obs-rec">Swap to sealed recorder&nbsp;→</button>`
             : `<button class="btn-primary" id="btn-exit-myths">Back to the main story</button>`}
         <button class="btn-depth" data-depth="mythObserver">How do we know?</button>
       `;
@@ -1277,7 +1315,10 @@ export function createApp({ stage, audio, root }) {
           </div>
           <div class="tally-sub">
             ${hasRun
-              ? `<strong>A lucky streak can poke past 75% — not keep it there.</strong> (${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()})`
+              ? (() => {
+                  const cLuck = formatSampleWithLuck(state.chshRun.wins, state.chshRun.rounds, ev.rate);
+                  return `<strong>A lucky streak can poke past 75% — not keep it there.</strong> (${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} · luck ±${cLuck.marginPct})`;
+                })()
               : 'Every card leaves a red ✗. Test it against the frosted 75% glass wall.'}
           </div>
           ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>` : ''}
@@ -1301,7 +1342,7 @@ export function createApp({ stage, audio, root }) {
       `;
     } else if (state.step === 6) {
       const st = computeChshS(state.chshRun);
-      const pct = state.chshRun.rounds > 0 ? st.winRate * 100 : 0;
+      const qLuck = formatSampleWithLuck(state.chshRun.wins, state.chshRun.rounds, 0.853553);
       const cracked = state.chshRun.crackedAt !== null;
       const broken = state.chshRun.brokenAt !== null;
       const settled = state.chshSettled && broken;
@@ -1314,7 +1355,7 @@ export function createApp({ stage, audio, root }) {
           : 'Entangled pairs vs. the 75% wall…';
 
       const statusText = settled
-        ? `Wall shattered at round ${state.chshRun.brokenAt}. After ${state.chshRun.rounds.toLocaleString()} rounds, scores hover around quantum nature's 85.4% average limit.`
+        ? `Wall shattered at round ${state.chshRun.brokenAt}. After ${state.chshRun.rounds.toLocaleString()} rounds, the score sits near nature's 85.4% quantum limit.`
         : broken
           ? `Wall shattered at round ${state.chshRun.brokenAt}! Less than a 1-in-a-million chance any hidden card did this by luck.`
           : cracked
@@ -1329,10 +1370,10 @@ export function createApp({ stage, audio, root }) {
         <div class="tally-card">
           <div class="tally-header">
             <span>Entangled score</span>
-            <span class="big-num hero-score gold-txt">${state.chshRun.rounds > 0 ? `${pct.toFixed(1)}%` : '—'}</span>
+            <span class="big-num hero-score gold-txt">${state.chshRun.rounds > 0 ? qLuck.pct : '—'}</span>
           </div>
           <div class="tally-sub">
-            ${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins
+            ${state.chshRun.rounds > 0 ? `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins (luck ±${qLuck.marginPct} · limit 85.4%)` : 'Starting run…'}
           </div>
           <div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>
         </div>
@@ -1360,6 +1401,7 @@ export function createApp({ stage, audio, root }) {
       const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : pctR;
       const curN = state.alicePolicy === '0' ? br.n0 : state.alicePolicy === '1' ? br.n1 : state.alicePolicy === 'off' ? br.nOff : br.nRand;
       const curHits = state.alicePolicy === '0' ? br.b0WhenA0 : state.alicePolicy === '1' ? br.b0WhenA1 : state.alicePolicy === 'off' ? br.b0WhenOff : br.b0WhenRand;
+      const bobLuck = formatSampleWithLuck(curHits, curN, 0.5);
       const winPct = br.total > 0 ? ((br.wins / br.total) * 100).toFixed(1) : '—';
 
       const dots = br.compared
@@ -1387,7 +1429,7 @@ export function createApp({ stage, audio, root }) {
             <span class="big-num">${curPct}</span>
           </div>
           <div class="tally-sub">
-            ${curN > 0 ? `${curHits.toLocaleString()} / ${curN.toLocaleString()} flashes — steady near 50%` : 'Tap Fire 2,000 to watch Bob\'s lamp alone.'}
+            ${curN > 0 ? `${curHits.toLocaleString()} / ${curN.toLocaleString()} flashes (luck ±${bobLuck.marginPct} around 50%)` : 'Tap Fire 2,000 to watch Bob\'s lamp alone.'}
           </div>
           ${dots.length > 0 ? `
             <div class="dot-strip-label">${br.compared ? `Notes combined — ${winPct}% winning pairs (gold):` : 'Bob\'s last 24 flashes (looks like pure coin flips):'}</div>

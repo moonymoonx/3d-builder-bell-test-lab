@@ -157,6 +157,18 @@ html, body {
   height: 28px;
   background: linear-gradient(180deg, rgba(230, 182, 85, 0.85), rgba(230, 182, 85, 0.1));
 }
+/* On phone settled/Myth 3, 75% sits cleanly BELOW the bar with an upward stem pointing to the 75% bracket! */
+.st-limit.is-below::after { display: none; }
+.st-limit.is-below::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 1.5px;
+  height: 12px;
+  transform: translateX(-50%);
+  background: linear-gradient(0deg, rgba(220, 232, 248, 0.72), rgba(220, 232, 248, 0));
+}
 .st-limit.st-85 strong { color: var(--gold); }
 .st-limit.st-85 span { color: #F5E0A8; }
 
@@ -284,6 +296,7 @@ html.teacher-mode .st-ang { font-size: 15px; padding: 2px 7px; }
 }
 #step-dots .dot.done { background: rgba(230, 182, 85, 0.6); }
 #step-dots .dot.active { width: 22px; border-radius: 999px; background: var(--gold); }
+#step-dots.in-myth { display: none; }
 .dot-myths { display: none; }
 
 /* Hero Step 0 Overlay */
@@ -330,10 +343,10 @@ html.teacher-mode .hero-headline { font-size: clamp(36px, 4.4vw, 56px); }
   overflow: hidden;
   transition: opacity 380ms ease-out, transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* Unobstructed shatter beat: UI rail softly dims & recedes for ~1.2s so the crystal explosion owns the stage! */
+/* Unobstructed shatter beat: UI rail softly dims & recedes for ~1.2s while remaining legible! */
 #app.shatter-focus #side-panel {
-  opacity: 0.22;
-  transform: translateX(26px);
+  opacity: 0.50;
+  transform: translateX(22px);
   pointer-events: none;
 }
 
@@ -383,29 +396,29 @@ html.teacher-mode .btn-primary { min-height: 66px; font-size: 23px; }
 html.teacher-mode .btn-secondary { min-height: 54px; font-size: 21px; border-width: 2px; }
 html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 19px; color: #E4ECF8; }
 
-/* 1280x720 classroom projector tuning: ALL copy >= 17.5-18px, bright lit-room contrast, zero clipping */
+/* 1280x720 classroom projector tuning: ALL copy >= 18px, bright lit-room contrast, wider 3D stage */
 @media (max-width: 1400px) and (min-width: 861px) {
   html.teacher-mode { --ts: 1.32; }
   html.teacher-mode #side-panel {
-    width: 520px;
-    flex: 0 0 520px;
+    width: 468px;
+    flex: 0 0 468px;
     padding-top: 62px;
   }
-  html.teacher-mode #panel-scroll { padding: 4px 20px 4px; gap: 6px; }
-  html.teacher-mode #panel-footer { padding: 7px 20px 9px; gap: 2px; }
-  html.teacher-mode .teacher-pin { padding: 7px 12px; font-size: 18px; }
+  html.teacher-mode #panel-scroll { padding: 4px 18px 4px; gap: 6px; }
+  html.teacher-mode #panel-footer { padding: 7px 18px 9px; gap: 2px; }
+  html.teacher-mode .teacher-pin { padding: 7px 12px; font-size: 18px; color: #F7F9FF; }
   html.teacher-mode .step-kicker { font-size: 15px; }
-  html.teacher-mode .step-question { font-size: 25.5px; line-height: 1.14; }
-  html.teacher-mode .sw-row { grid-template-columns: 72px 1fr 1fr; gap: 6px; }
-  html.teacher-mode .sw-who { font-size: 18.5px; }
-  html.teacher-mode .mini-sw { min-height: 40px; font-size: 18px; }
-  html.teacher-mode .r-chip { font-size: 17px; padding: 4px 4px; }
-  html.teacher-mode .tally-card.compact { padding: 7px 14px; gap: 3px; }
-  html.teacher-mode .tally-header { font-size: 18px; color: #EEF4FF; }
+  html.teacher-mode .step-question { font-size: 25px; line-height: 1.14; }
+  html.teacher-mode .sw-row { grid-template-columns: 68px 1fr 1fr; gap: 6px; }
+  html.teacher-mode .sw-who { font-size: 18px; }
+  html.teacher-mode .mini-sw { min-height: 40px; font-size: 17.5px; }
+  html.teacher-mode .r-chip { font-size: 16.5px; padding: 4px 3px; }
+  html.teacher-mode .tally-card.compact { padding: 7px 12px; gap: 3px; }
+  html.teacher-mode .tally-header { font-size: 18px; color: #F0F5FF; }
   html.teacher-mode .hero-score { font-size: 42px; }
-  html.teacher-mode .tally-sub { font-size: 17.5px; color: #EEF4FF; line-height: 1.28; }
-  html.teacher-mode .luck-pill { font-size: 16.5px; padding: 3px 10px; }
-  html.teacher-mode .btn-primary { min-height: 48px; font-size: 19.5px; }
+  html.teacher-mode .tally-sub { font-size: 18px; color: #EEF4FF; line-height: 1.26; }
+  html.teacher-mode .luck-pill { font-size: 17px; padding: 3px 10px; color: #EEF4FF; }
+  html.teacher-mode .btn-primary { min-height: 48px; font-size: 19px; }
   html.teacher-mode .btn-secondary, html.teacher-mode .btn-clear { min-height: 44px; font-size: 18px; }
   html.teacher-mode .btn-depth { font-size: 17.5px; min-height: 36px; color: #EEF4FF; }
 }
@@ -887,6 +900,8 @@ html.teacher-mode .myth-tab { min-height: 48px; font-size: 18px; }
   color: var(--muted);
   font-size: 11.5px;
   font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .myth-tag.gold { background: rgba(230, 182, 85, 0.22); color: var(--gold); }
 
@@ -910,14 +925,44 @@ html.teacher-mode .myth-tab { min-height: 48px; font-size: 18px; }
   border-color: rgba(230, 182, 85, 0.72);
   background: rgba(230, 182, 85, 0.14);
 }
-.ftl-lbl { font-size: 11px; font-weight: 700; color: var(--muted); }
+.ftl-lbl { font-size: 10.5px; font-weight: 700; color: var(--muted); }
 .ftl-rate { font-size: 14px; font-weight: 800; color: var(--ivory); font-variant-numeric: tabular-nums; }
-.ftl-mini-dots { display: flex; gap: 3px; }
-.m-dot { width: 7px; height: 7px; border-radius: 50%; }
-.m-dot.c0 { background: var(--coral); }
-.m-dot.c1 { background: var(--jade); }
-.ftl-noise { font-size: 11px; color: var(--muted); }
-.ftl-dec { font-size: 11.5px; font-weight: 800; color: var(--gold); }
+.ftl-luck { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ftl-mini-dots { display: flex; gap: 3px; justify-content: center; }
+.m-glyph { font-size: 10px; font-weight: 800; line-height: 1; }
+.m-glyph.c0 { color: var(--coral); }
+.m-glyph.c1 { color: var(--jade); }
+.ftl-match-pct { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ftl-match-pct.gold-txt { color: var(--gold); }
+.ftl-match-pct.coral-txt { color: var(--coral); }
+.ftl-pair-row { display: flex; gap: 2px; justify-content: center; }
+.p-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+}
+.p-chip.hi { background: var(--gold); color: var(--night); }
+.p-chip.lo { background: rgba(255, 122, 107, 0.28); color: var(--coral); }
+.ftl-noise { font-size: 10.5px; color: var(--muted); }
+.ftl-dec { font-size: 12px; font-weight: 800; color: var(--gold); }
+
+.cmp-mini-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.cmp-mini-strip strong { color: var(--ivory); font-variant-numeric: tabular-nums; }
 
 .cmp-pair {
   display: grid;
@@ -942,12 +987,13 @@ html.teacher-mode .myth-tab { min-height: 48px; font-size: 18px; }
 .cmp-box small { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .tally-card.highlight-gold { border-color: rgba(230, 182, 85, 0.55); }
-.cmp-bars { display: flex; flex-direction: column; gap: 8px; }
-.cmp-bar-row { display: flex; flex-direction: column; gap: 3px; }
-.cmp-bar-lbl { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.cmp-bar-lbl strong { color: var(--ivory); }
+.cmp-bars { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
+.cmp-bar-row { display: flex; flex-direction: column; gap: 4px; }
+.cmp-bar-lbl { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cmp-bar-lbl strong { color: var(--ivory); white-space: nowrap; }
+.cmp-bar-lbl strong small { font-weight: 600; font-size: 11px; color: var(--muted); }
 .cmp-bar-lbl .gold-txt { color: var(--gold); }
-.bar-track.slim { height: 12px; margin: 2px 0; }
+.bar-track.slim { height: 12px; margin: 16px 0 2px; }
 .bar-fill.ivory { background: #DCE4F2; }
 
 /* Step 8 real-world list */
@@ -1084,8 +1130,8 @@ html.teacher-mode .myth-tab { min-height: 48px; font-size: 18px; }
     box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.45);
   }
   #app.shatter-focus #side-panel {
-    opacity: 0.20;
-    transform: translateY(16px);
+    opacity: 0.50;
+    transform: translateY(14px);
   }
   #panel-scroll, html.teacher-mode #panel-scroll {
     padding: 9px 14px 6px;
@@ -1110,7 +1156,8 @@ html.teacher-mode .myth-tab { min-height: 48px; font-size: 18px; }
   #top-bar { padding: 8px 10px; gap: 6px; }
   #btn-skip-top, #btn-myths { display: none; }
   /* Slim phone step-progress bar cleanly seated below top chrome! */
-  #step-dots {
+  #step-dots, #step-dots.in-myth {
+    display: flex;
     position: fixed;
     top: 56px;
     left: 50%;
@@ -1185,9 +1232,15 @@ html.teacher-mode .myth-tab { min-height: 48px; font-size: 18px; }
   .ftl-col { padding: 5px 4px; gap: 2px; }
   .ftl-rate { font-size: 12.5px; }
   .ftl-dec, .ftl-noise { font-size: 10px; }
+  .cmp-mini-strip { padding: 5px 9px; font-size: 11px; }
   .cmp-box { padding: 6px; }
   .cmp-box strong { font-size: 18px; }
-  .cmp-bar-lbl { font-size: 11.5px; }
+  .cmp-bars { gap: 8px; padding-top: 2px; }
+  .cmp-bar-lbl { font-size: 10.8px; }
+  .cmp-bar-lbl strong small { font-size: 9.8px; }
+  .bar-track.slim { height: 10px; margin: 10px 0 1px; }
+  .ftl-match-pct { font-size: 11.5px; }
+  .p-chip { width: 12px; height: 12px; font-size: 8px; }
   #idle-hint { left: 12px; right: 12px; bottom: 12px; text-align: center; font-size: 13px; }
 }
 

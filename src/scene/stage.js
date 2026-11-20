@@ -1357,10 +1357,14 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   mounted75Collar.add(collarBack);
   wallGroup.add(mounted75Collar);
 
-  // 3D anchor for crisp screen-space "75% PLAN LIMIT" badge locked dead-center above exact x75!
+  // 3D anchors for crisp screen-space "75% PLAN LIMIT" badge (above glass normally; cleanly BELOW bar on phone settled!)
   const anchor75 = new THREE.Object3D();
   anchor75.position.set(0, 0.96, 0);
   wallGroup.add(anchor75);
+
+  const anchor75Below = new THREE.Object3D();
+  anchor75Below.position.set(0, -0.58, 0);
+  wallGroup.add(anchor75Below);
 
   // ---- Slender Luminous 85.4% Quantum Gold Horizon Hairline (HIDDEN until Breakthrough!) ----
   const x85 = BAR_X0 + 0.853553 * BAR_LEN;
@@ -1582,13 +1586,12 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     const isTallPortrait = aspect < 0.72;
     const isPhoneStage = aspect < 1.25 && stepIndex > 0;
 
-    const halfSpan = stepIndex === 5 || stepIndex === 6 ? 3.92 : stepIndex === 0 && isTallPortrait ? 3.74 : 3.58;
+    const halfSpan = stepIndex === 7 ? 4.25 : stepIndex === 5 || stepIndex === 6 ? 3.92 : stepIndex === 0 && isTallPortrait ? 3.74 : 3.58;
     const vFovRad = (camera.fov * Math.PI) / 180;
     const minZForWidth = halfSpan / (Math.tan(vFovRad / 2) * Math.max(0.42, aspect));
 
     if (stepIndex === 0) {
       if (isTallPortrait) {
-        // Close, tactile, sculptural phone hero: boxes fill ~86% width with clean side margins!
         const z = Math.max(10.1, minZForWidth * 1.0);
         camTargetPos.set(0, 1.98, z);
         camTargetLook.set(0, 0.46, 0.15);
@@ -1602,16 +1605,18 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       camTargetPos.set(0, 1.88, z);
       camTargetLook.set(0, 0.86, 0.15);
     } else if (stepIndex === 5 || stepIndex === 6) {
-      const baseZ = Math.max(isPhoneStage ? 11.4 : 10.9, minZForWidth * 1.07);
+      const baseZ = Math.max(isPhoneStage ? 11.6 : 10.9, minZForWidth * 1.07);
       const z = baseZ - breakthroughZoom * 1.45;
       const lx = breakthroughZoom * 0.62;
-      const ly = isPhoneStage ? 1.56 : 1.72 + breakthroughZoom * 0.22;
-      camTargetPos.set(lx, 2.68, z);
+      // On phone, aim slightly higher/frame gallery lower so 75% & 85.4% badges sit in clean dark sky above the wall!
+      const ly = isPhoneStage ? 1.82 : 1.72 + breakthroughZoom * 0.22;
+      camTargetPos.set(lx, isPhoneStage ? 2.74 : 2.68, z);
       camTargetLook.set(lx, ly, -0.38);
     } else if (stepIndex === 7) {
-      const z = Math.max(8.7, minZForWidth * 1.05);
-      camTargetPos.set(0.05, 2.24, z);
-      camTargetLook.set(0.05, 0.92, 0.22);
+      // Pull back slightly & center left-weighted privacy screen so left brass frame NEVER clips on phone or desktop!
+      const z = Math.max(9.4, minZForWidth * 1.06);
+      camTargetPos.set(-0.18, 2.28, z);
+      camTargetLook.set(-0.18, 0.96, 0.22);
     } else {
       const z = Math.max(8.2, minZForWidth * 1.03);
       camTargetPos.set(0, 2.25, z);
@@ -1830,8 +1835,8 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
         s.pos.y = BEAM_Y + 0.56;
         if (s.vel.y > 0) s.vel.y *= -0.25;
       }
-      if (s.pos.y < BEAM_Y - 0.56 && s.pos.x > x75 + 0.25 && shatterAge < 0.35) {
-        s.pos.y = BEAM_Y - 0.56;
+      if (s.pos.y < BEAM_Y - 0.44 && s.pos.x > x75 + 0.18 && shatterAge < 0.35) {
+        s.pos.y = BEAM_Y - 0.44;
         if (s.vel.y < 0) s.vel.y *= -0.15;
       }
       s.rot.x += s.angVel.x * simDt;
@@ -2019,38 +2024,46 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
 
   function updateStageLabels() {
     const isPhone = (container.clientWidth || window.innerWidth) < 861;
-    const topSafe = isPhone ? 104 : 74;
+    const topSafe = isPhone ? 92 : 74;
 
     if (arenaGroup.visible) {
-      // Stagger vertical height of 75% and 85.4% while keeping BOTH locked to their EXACT X marks on the bar!
-      const p75 = projectPoint(anchor75, { minTop: topSafe + (isPhone ? 34 : 0), clampX: 44 });
       const show85 = goldLineGroup.visible && showQuantumLabel;
-      const p85 = show85 ? projectPoint(anchor85, { minTop: topSafe, clampX: 54 }) : null;
-
-      // During unobstructed mid-shatter burst, keep stage uncluttered of overlay pills over the shards!
       const isActiveBurst = shardMesh.visible && !showQuantumLabel;
+
       if (isActiveBurst) {
         lbl75.hidden = true;
         lbl85.hidden = true;
-      } else if (p75 && p85) {
-        // Guaranteed vertical stagger cleanly below phone #step-dots AND locked above exact x75 & x85!
-        const y75 = Math.max(topSafe + (isPhone ? 36 : 48), p75.y);
-        const y85 = Math.max(topSafe, Math.min(p85.y, y75 - (isPhone ? 34 : 52)));
-        placeLabel(lbl75, p75.x, y75);
-        placeLabel(lbl85, p85.x, y85);
-      } else if (p75) {
-        placeLabel(lbl75, p75.x, p75.y);
-        lbl85.hidden = true;
+      } else if (show85 && isPhone) {
+        // On phone settled/Myth 3: put 85.4% cleanly ABOVE the bar and 75% cleanly BELOW the bar — ZERO stem collisions!
+        const p75Bot = projectPoint(anchor75Below, { minTop: topSafe, clampX: 46 });
+        const p85Top = projectPoint(anchor85, { minTop: topSafe, clampX: 58 });
+        lbl75.classList.add('is-below');
+        if (p75Bot) placeLabel(lbl75, p75Bot.x, p75Bot.y); else lbl75.hidden = true;
+        if (p85Top) placeLabel(lbl85, p85Top.x, p85Top.y); else lbl85.hidden = true;
       } else {
-        lbl75.hidden = true;
-        lbl85.hidden = true;
+        lbl75.classList.remove('is-below');
+        const p75 = projectPoint(anchor75, { minTop: topSafe, clampX: 44 });
+        const p85 = show85 ? projectPoint(anchor85, { minTop: topSafe, clampX: 54 }) : null;
+        if (p75 && p85) {
+          const y75 = Math.max(topSafe + 48, p75.y);
+          const y85 = Math.max(topSafe, Math.min(p85.y, y75 - 52));
+          placeLabel(lbl75, p75.x, y75);
+          placeLabel(lbl85, p85.x, y85);
+        } else if (p75) {
+          placeLabel(lbl75, p75.x, p75.y);
+          lbl85.hidden = true;
+        } else {
+          lbl75.hidden = true;
+          lbl85.hidden = true;
+        }
       }
     } else {
       lbl75.hidden = true;
       lbl85.hidden = true;
     }
 
-    const showAngles = stepIndex === 4 && peelCurrent > 0.55;
+    // Hide floating Step 4 degree badges in phone portrait (controls already show Alice 0° / Bob 120° cleanly, zero pole/plaque collisions!)
+    const showAngles = stepIndex === 4 && peelCurrent > 0.55 && !isPhone;
     for (let i = 0; i < 3; i++) {
       if (showAngles) {
         const pL = projectPoint(boxLeft.angleAnchors[i], { minTop: topSafe, clampX: 18 });
@@ -2195,10 +2208,14 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       m.t += rawDt / m.duration;
       const u = Math.min(1, m.t);
       const ease = 1 - Math.pow(1 - u, 3);
-      const xOff = ease * 1.58;
+      const xOff = ease * 1.56;
       const arcY = 0.96 + Math.sin(u * Math.PI) * 0.14;
       m.meshA.position.set(-xOff, arcY, 0.15);
       m.meshB.position.set(xOff, arcY, 0.15);
+      // Smoothly taper scale/halo as motes enter the brass ports (prevents bunched caterpillar blobs!)
+      const portFade = u > 0.82 ? Math.max(0.05, 1 - (u - 0.82) / 0.18) : 1.0;
+      m.meshA.scale.setScalar(portFade);
+      m.meshB.scale.setScalar(portFade);
       if (!m.entangled) {
         m.meshA.rotation.y = u * Math.PI * 0.85;
         m.meshB.rotation.y = -u * Math.PI * 0.85;
