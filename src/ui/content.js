@@ -26,7 +26,7 @@ export const DEPTH_DRAWERS = {
   },
   merminCard: {
     title: 'How do we know? — Why every hidden card scores ≥ 5/9',
-    plain: 'Because matching dials agreed 100%, both particles must carry the same 3-colour hidden card — and every 3-colour card matches on at least 5 of the 9 dial pairs.',
+    plain: 'If hidden cards ran the boxes, 100% agreement on matching dials means both particles must carry the same 3-colour card — and every such card matches on at least 5 of the 9 dial pairs.',
     detail: 'All-same cards (▲▲▲ or ●●●) match 9/9 (100%). Any 2-and-1 card (like ▲▲●) matches on 2² + 1² = 5 of 9 pairs (55.6%). Mixing cards at random only averages ≥ 55.6%.',
     math: '8 deterministic cards → matches ∈ {9/9, 5/9}. Any convex mixture obeys P(same) ≥ 5/9 ≈ 55.56% > 50%.',
     sources: [

@@ -23,13 +23,15 @@ for (const [sz, vp] of Object.entries(SIZES)) {
   const p = await ctx.newPage(); const errs = []; const reqs = [];
   p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); p.on('pageerror', e => errs.push(String(e)));
   p.on('request', r => { if (!r.url().startsWith('file:') && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) reqs.push(r.url()); });
-  await p.goto('file://' + path.join(ROOT, file)); await p.waitForTimeout(3200);
+  await p.goto('file://' + path.join(ROOT, file) + '?shots'); await p.waitForTimeout(3200);
   await p.screenshot({ path: path.join(OUT, `00-first-${sz}.png`) });
   const fps = await p.evaluate(() => new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; performance.now() - t0 < 2000 ? requestAnimationFrame(f) : r(Math.round(n / 2)); }; requestAnimationFrame(f); }));
   let i = 1;
   for (const s of steps) {
     try { if (s.click) await p.click(s.click, { timeout: 4000 }); if (s.eval) await p.evaluate(s.eval); } catch (e) { errs.push(`step ${s.name}: ${e.message.split('\n')[0]}`); }
-    await p.waitForTimeout(s.wait || 1200); await p.screenshot({ path: path.join(OUT, `${String(i++).padStart(2, '0')}-${s.name}-${sz}.png`) });
+    await p.waitForTimeout(s.wait || 1200);
+    const prefix = s.id || String(i++).padStart(2, '0');
+    await p.screenshot({ path: path.join(OUT, `${prefix}-${s.name}-${sz}.png`) });
   }
   report[sz] = { fps_swiftshader: fps, errors: errs, externalRequests: reqs }; await ctx.close();
 }
@@ -39,8 +41,8 @@ for (const [sz, vp] of Object.entries(SIZES)) {
   const p = await ctx.newPage(); const errs = []; const reqs = [];
   p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); p.on('pageerror', e => errs.push(String(e)));
   p.on('request', r => { if (!r.url().startsWith('file:') && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) reqs.push(r.url()); });
-  await p.goto('file://' + path.join(ROOT, file)); await p.waitForTimeout(1600);
-  await p.evaluate('window.__bell.setTeacher(true); window.__bell.goto(5); window.__bell.fire(1000);');
+  await p.goto('file://' + path.join(ROOT, file) + '?shots'); await p.waitForTimeout(1600);
+  await p.evaluate('window.__bell.setTeacher(true); window.__bell.goto(5); window.__bell.fire(2000);');
   await p.waitForTimeout(900);
   await p.screenshot({ path: path.join(OUT, '09-teacher-mode-proj1280.png') });
   report.proj1280 = { errors: errs, externalRequests: reqs }; await ctx.close();

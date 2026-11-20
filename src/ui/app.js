@@ -22,6 +22,7 @@ const SVG_SOUND_OFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="non
 export function createApp({ stage, audio, root }) {
   const state = {
     step: 0,
+    bridgeOpen: false, // Dedicated "Same puzzle, sharper test." beat between Step 4 and Step 5
     teacher: window.location.hash === '#teacher',
     peeled: false,
     dialA: 0,
@@ -45,7 +46,7 @@ export function createApp({ stage, audio, root }) {
       nRand: 0, b0WhenRand: 0,
       nOff: 0, b0WhenOff: 0,
       total: 0, wins: 0, compared: false,
-      recent: [], // last 24 rounds: { b, win }
+      recent: [],
     },
     depthKey: null,
     idleHint: '',
@@ -114,10 +115,31 @@ export function createApp({ stage, audio, root }) {
     stage.bloomLampRight(state.merminCard[2]);
   }
 
+  function openBridge() {
+    stopTimers();
+    state.step = 4;
+    state.bridgeOpen = true;
+    state.peeled = false;
+    state.depthKey = null;
+    elDepthBackdrop.hidden = true;
+    state.idleHint = '';
+    elHintPill.hidden = true;
+    stage.setStep(4.5);
+    stage.setPeel(false, { snap: true });
+    stage.setSourceEntangled(true);
+    stage.setDial('left', 0, 'chsh');
+    stage.setDial('right', 0, 'chsh');
+    stage.setTeacherMode(state.teacher);
+    render();
+    elPanelScroll.scrollTop = 0;
+    requestAnimationFrame(() => stage.resize());
+  }
+
   function goto(nextStep) {
     const s = Math.max(0, Math.min(STEP_COUNT - 1, nextStep));
     stopTimers();
     state.step = s;
+    state.bridgeOpen = false;
     state.depthKey = null;
     elDepthBackdrop.hidden = true;
     state.idleHint = '';
@@ -176,7 +198,11 @@ export function createApp({ stage, audio, root }) {
       stage.setSourceEntangled(false);
       stage.setWallState('intact');
       const stats = computeChshS(state.chshRun);
-      stage.setArenaProgress(state.chshRun.rounds > 0 ? stats.winRate : 0, { isQuantum: false, snap: true });
+      stage.setArenaProgress(state.chshRun.rounds > 0 ? stats.winRate : 0, {
+        isQuantum: false,
+        snap: true,
+        rounds: state.chshRun.rounds,
+      });
       stage.setDial('left', 0, 'chsh');
       stage.setDial('right', 0, 'chsh');
     } else if (s === 6) {
@@ -188,7 +214,7 @@ export function createApp({ stage, audio, root }) {
       stage.setDial('right', 0, 'chsh');
       if (state.chshRun.rounds === 0) {
         stage.setWallState('intact');
-        stage.setArenaProgress(0, { isQuantum: true, snap: true });
+        stage.setArenaProgress(0, { isQuantum: true, snap: true, rounds: 0 });
       }
     } else if (s === 7) {
       state.peeled = false;
@@ -220,12 +246,13 @@ export function createApp({ stage, audio, root }) {
     state.chshSettled = false;
     state.wallHitBy75 = false;
     state.classVoted = false;
+    state.bridgeOpen = false;
     state.bobRun = {
       n0: 0, b0WhenA0: 0, n1: 0, b0WhenA1: 0, nRand: 0, b0WhenRand: 0, nOff: 0, b0WhenOff: 0,
       total: 0, wins: 0, compared: false, recent: [],
     };
     stage.setWallState('intact');
-    stage.setArenaProgress(0, { isQuantum: false, snap: true });
+    stage.setArenaProgress(0, { isQuantum: false, snap: true, rounds: 0 });
     goto(0);
   }
 
@@ -325,7 +352,7 @@ export function createApp({ stage, audio, root }) {
       state.chshRun = createChshRun();
       state.chshSettled = false;
       stage.setWallState('intact');
-      stage.setArenaProgress(0, { isQuantum, snap: true });
+      stage.setArenaProgress(0, { isQuantum, snap: true, rounds: 0 });
     }
     if (isQuantum) state.chshSettled = false;
 
@@ -358,7 +385,7 @@ export function createApp({ stage, audio, root }) {
         state.chshSettled = true;
       }
       const stats = computeChshS(state.chshRun);
-      stage.setArenaProgress(stats.winRate, { isQuantum, snap: instant });
+      stage.setArenaProgress(stats.winRate, { isQuantum, snap: instant, rounds: state.chshRun.rounds });
       if (!isQuantum && evaluateChshCard(state.chshCard).wins === 3 && state.chshRun.rounds >= 100) {
         state.wallHitBy75 = true;
       }
@@ -401,7 +428,7 @@ export function createApp({ stage, audio, root }) {
       }
 
       const stats = computeChshS(state.chshRun);
-      stage.setArenaProgress(stats.winRate, { isQuantum });
+      stage.setArenaProgress(stats.winRate, { isQuantum, rounds: state.chshRun.rounds });
       if (last) {
         stage.setDial('left', last.x, 'chsh');
         stage.setDial('right', last.y, 'chsh');
@@ -436,8 +463,8 @@ export function createApp({ stage, audio, root }) {
         recordChshRound(state.chshRun, r);
       }
       const st = computeChshS(state.chshRun);
-      stage.setWallState('shattered', { settled: false });
-      stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true });
+      stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true, rounds: state.chshRun.rounds });
+      stage.setWallState('shattered', { midShatter: true });
       stage.bloomLampLeft(0);
       stage.bloomLampRight(0);
       render();
@@ -448,7 +475,7 @@ export function createApp({ stage, audio, root }) {
         state.chshSettled = true;
         const st = computeChshS(state.chshRun);
         stage.setWallState('shattered', { settled: true });
-        stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true });
+        stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true, rounds: state.chshRun.rounds });
         render();
         requestAnimationFrame(() => stage.resize());
       }
@@ -598,7 +625,7 @@ export function createApp({ stage, audio, root }) {
 
     if (isHero) {
       elHeroOverlay.innerHTML = `
-        <h1 class="hero-headline">Two boxes. No wires.<br>How do they always&nbsp;agree?</h1>
+        <h1 class="hero-headline">Two boxes. No wires.<br>Same dial, same colour.&nbsp;How?</h1>
         <div class="hero-actions">
           <button class="btn-primary" id="btn-investigate">Investigate</button>
         </div>
@@ -692,7 +719,7 @@ export function createApp({ stage, audio, root }) {
       bodyHtml += `
         <div class="step-kicker">Step 3 · Test a hidden card</div>
         <h2 class="step-question">Could a hidden card hit 50%?</h2>
-        <p class="step-sub">Because matching dials agreed 100%, both particles must carry the same hidden card. Tap a dial to flip ▲ Coral or ● Jade.</p>
+        <p class="step-sub">If hidden cards ran the boxes, 100% agreement on matching dials means both particles would carry the same card. Tap a dial to test:</p>
         <div class="card-switches">
           ${[0, 1, 2].map(i => {
             const c = state.merminCard[i];
@@ -721,6 +748,7 @@ export function createApp({ stage, audio, root }) {
                 `).join('')}
               </div>
             </div>
+            <div class="grid-micro">Each square = one Alice &amp; Bob dial pair</div>
           </div>
           <div class="grid-readout">
             <div class="big-num">${ev.matches} / 9</div>
@@ -735,11 +763,35 @@ export function createApp({ stage, audio, root }) {
         <button class="btn-primary" data-next="4">No card works — peel off the casing →</button>
         <button class="btn-depth" data-depth="merminCard">How do we know?</button>
       `;
+    } else if (state.step === 4 && state.bridgeOpen) {
+      // Dedicated bridge beat: 3-dial boxes → 2-question 75% team game ("Same puzzle, sharper test.")
+      bodyHtml += `
+        <div class="step-kicker">The bridge · From 3 dials to 2 questions</div>
+        <h2 class="step-question">Same puzzle, sharper test.</h2>
+        <div class="bridge-diagram" role="img" aria-label="Comparison from 3 dials with a 5.6% gap to 2 questions with a bold 75% glass wall">
+          <div class="br-card">
+            <div class="br-badge">3 DIALS (1 · 2 · 3)</div>
+            <div class="br-stat">55.6% <span>vs</span> 50%</div>
+            <div class="br-note">Tiny 5.6% gap</div>
+          </div>
+          <div class="br-arrow" aria-hidden="true">→</div>
+          <div class="br-card gold">
+            <div class="br-badge gold-txt">2 QUESTIONS (0 · 1)</div>
+            <div class="br-stat gold-txt">75% <span>wall</span></div>
+            <div class="br-note">Can nature break through?</div>
+          </div>
+        </div>
+        <p class="step-sub">Same boxes, simpler dials: give Alice and Bob just <strong>0</strong> or <strong>1</strong>. They win by <strong>matching</strong> — unless both get <strong>1</strong>, then they must <strong>differ</strong>.</p>
+      `;
+      footerHtml = `
+        <button class="btn-primary" data-next="5">Play the 75% team game →</button>
+        <button class="btn-depth" data-depth="chshCard">How do we know?</button>
+      `;
     } else if (state.step === 4) {
       bodyHtml += `
         <div class="step-kicker">Step 4 · Inside the boxes</div>
-        <h2 class="step-question">No wires. No cards. Just tilted magnets.</h2>
-        <p class="step-sub">Each particle meets a tilted magnet (0°, 120°, or 240°) and triggers ▲ Coral or ● Jade. Turn Alice or Bob's dial to rotate the poles.</p>
+        <h2 class="step-question">No wires. Just tilted magnets.</h2>
+        <p class="step-sub">Each particle meets a tilted magnet (0°, 120°, or 240°) and flashes ▲ Coral or ● Jade. Turn Alice or Bob's dial to rotate the poles.</p>
         <div class="dial-pair">
           <div class="dial-col">
             <div class="dial-label">Alice (${MERMIN_SPIN_ANGLES[state.dialA]}°)</div>
@@ -760,7 +812,7 @@ export function createApp({ stage, audio, root }) {
         </div>
       `;
       footerHtml = `
-        <button class="btn-primary" data-next="5">Sharpen this into a 75% team game →</button>
+        <button class="btn-primary" id="btn-open-bridge">Same puzzle, sharper test →</button>
         <button class="btn-depth" data-depth="peelOff">How do we know?</button>
       `;
     } else if (state.step === 5) {
@@ -768,9 +820,9 @@ export function createApp({ stage, audio, root }) {
       const st = computeChshS(state.chshRun);
       const hasRun = state.chshRun.rounds > 0;
       const pct = hasRun ? st.winRate * 100 : 0;
-      const isLuckyStreak = hasRun && st.winRate > 0.75;
       const luckInfo = formatLuckChance(state.chshRun.maxLog10B);
       const leverReady = state.teacher ? state.classVoted : state.wallHitBy75;
+      const teacherFireN = 2000;
 
       bodyHtml += `
         ${state.teacher ? `
@@ -780,7 +832,7 @@ export function createApp({ stage, audio, root }) {
         ` : ''}
         <div class="step-kicker">Step 5 · The team game</div>
         <h2 class="step-question">${state.teacher ? 'Can any card beat 75%?' : 'Can any hidden card beat 75%?'}</h2>
-        ${!state.teacher ? `<p class="step-sub">The 3-dial gap was tiny (50% vs 55.6%). This 2-question game raises the stakes: Alice &amp; Bob must match — unless both get 1, then differ.</p>` : ''}
+        ${!state.teacher ? `<p class="step-sub">Same boxes, now 0 or 1: match — unless both get 1, then differ. Build the best hidden card you can.</p>` : ''}
 
         <div class="chsh-switches">
           <div class="sw-row">
@@ -803,15 +855,13 @@ export function createApp({ stage, audio, root }) {
 
         <div class="tally-card compact">
           <div class="tally-header">
-            <span>Hidden card (${ev.wins}/4 = ${Math.round(ev.rate * 100)}%)</span>
+            <span>Plan max: ${Math.round(ev.rate * 100)}.0% (${ev.wins}/4)</span>
             <span class="big-num hero-score">${hasRun ? `${pct.toFixed(1)}%` : '—'}</span>
           </div>
           <div class="tally-sub">
             ${hasRun
-              ? isLuckyStreak
-                ? `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} — a lucky streak! Keep firing, luck fades to 75%.`
-                : `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins — stuck at the 75% wall.`
-              : 'Every card leaves a red ✗. Test it against the glass wall.'}
+              ? `<strong>Luck can dent the glass. It can't break it.</strong> (${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()})`
+              : 'Every card leaves a red ✗. Test it against the frosted 75% glass wall.'}
           </div>
           ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>` : ''}
         </div>
@@ -819,7 +869,7 @@ export function createApp({ stage, audio, root }) {
         <div class="inline-actions">
           ${!state.teacher ? `<button class="btn-secondary" data-fire="1" ${state.burstRunning ? 'disabled' : ''}>×1</button>` : ''}
           ${!state.teacher ? `<button class="btn-secondary" data-fire="100" ${state.burstRunning ? 'disabled' : ''}>×100</button>` : ''}
-          <button class="btn-secondary" data-fire="1000" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
+          <button class="btn-secondary" data-fire="${state.teacher ? teacherFireN : 1000}" ${state.burstRunning ? 'disabled' : ''}>Fire ${state.teacher ? '2,000' : '1,000'}</button>
           ${hasRun ? `<button class="btn-quiet-sm" id="btn-clear-chsh">Clear</button>` : ''}
         </div>
       `;
@@ -847,7 +897,7 @@ export function createApp({ stage, audio, root }) {
           : 'Entangled pairs vs. the 75% wall…';
 
       const statusText = settled
-        ? `Wall shattered at round ${state.chshRun.brokenAt}. After ${state.chshRun.rounds.toLocaleString()} rounds, the score hovers around quantum nature's 85.4% limit.`
+        ? `Wall shattered at round ${state.chshRun.brokenAt}. After ${state.chshRun.rounds.toLocaleString()} rounds, scores hover around quantum nature's 85.4% average limit.`
         : broken
           ? `Wall shattered at round ${state.chshRun.brokenAt}! Less than a 1-in-a-million chance any hidden card did this by luck.`
           : cracked
@@ -872,7 +922,7 @@ export function createApp({ stage, audio, root }) {
 
         ${broken ? `
           <div class="callout-box">
-            <strong>No hidden card — no plan made in advance — can do this.</strong> Nature just did.
+            <strong>No hidden card — no plan made in advance without talking — can do this.</strong> Real entangled pairs in nature do.
           </div>
         ` : ''}
 
@@ -893,7 +943,6 @@ export function createApp({ stage, audio, root }) {
       const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : pctR;
       const winPct = br.total > 0 ? ((br.wins / br.total) * 100).toFixed(1) : '—';
 
-      // Visual strip of recent 24 Bob lamps: random coin flips alone -> sorted golden wins when notes meet!
       const dots = br.compared
         ? [...br.recent].sort((a, b) => Number(b.win) - Number(a.win))
         : br.recent;
@@ -901,13 +950,16 @@ export function createApp({ stage, audio, root }) {
       bodyHtml += `
         <div class="step-kicker">Step 7 · No faster-than-light texting</div>
         <h2 class="step-question">Can Alice send Bob an instant message?</h2>
-        <p class="step-sub">Switch Alice behind the frosted screen and watch Bob's lamp alone. Does his 50/50 stream ever budge?</p>
+        <p class="step-sub">Switch Alice behind her frosted screen and watch Bob's lamp alone. Does his 50/50 stream ever budge?</p>
 
-        <div class="seg-group four">
-          <button class="seg-btn ${state.alicePolicy === '0' ? 'active' : ''}" data-apol="0">Always 0</button>
-          <button class="seg-btn ${state.alicePolicy === '1' ? 'active' : ''}" data-apol="1">Always 1</button>
-          <button class="seg-btn ${state.alicePolicy === 'random' ? 'active' : ''}" data-apol="random">Random</button>
-          <button class="seg-btn ${state.alicePolicy === 'off' ? 'active' : ''}" data-apol="off">Off</button>
+        <div class="control-block">
+          <div class="dial-label">Alice's box (behind the frosted screen)</div>
+          <div class="seg-group four">
+            <button class="seg-btn ${state.alicePolicy === '0' ? 'active' : ''}" data-apol="0">Always 0</button>
+            <button class="seg-btn ${state.alicePolicy === '1' ? 'active' : ''}" data-apol="1">Always 1</button>
+            <button class="seg-btn ${state.alicePolicy === 'random' ? 'active' : ''}" data-apol="random">Random</button>
+            <button class="seg-btn ${state.alicePolicy === 'off' ? 'active' : ''}" data-apol="off">Off</button>
+          </div>
         </div>
 
         <div class="tally-card compact">
@@ -933,8 +985,8 @@ export function createApp({ stage, audio, root }) {
         </div>
 
         <div class="inline-actions">
-          <button class="btn-secondary" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
-          <button class="btn-secondary" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Bring notes together</button>
+          <button class="btn-secondary strong" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
+          <button class="btn-secondary reveal-outline" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Bring notes together</button>
         </div>
       `;
       footerHtml = `
@@ -980,7 +1032,14 @@ export function createApp({ stage, audio, root }) {
 
     if (t.id === 'btn-investigate') { audio.playDialClick(); goto(1); return; }
     if (t.id === 'btn-skip-top') { audio.playDialClick(); goto(5); return; }
-    if (t.id === 'btn-back') { audio.playDialClick(); goto(state.step - 1); return; }
+    if (t.id === 'btn-back') {
+      audio.playDialClick();
+      if (state.bridgeOpen) goto(4);
+      else if (state.step === 5) openBridge();
+      else goto(state.step - 1);
+      return;
+    }
+    if (t.id === 'btn-open-bridge') { audio.playDialClick(); openBridge(); return; }
     if (t.id === 'btn-reset' || t.id === 'btn-play-again') { audio.playDialClick(); resetAll(); return; }
     if (t.id === 'btn-sound') { audio.setMuted(!audio.isMuted()); if (!audio.isMuted()) audio.playDialClick(); renderTopBar(); return; }
     if (t.id === 'mode-self') { state.teacher = false; audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
@@ -998,7 +1057,7 @@ export function createApp({ stage, audio, root }) {
       if (side === 'left') state.dialA = idx; else state.dialB = idx;
       stage.setDial(side, idx, 'mermin');
       audio.playDialClick();
-      if (state.step === 4) fireMerminSingle(false);
+      if (state.step === 4 && !state.bridgeOpen) fireMerminSingle(false);
       else render();
       return;
     }
@@ -1032,7 +1091,7 @@ export function createApp({ stage, audio, root }) {
       state.chshCard[k] = state.chshCard[k] === 0 ? 1 : 0;
       state.chshRun = createChshRun();
       stage.setWallState('intact');
-      stage.setArenaProgress(0, { isQuantum: false, snap: true });
+      stage.setArenaProgress(0, { isQuantum: false, snap: true, rounds: 0 });
       audio.playDialClick();
       render();
       return;
@@ -1048,7 +1107,7 @@ export function createApp({ stage, audio, root }) {
     if (t.id === 'btn-clear-chsh') {
       state.chshRun = createChshRun();
       stage.setWallState('intact');
-      stage.setArenaProgress(0, { isQuantum: false, snap: true });
+      stage.setArenaProgress(0, { isQuantum: false, snap: true, rounds: 0 });
       audio.playDialClick();
       render();
       return;
@@ -1087,9 +1146,15 @@ export function createApp({ stage, audio, root }) {
 
   window.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !elDepthBackdrop.hidden) { elDepthBackdrop.hidden = true; return; }
-    if (e.key === 'ArrowRight' && state.step < STEP_COUNT - 1) goto(state.step + 1);
-    else if (e.key === 'ArrowLeft' && state.step > 0) goto(state.step - 1);
-    else if (e.key === 't' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); state.teacher = !state.teacher; render(); }
+    if (e.key === 'ArrowRight') {
+      if (state.step === 4 && !state.bridgeOpen) openBridge();
+      else if (state.step < STEP_COUNT - 1) goto(state.step + 1);
+    } else if (e.key === 'ArrowLeft') {
+      if (state.bridgeOpen) goto(4);
+      else if (state.step > 0) goto(state.step - 1);
+    } else if (e.key === 't' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); state.teacher = !state.teacher; render();
+    }
   });
 
   const HINTS = {
@@ -1097,7 +1162,7 @@ export function createApp({ stage, audio, root }) {
     2: 'Tap "Fire 1,000 random pairs" to see how often random dials match.',
     3: 'Tap any Dial button to flip the hidden card and watch the 3×3 grid.',
     4: 'Tap 0°, 120°, or 240° to watch Alice or Bob\'s magnet rotate inside.',
-    5: 'Tap "Fire 1,000 rounds" to see the best hidden card hit the 75% glass wall.',
+    5: 'Tap "Fire 1,000 rounds" to see the best hidden card dent the frosted 75% glass.',
     7: 'Switch Alice between "Always 0" and "Always 1", then tap "Bring notes together".',
   };
   setInterval(() => {
@@ -1114,8 +1179,9 @@ export function createApp({ stage, audio, root }) {
 
   return {
     goto,
+    openBridge,
     fire(n = 1) {
-      if (state.step === 1 || state.step === 4) {
+      if (state.step === 1 || (state.step === 4 && !state.bridgeOpen)) {
         if (n === 1) fireMerminSingle(false);
         else fireMerminBatch(n, { randomDials: false, instant: true });
       } else if (state.step === 2) {

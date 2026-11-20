@@ -6,8 +6,11 @@ const root = document.getElementById('app');
 const stageEl = document.getElementById('stage-wrap');
 const loaderEl = document.getElementById('loader');
 
+const params = new URLSearchParams(window.location.search);
+const highQuality = params.has('shots') || params.get('q') === 'high';
+
 const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-const stage = createStage(stageEl, { reducedMotion: mqReduce.matches });
+const stage = createStage(stageEl, { reducedMotion: mqReduce.matches, highQuality });
 mqReduce.addEventListener?.('change', e => stage.setReducedMotion(e.matches));
 
 const audio = createAudio();
