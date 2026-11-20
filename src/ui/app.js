@@ -197,6 +197,7 @@ export function createApp({ stage, audio, root }) {
     } else if (tab === 'gloves') {
       const showEnt = !!state.mythGloves.randRes;
       stage.setSourceEntangled(showEnt);
+      stage.setCardStandVisible(!showEnt);
       stage.setDial('left', 0, 'mermin');
       stage.setDial('right', showEnt ? 2 : 0, 'mermin');
       stage.bloomLampLeft(0);
@@ -264,6 +265,7 @@ export function createApp({ stage, audio, root }) {
     state.mythGloves.sameRes = sampleGlovesVsEntangled({ rounds: 1200, sameDial: true });
     state.mythGloves.randRes = null;
     stage.setSourceEntangled(false);
+    stage.setCardStandVisible(true);
     stage.setDial('left', 0, 'mermin');
     stage.setDial('right', 0, 'mermin');
     stage.bloomLampLeft(0);
@@ -280,6 +282,7 @@ export function createApp({ stage, audio, root }) {
     }
     state.mythGloves.randRes = sampleGlovesVsEntangled({ rounds: 2400, sameDial: false });
     stage.setSourceEntangled(true);
+    stage.setCardStandVisible(false);
     const le = state.mythGloves.randRes.lastEnt;
     stage.setDial('left', le.dialA, 'mermin');
     stage.setDial('right', le.dialB, 'mermin');
@@ -893,14 +896,13 @@ export function createApp({ stage, audio, root }) {
 
         ${mf.revealed ? `
           <div class="callout-box">
-            <strong>Entanglement links results, not messages.</strong> Bob's local stream stayed ~50/50 on every letter; the pattern only appeared after Alice's notes arrived at light speed.
+            <strong>Entanglement links results, not messages.</strong> Bob's local stream stayed ~50/50; the pattern only appeared after Alice's notes arrived at light speed.
           </div>
-        ` : ''}
-
-        <div class="inline-actions">
-          <button class="btn-secondary strong" id="btn-myth-ftl-send">${mf.sent ? 'Send fresh burst' : 'Send S · O · S'}</button>
-          ${mf.sent && !mf.revealed ? `<button class="btn-secondary reveal-outline" id="btn-myth-ftl-reveal">Bring notes together (light speed)</button>` : ''}
-        </div>
+        ` : `
+          <div class="inline-actions">
+            <button class="btn-secondary strong" id="btn-myth-ftl-send">${mf.sent ? 'Send fresh burst' : 'Send S · O · S'}</button>
+          </div>
+        `}
       `;
       footerHtml = `
         ${!mf.sent
@@ -954,12 +956,11 @@ export function createApp({ stage, audio, root }) {
           <div class="callout-box">
             <strong>Gloves carry instructions. Entangled pairs don't — and the numbers prove it.</strong>
           </div>
-        ` : ''}
-
-        <div class="inline-actions">
-          <button class="btn-secondary" id="btn-myth-gloves-same">Test same dials</button>
-          <button class="btn-secondary reveal-outline" id="btn-myth-gloves-rand">Test random dials</button>
-        </div>
+        ` : `
+          <div class="inline-actions">
+            <button class="btn-secondary" id="btn-myth-gloves-same">Test same dials</button>
+          </div>
+        `}
       `;
       footerHtml = `
         ${!hasSame

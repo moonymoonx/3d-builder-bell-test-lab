@@ -1720,6 +1720,10 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     boxRight.dimmed = recorderHoodsOn;
   }
 
+  function setCardStandVisible(visible) {
+    cardStandGroup.visible = !!visible;
+  }
+
   function setStep(step) {
     stepIndex = step;
     showStationPlaques = step >= 1;
@@ -2015,11 +2019,11 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
 
   function updateStageLabels() {
     const isPhone = (container.clientWidth || window.innerWidth) < 861;
-    const topSafe = isPhone ? 68 : 74;
+    const topSafe = isPhone ? 104 : 74;
 
     if (arenaGroup.visible) {
       // Stagger vertical height of 75% and 85.4% while keeping BOTH locked to their EXACT X marks on the bar!
-      const p75 = projectPoint(anchor75, { minTop: topSafe, clampX: 44 });
+      const p75 = projectPoint(anchor75, { minTop: topSafe + (isPhone ? 34 : 0), clampX: 44 });
       const show85 = goldLineGroup.visible && showQuantumLabel;
       const p85 = show85 ? projectPoint(anchor85, { minTop: topSafe, clampX: 54 }) : null;
 
@@ -2029,9 +2033,9 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
         lbl75.hidden = true;
         lbl85.hidden = true;
       } else if (p75 && p85) {
-        // Guaranteed vertical stagger so they NEVER collide AND stay 100% locked above exact x75 & x85!
-        const y75 = p75.y;
-        const y85 = Math.max(topSafe, Math.min(p85.y, y75 - (isPhone ? 40 : 52)));
+        // Guaranteed vertical stagger cleanly below phone #step-dots AND locked above exact x75 & x85!
+        const y75 = Math.max(topSafe + (isPhone ? 36 : 48), p75.y);
+        const y85 = Math.max(topSafe, Math.min(p85.y, y75 - (isPhone ? 34 : 52)));
         placeLabel(lbl75, p75.x, y75);
         placeLabel(lbl85, p85.x, y85);
       } else if (p75) {
@@ -2302,6 +2306,7 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     setStep,
     setMythView,
     setRecorderHoods,
+    setCardStandVisible,
     setDial,
     setPeel,
     setCardStrip,
