@@ -10,3 +10,4 @@
 - 02:28 G03 built M1+M2 (19bdf82). r0 screenshots: 0 errors, 0 external requests, SwiftShader FPS 5–8 (software). R1 cold review started in fresh agy session bell-eye.
 - 02:34 R1 scores clarity 3, ease 3, beauty 3, smooth 3, delight 3 → G04 fix brief sent. Physics independently re-simulated by orchestrator: quantum 85.31% (200k), Bob P(0)=0.502/0.501, Mermin random 50.05%, 16 cards 75/25%.
 - 02:34 Gemini quota: weekly 81.4%, 5-hour 89.9% (resets ~07:20).
+- 02:47 G04 done (0f744d8, pushed). R2 cold review started in a fresh bell-eye session.

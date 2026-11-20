@@ -1,0 +1,13 @@
+# Gemini brief 05 — fix round 2 (R2 cold scores still 3/3/3/3/3; target ≥ 4 everywhere, 4.5 on beauty & delight)
+Same sandbox rules (only this folder; no push/gh/deploy/installs). Re-read STYLE.md, DESIGN-RULES.md and ALL of ref/REVIEW-R2.md. Last round was fast; this round, go deep and verify every fix visually before moving on (rebuild + reshoot + open the PNG after each major fix — iterate until it really looks right).
+
+Must-fix, in order:
+1. **The wow moment, staged as a scene, not a widget.** Stop treating the score bar as a plank floating above the boxes. On step 5, the glass wall is a thick, beautiful pane standing on the stage between the source and the camera (or a dedicated "scoreboard" plinth), edge-lit, with the score as a glowing beam/liquid of light pressing against it. On breakthrough: camera eases in (≈ 600 ms), cracks race across the pane, a beat of silence, then hundreds of translucent refractive crystal shards (MeshPhysicalMaterial transmission or a cheap fake: env-mapped, high specular, thin, additive edge glint, warm gold backlight) burst radially and forward with tumble and gravity in slow motion, a golden flash, deep chord; the beam surges through and settles on a gold 85% line; camera eases back. Nothing left dangling. Keep ≥ 30 fps feel: instanced shards, short-lived.
+2. **Physics honesty:** remove "the particles truly wait until you measure" and any similar line. Allowed claim: "No hidden card — no plan made in advance — can do this. Nature just did." Depth behind "How do we know?" may mention what Bell tests do and don't rule out (RESEARCH.md Q10).
+3. **Bridge 3-dial box → 2-question game** with one short plain line/screen (why the game is the same mystery in a sharper form; "the boxes needed 50%; this game needs more than 75%"). Don't spend step 6's punch in step 3.
+4. **Phone:** nothing clipped behind the sticky CTA — compute sheet height; the step's action buttons always visible; 3D labels never collide with top chrome (hide floor labels on phone or move them). Bars and numbers always in sync (same value, same moment) in 3D and 2D.
+5. **Teacher 1280×720:** legible from the back of a room — fewer words, bigger type, the rule table and one big number.
+6. Step 7 "veil": make the Bob-alone vs compare-notes reveal read clearly (e.g. Bob's lamp history as a strip of coin-flip dots that, on "Bring notes together", sorts into a visible pattern). No smudge effects.
+7. Every remaining item in REVIEW-R2.md's fix list.
+
+Then tests, build, `node tools/shots.mjs index.html --out=screenshots/r3 --steps=tools/steps.json` (make sure a step captures the shatter mid-burst AND one ~1 s later). Look at every PNG, fix, reshoot. Commit (no push), log DECISIONS.md + LOG.md. Reply with a 6-line summary.
