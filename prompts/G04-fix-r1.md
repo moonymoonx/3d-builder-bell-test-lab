@@ -1,0 +1,15 @@
+# Gemini brief 04 — fix round 1 (scores were 3/3/3/3/3; every score must reach ≥ 4)
+Same sandbox rules as brief 03 (only this folder; no push/gh/deploy/installs). Re-read STYLE.md and DESIGN-RULES.md.
+
+A cold first-time-visitor review is in ref/REVIEW-R1.md. Read ALL of it. Implement its top fixes and every "broken / cheap / cramped" item. Musts, in priority order:
+1. Phone layout: nothing ever clipped; primary CTA and the fire buttons always in thumb reach (sheet scrolls internally or content is condensed; stage still visible). Phone first view: frame the boxes larger, no dead void.
+2. The 75% honesty problem: the bar must never contradict the number. Draw the bar at the true value; when a card's sampled rate wobbles above 75%, say so in plain words ("a lucky streak — keep firing, luck fades") and let the evidence meter, not the bar, decide cracks. Remove the pre-spoiled 85.4% marker until breakthrough.
+3. Make the wow moment worthy: a real 3D glass wall (thick, refractive-looking, edge-lit) that the score bar presses against; cracks spread visibly as evidence grows; the shatter = many small glinting glass shards with light, not paper; slow-motion, chord, then settle. "Settled" text only after it truly settles.
+4. Each step answers "why should I care?" in one plain line (esp. step 2: why 100%-when-same + 50%-overall is a paradox; step 6: what nature just told us). One consistent word: "hidden card". Consistent names: Alice / Bob everywhere. No jargon on the surface (no "S", no "maths" in labels).
+5. Peel-off must clearly show a tilted magnet per box (two pole pieces, N/S, rotate with the dial; default to different angles so the tilt is visible), dial moves aside / becomes see-through; crisp casing edges; no line that looks like a wire under "No wires" (make the beam a faint dotted particle path only while motes fly, or remove).
+6. Button hierarchy: the step's real action is the bright button; "next step" becomes bright only after the visitor has done the action (or after a hint). Tally visible for "Fire 50" (50 / 50 same colour). Replace the emoji speaker with a crisp inline SVG icon. Remove "Skip to the 75% game" spoiler from the first view (keep a quiet "Skip to the game" in the step dots/menu).
+7. Card grid: label axes Alice / Bob, mismatched cells readable at a glance (coral/jade pair vs a clear "different" mark), the "every card ≥ 5 of 9" punchline as a big callout. Stage boxes reflect the card being edited.
+8. Teacher mode readable from the back of a classroom on a projector (big type, high contrast, nothing clipped at 1280×720 and 1920×1080).
+Also: a real lever object in 3D (or rename the button); add a `?fps` overlay and an adaptive-quality guard (drop pixel ratio / bloom if frame time > 20 ms) for phones.
+
+Then: `node --test tests/*.mjs`, `node tools/build.mjs`, `node tools/shots.mjs index.html --out=screenshots/r2 --steps=tools/steps.json` (add a 1280×720 teacher shot if easy). OPEN and look at every screenshot; fix anything still off before reporting. Commit (no push). Log decisions (DECISIONS.md) + LOG.md line. Reply with a 6-line summary.
