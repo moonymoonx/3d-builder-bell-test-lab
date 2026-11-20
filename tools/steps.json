@@ -7,6 +7,6 @@
   { "name": "game-wall", "eval": "window.__bell.goto(5); window.__bell.fire(1000);", "wait": 900 },
   { "name": "breakthrough-shatter", "eval": "window.__bell.triggerBreakthrough({ midShatter: true });", "wait": 450 },
   { "name": "settled-85", "eval": "window.__bell.triggerBreakthrough({ instant: true, targetRounds: 2000, settled: true });", "wait": 1100 },
-  { "name": "bob-alone", "eval": "window.__bell.goto(7); window.__bell.fire(1000);", "wait": 900 },
+  { "name": "bob-alone", "eval": "window.__bell.goto(7); window.__bell.fire(2000);", "wait": 900 },
   { "name": "teacher-mode", "eval": "window.__bell.setTeacher(true); window.__bell.goto(5); window.__bell.fire(2000);", "wait": 900 }
 ]

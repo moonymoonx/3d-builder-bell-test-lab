@@ -36,6 +36,7 @@ export function createApp({ stage, audio, root }) {
     chshMode: 'card',
     chshRun: createChshRun(),
     chshSettled: false,
+    shatterBeat: false,
     wallHitBy75: false,
     classVoted: false,
     burstRunning: false,
@@ -55,6 +56,7 @@ export function createApp({ stage, audio, root }) {
 
   let idlePairTimer = null;
   let burstTimer = null;
+  let shatterBeatTimer = null;
 
   const elBackBtn = root.querySelector('#btn-back');
   const elResetBtn = root.querySelector('#btn-reset');
@@ -83,6 +85,7 @@ export function createApp({ stage, audio, root }) {
   function stopTimers() {
     if (idlePairTimer) { clearInterval(idlePairTimer); idlePairTimer = null; }
     if (burstTimer) { clearInterval(burstTimer); burstTimer = null; }
+    if (shatterBeatTimer) { clearTimeout(shatterBeatTimer); shatterBeatTimer = null; }
     state.burstRunning = false;
   }
 
@@ -98,11 +101,27 @@ export function createApp({ stage, audio, root }) {
         colorA: draw.colorA,
         colorB: draw.colorB,
         entangled: true,
-        duration: 0.58,
+        duration: 1.05,
       });
     };
-    setTimeout(fireOnce, 250);
-    idlePairTimer = setInterval(fireOnce, 2100);
+    setTimeout(fireOnce, 180);
+    idlePairTimer = setInterval(fireOnce, 1250);
+  }
+
+  function syncLeverVisibility({ snap = true } = {}) {
+    const revealed = !state.teacher || state.classVoted || state.step === 6;
+    stage.setLeverRevealed(revealed, { snap });
+  }
+
+  function createFreshBobRun() {
+    return {
+      n0: 0, b0WhenA0: 0,
+      n1: 0, b0WhenA1: 0,
+      nRand: 0, b0WhenRand: 0,
+      nOff: 0, b0WhenOff: 0,
+      total: 0, wins: 0, compared: false,
+      recent: [],
+    };
   }
 
   function syncCardStageVisual() {
@@ -140,6 +159,7 @@ export function createApp({ stage, audio, root }) {
     stopTimers();
     state.step = s;
     state.bridgeOpen = false;
+    state.shatterBeat = false;
     state.depthKey = null;
     elDepthBackdrop.hidden = true;
     state.idleHint = '';
@@ -148,6 +168,7 @@ export function createApp({ stage, audio, root }) {
 
     stage.setStep(s);
     stage.setTeacherMode(state.teacher);
+    syncLeverVisibility({ snap: true });
 
     if (s === 0) {
       state.dialA = 0; state.dialB = 0;
@@ -187,6 +208,7 @@ export function createApp({ stage, audio, root }) {
       stage.setSourceEntangled(true);
       stage.setDial('left', 0, 'mermin');
       stage.setDial('right', 1, 'mermin');
+      stage.setStep4ActiveAngles(0, 1);
     } else if (s === 5) {
       if (state.chshMode !== 'card') {
         state.chshRun = createChshRun();
@@ -205,11 +227,13 @@ export function createApp({ stage, audio, root }) {
       });
       stage.setDial('left', 0, 'chsh');
       stage.setDial('right', 0, 'chsh');
+      syncLeverVisibility({ snap: true });
     } else if (s === 6) {
       state.chshMode = 'entangled';
       state.peeled = false;
       stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
+      stage.setLeverRevealed(true, { snap: true });
       stage.setDial('left', 0, 'chsh');
       stage.setDial('right', 0, 'chsh');
       if (state.chshRun.rounds === 0) {
@@ -218,9 +242,11 @@ export function createApp({ stage, audio, root }) {
       }
     } else if (s === 7) {
       state.peeled = false;
+      state.alicePolicy = '0';
+      state.bobRun = createFreshBobRun(); // Always start from an honest fresh tally, never stale!
       stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
-      stage.setAlicePartition(!state.bobRun.compared);
+      stage.setAlicePartition(true);
     } else if (s === 8) {
       state.peeled = true;
       stage.setPeel(true);
@@ -371,6 +397,16 @@ export function createApp({ stage, audio, root }) {
       if (!prevBroken && nowBroken) {
         stage.setWallState('shattered');
         if (emitAudio) audio.playShatterChord();
+        // Give the shatter its own unobstructed ~1.2s cinematic beat (UI dims/recedes, 85.4% & CTA wait!)
+        if (!instant) {
+          state.shatterBeat = true;
+          if (shatterBeatTimer) clearTimeout(shatterBeatTimer);
+          shatterBeatTimer = setTimeout(() => {
+            state.shatterBeat = false;
+            stage.setShowQuantumLabel(true);
+            render();
+          }, 1200);
+        }
       }
       return r;
     };
@@ -457,6 +493,7 @@ export function createApp({ stage, audio, root }) {
     state.chshSettled = false;
     goto(6);
     if (midShatter) {
+      state.shatterBeat = true;
       stage.setWallState('intact');
       for (let i = 0; i < 1500 && state.chshRun.brokenAt === null; i++) {
         const r = sampleChshRound({ mode: 'entangled' });
@@ -472,9 +509,11 @@ export function createApp({ stage, audio, root }) {
     } else {
       fireChsh(targetRounds, { instant });
       if (settled) {
+        state.shatterBeat = false;
         state.chshSettled = true;
         const st = computeChshS(state.chshRun);
         stage.setWallState('shattered', { settled: true });
+        stage.setShowQuantumLabel(true);
         stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true, rounds: state.chshRun.rounds });
         render();
         requestAnimationFrame(() => stage.resize());
@@ -620,6 +659,7 @@ export function createApp({ stage, audio, root }) {
     renderTopBar();
     const isHero = state.step === 0;
     root.classList.toggle('is-hero', isHero);
+    root.classList.toggle('shatter-focus', state.shatterBeat);
     elHeroOverlay.hidden = !isHero;
     elPanel.hidden = isHero;
 
@@ -831,7 +871,7 @@ export function createApp({ stage, audio, root }) {
           </div>
         ` : ''}
         <div class="step-kicker">Step 5 · The team game</div>
-        <h2 class="step-question">${state.teacher ? 'Can any card beat 75%?' : 'Can any hidden card beat 75%?'}</h2>
+        <h2 class="step-question">${state.teacher ? 'Can any card beat 75% — and keep it there?' : 'Can any hidden card beat 75% — and keep it there?'}</h2>
         ${!state.teacher ? `<p class="step-sub">Same boxes, now 0 or 1: match — unless both get 1, then differ. Build the best hidden card you can.</p>` : ''}
 
         <div class="chsh-switches">
@@ -855,12 +895,12 @@ export function createApp({ stage, audio, root }) {
 
         <div class="tally-card compact">
           <div class="tally-header">
-            <span>Plan max: ${Math.round(ev.rate * 100)}.0% (${ev.wins}/4)</span>
+            <span>Plan average max: ${Math.round(ev.rate * 100)}.0% (${ev.wins}/4)</span>
             <span class="big-num hero-score">${hasRun ? `${pct.toFixed(1)}%` : '—'}</span>
           </div>
           <div class="tally-sub">
             ${hasRun
-              ? `<strong>Luck can dent the glass. It can't break it.</strong> (${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()})`
+              ? `<strong>A lucky streak can poke past 75% — not keep it there.</strong> (${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()})`
               : 'Every card leaves a red ✗. Test it against the frosted 75% glass wall.'}
           </div>
           ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>` : ''}
@@ -870,13 +910,13 @@ export function createApp({ stage, audio, root }) {
           ${!state.teacher ? `<button class="btn-secondary" data-fire="1" ${state.burstRunning ? 'disabled' : ''}>×1</button>` : ''}
           ${!state.teacher ? `<button class="btn-secondary" data-fire="100" ${state.burstRunning ? 'disabled' : ''}>×100</button>` : ''}
           <button class="btn-secondary" data-fire="${state.teacher ? teacherFireN : 1000}" ${state.burstRunning ? 'disabled' : ''}>Fire ${state.teacher ? '2,000' : '1,000'}</button>
-          ${hasRun ? `<button class="btn-quiet-sm" id="btn-clear-chsh">Clear</button>` : ''}
+          ${hasRun ? `<button class="btn-clear" id="btn-clear-chsh">Clear</button>` : ''}
         </div>
       `;
 
       footerHtml = `
         ${leverReady
-          ? `<button class="btn-primary pulse-gold" id="btn-entangled-lever">Pull brass lever: Entangled pairs →</button>`
+          ? `<button class="btn-primary pulse-gold" id="btn-entangled-lever">Pull lever: Entangled pairs →</button>`
           : state.teacher
             ? `<button class="btn-primary" id="btn-class-voted">The class has voted — reveal lever</button>`
             : `<button class="btn-primary" data-fire="1000" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 rounds</button>`}
@@ -922,16 +962,16 @@ export function createApp({ stage, audio, root }) {
 
         ${broken ? `
           <div class="callout-box">
-            <strong>No hidden card — no plan made in advance without talking — can do this.</strong> Real entangled pairs in nature do.
+            <strong>No hidden card — no plan made in advance without talking — can keep this up.</strong> Real entangled pairs in nature do.
           </div>
         ` : ''}
 
         <div class="inline-actions">
-          <button class="btn-secondary" id="btn-refire-entangled" ${state.burstRunning ? 'disabled' : ''}>Run fresh 2,000 rounds</button>
+          <button class="btn-secondary" id="btn-refire-entangled" ${state.burstRunning || state.shatterBeat ? 'disabled' : ''}>Run fresh 2,000 rounds</button>
         </div>
       `;
       footerHtml = `
-        <button class="btn-primary" data-next="7" ${state.burstRunning ? 'disabled' : ''}>Can Alice text Bob? →</button>
+        <button class="btn-primary" data-next="7" ${state.burstRunning || state.shatterBeat ? 'disabled' : ''}>${state.shatterBeat ? 'Wall shattered…' : 'Can Alice text Bob? →'}</button>
         <button class="btn-depth" data-depth="breakthrough">How do we know?</button>
       `;
     } else if (state.step === 7) {
@@ -941,6 +981,8 @@ export function createApp({ stage, audio, root }) {
       const pctR = br.nRand > 0 ? `${((br.b0WhenRand / br.nRand) * 100).toFixed(1)}%` : '—';
       const pctOff = br.nOff > 0 ? `${((br.b0WhenOff / br.nOff) * 100).toFixed(1)}%` : '—';
       const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : pctR;
+      const curN = state.alicePolicy === '0' ? br.n0 : state.alicePolicy === '1' ? br.n1 : state.alicePolicy === 'off' ? br.nOff : br.nRand;
+      const curHits = state.alicePolicy === '0' ? br.b0WhenA0 : state.alicePolicy === '1' ? br.b0WhenA1 : state.alicePolicy === 'off' ? br.b0WhenOff : br.b0WhenRand;
       const winPct = br.total > 0 ? ((br.wins / br.total) * 100).toFixed(1) : '—';
 
       const dots = br.compared
@@ -967,8 +1009,11 @@ export function createApp({ stage, audio, root }) {
             <span>Bob's ▲ Coral rate</span>
             <span class="big-num">${curPct}</span>
           </div>
+          <div class="tally-sub">
+            ${curN > 0 ? `${curHits.toLocaleString()} / ${curN.toLocaleString()} flashes — steady near 50%` : 'Tap Fire 2,000 to watch Bob\'s lamp alone.'}
+          </div>
           ${dots.length > 0 ? `
-            <div class="dot-strip-label">${br.compared ? `Notes combined — ${winPct}% winning pairs (gold):` : 'Bob\'s last 24 flashes (pure coin flips):'}</div>
+            <div class="dot-strip-label">${br.compared ? `Notes combined — ${winPct}% winning pairs (gold):` : 'Bob\'s last 24 flashes (looks like pure coin flips):'}</div>
             <div class="dot-strip">
               ${dots.map(d => br.compared
                 ? `<span class="h-dot ${d.win ? 'win' : 'miss'}">${d.win ? '✓' : '·'}</span>`
@@ -985,7 +1030,7 @@ export function createApp({ stage, audio, root }) {
         </div>
 
         <div class="inline-actions">
-          <button class="btn-secondary strong" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
+          <button class="btn-secondary strong" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 2,000</button>
           <button class="btn-secondary reveal-outline" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Bring notes together</button>
         </div>
       `;
@@ -1042,8 +1087,8 @@ export function createApp({ stage, audio, root }) {
     if (t.id === 'btn-open-bridge') { audio.playDialClick(); openBridge(); return; }
     if (t.id === 'btn-reset' || t.id === 'btn-play-again') { audio.playDialClick(); resetAll(); return; }
     if (t.id === 'btn-sound') { audio.setMuted(!audio.isMuted()); if (!audio.isMuted()) audio.playDialClick(); renderTopBar(); return; }
-    if (t.id === 'mode-self') { state.teacher = false; audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
-    if (t.id === 'mode-teacher') { state.teacher = true; audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
+    if (t.id === 'mode-self') { state.teacher = false; syncLeverVisibility({ snap: true }); audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
+    if (t.id === 'mode-teacher') { state.teacher = true; syncLeverVisibility({ snap: true }); audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
     if (t.id === 'btn-switch-teacher') { state.teacher = !state.teacher; audio.playDialClick(); goto(0); return; }
     if (t.id === 'depth-close') { state.depthKey = null; elDepthBackdrop.hidden = true; return; }
 
@@ -1056,6 +1101,7 @@ export function createApp({ stage, audio, root }) {
       const idx = Number(idxStr);
       if (side === 'left') state.dialA = idx; else state.dialB = idx;
       stage.setDial(side, idx, 'mermin');
+      stage.setStep4ActiveAngles(state.dialA, state.dialB);
       audio.playDialClick();
       if (state.step === 4 && !state.bridgeOpen) fireMerminSingle(false);
       else render();
@@ -1115,7 +1161,8 @@ export function createApp({ stage, audio, root }) {
 
     if (t.id === 'btn-class-voted') {
       state.classVoted = true;
-      audio.playDialClick();
+      stage.setLeverRevealed(true, { snap: false }); // Smoothly rises out of the stage pedestal!
+      audio.playLeverReveal();
       render();
       return;
     }
@@ -1129,11 +1176,11 @@ export function createApp({ stage, audio, root }) {
     if (t.dataset.apol) {
       state.alicePolicy = t.dataset.apol;
       audio.playDialClick();
-      fireBobAlone(1000);
+      fireBobAlone(2000);
       return;
     }
 
-    if (t.id === 'btn-fire-bob') { fireBobAlone(1000); return; }
+    if (t.id === 'btn-fire-bob') { fireBobAlone(2000); return; }
     if (t.id === 'btn-compare-notes') { compareNotes(); return; }
   });
 
@@ -1199,6 +1246,8 @@ export function createApp({ stage, audio, root }) {
     triggerBreakthrough,
     setTeacher(val) {
       state.teacher = !!val;
+      if (state.teacher) state.classVoted = false;
+      syncLeverVisibility({ snap: true });
       render();
       requestAnimationFrame(() => stage.resize());
     },

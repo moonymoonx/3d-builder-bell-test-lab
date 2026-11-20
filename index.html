@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Bell Test Lab — Two Boxes, No Wires</title>
-  <style>:root{--night:#0D1017;--slate:#161B26;--card:#1F2636;--line:rgba(244,239,230,0.16);--ivory:#F4EFE6;--muted:#C2CADB;--gold:#E6B655;--coral:#FF7A6B;--jade:#4FD6A8;--ts:1;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}html.teacher-mode{--ts:1.62;--slate:#1A2233;--card:#28344C;--line:rgba(244,239,230,0.42);--muted:#E4ECF8}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}[hidden]{display:none !important}html,body{width:100%;height:100%;overflow:hidden;background:var(--night);color:var(--ivory);font-family:var(--sans);-webkit-font-smoothing:antialiased}#loader{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--night);color:var(--muted);font-size:14px;letter-spacing:0.03em;transition:opacity 320ms ease-out}#loader.done{opacity:0;pointer-events:none}.loader-dot{width:16px;height:16px;border-radius:50%;background:var(--gold);box-shadow:0 0 24px rgba(230,182,85,0.8);animation:pulseDot 1.3s ease-in-out infinite}@keyframes pulseDot{0%,100%{transform:scale(0.9);opacity:0.7}50%{transform:scale(1.18);opacity:1}}#app{position:relative;width:100%;height:100%;display:flex;flex-direction:row;background:var(--night)}#stage-wrap{position:relative;flex:1 1 auto;height:100%;min-width:0;min-height:0;overflow:hidden}#stage-wrap canvas{display:block;width:100% !important;height:100% !important}#stage-labels{position:absolute;inset:0;pointer-events:none;z-index:12;overflow:hidden}.st-lbl{position:absolute;left:0;top:0;will-change:transform;white-space:nowrap;user-select:none}.st-limit{display:flex;flex-direction:column;align-items:center;line-height:1.05;padding:4px 10px;border-radius:9px;background:rgba(13,16,23,0.72);border:1px solid rgba(220,232,248,0.28);backdrop-filter:blur(4px);text-shadow:0 1px 10px rgba(0,0,0,0.75)}.st-limit strong{font-size:20px;font-weight:800;letter-spacing:-0.02em;color:#E6F2FF;font-variant-numeric:tabular-nums}.st-limit span{font-size:10.5px;font-weight:800;letter-spacing:0.08em;color:#C8D8EE}.st-limit.st-85{border-color:rgba(230,182,85,0.62);background:rgba(18,16,12,0.80)}.st-limit.st-85 strong{color:var(--gold)}.st-limit.st-85 span{color:#F5E0A8}.st-ang{padding:2px 7px;border-radius:6px;background:rgba(13,16,23,0.82);border:1px solid rgba(200,168,107,0.52);font-size:13.5px;font-weight:800;color:var(--ivory);font-variant-numeric:tabular-nums;box-shadow:0 2px 8px rgba(0,0,0,0.45)}html.teacher-mode .st-limit{padding:6px 14px;border-width:1.5px}html.teacher-mode .st-limit strong{font-size:28px}html.teacher-mode .st-limit span{font-size:14px;color:#EFF5FF}html.teacher-mode .st-ang{font-size:18px;padding:3px 9px}#top-bar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px;pointer-events:none}#top-bar>*{pointer-events:auto}.top-left,.top-right{display:flex;align-items:center;gap:8px}.brand-mark{font-size:calc(13.5px * min(var(--ts),1.3));font-weight:600;letter-spacing:0.04em;color:var(--muted);padding:6px 4px}.icon-btn{min-width:44px;min-height:44px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:rgba(22,27,38,0.86);backdrop-filter:blur(10px);color:var(--ivory);font-family:var(--sans);font-size:calc(13px * min(var(--ts),1.28));font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;transition:transform 90ms ease-out,background 150ms ease-out,border-color 150ms ease-out}.icon-btn:hover{background:rgba(40,50,72,0.96);border-color:rgba(244,239,230,0.45)}.icon-btn:active{transform:scale(0.96)}.icon-btn.svg-only{padding:0;width:44px}.mode-pill{display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--line);background:rgba(22,27,38,0.88);backdrop-filter:blur(10px)}.mode-opt{min-height:38px;padding:0 12px;border:none;border-radius:999px;background:transparent;color:var(--muted);font-family:var(--sans);font-size:calc(13px * min(var(--ts),1.28));font-weight:600;cursor:pointer;white-space:nowrap;transition:background 150ms ease-out,color 150ms ease-out}.mode-opt.active{background:var(--card);color:var(--ivory)}#step-dots{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(22,27,38,0.65);backdrop-filter:blur(8px)}#step-dots .dot{width:8px;height:8px;padding:0;border:none;border-radius:50%;background:rgba(244,239,230,0.24);cursor:pointer;transition:transform 180ms ease-out,background 180ms ease-out,width 180ms ease-out}#step-dots .dot.done{background:rgba(230,182,85,0.6)}#step-dots .dot.active{width:22px;border-radius:999px;background:var(--gold)}#hero-overlay{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 24px 46px;background:linear-gradient(180deg,rgba(13,16,23,0) 0%,rgba(13,16,23,0.78) 44%,rgba(13,16,23,0.96) 100%);pointer-events:none}#hero-overlay>*{pointer-events:auto}.hero-headline{font-size:clamp(27px,3.1vw,42px);font-weight:700;letter-spacing:-0.025em;line-height:1.2;color:var(--ivory);max-width:26ch;margin-bottom:22px;text-shadow:0 2px 24px rgba(0,0,0,0.5)}html.teacher-mode .hero-headline{font-size:clamp(36px,4.4vw,56px)}.hero-actions{display:flex;flex-direction:column;align-items:center;gap:10px}#side-panel{position:relative;z-index:20;width:420px;flex:0 0 420px;height:100%;background:var(--slate);border-left:1px solid var(--line);padding-top:74px;display:flex;flex-direction:column;overflow:hidden}html.teacher-mode #side-panel{width:600px;flex:0 0 600px;padding-top:78px}html.teacher-mode #panel-scroll{padding:12px 30px 14px;gap:14px}html.teacher-mode #panel-footer{padding:14px 30px 20px;gap:6px}html.teacher-mode .teacher-pin{padding:14px 18px;font-size:21px;background:rgba(230,182,85,0.22);border:2px solid rgba(230,182,85,0.85)}html.teacher-mode .step-kicker{font-size:18px}html.teacher-mode .step-question{font-size:40px}html.teacher-mode .step-sub{font-size:21px;color:#E4ECF8}html.teacher-mode .sw-row{grid-template-columns:84px 1fr 1fr;gap:10px}html.teacher-mode .sw-who{font-size:22px}html.teacher-mode .mini-sw{min-height:56px;font-size:21px}html.teacher-mode .r-chip{font-size:20px;padding:10px 6px;border-width:2px}html.teacher-mode .r-chip.win{background:rgba(79,214,168,0.24);border-color:#4FD6A8;color:#7CF0C7}html.teacher-mode .r-chip.lose{background:rgba(255,122,107,0.26);border-color:#FF7A6B;color:#FF9C90}html.teacher-mode .tally-card,html.teacher-mode .tally-card.compact{padding:16px 20px;gap:8px;border-width:2px}html.teacher-mode .tally-header{font-size:21px;color:#E4ECF8}html.teacher-mode .hero-score{font-size:62px}html.teacher-mode .tally-sub{font-size:19px;color:#E4ECF8}html.teacher-mode .luck-pill{font-size:18.5px;padding:6px 14px}html.teacher-mode .btn-primary{min-height:66px;font-size:23px}html.teacher-mode .btn-secondary{min-height:54px;font-size:21px;border-width:2px}html.teacher-mode .btn-depth,html.teacher-mode .btn-quiet-sm{font-size:19px;color:#E4ECF8}@media (max-width:1400px) and (min-width:861px){html.teacher-mode{--ts:1.30}html.teacher-mode #side-panel{width:492px;flex:0 0 492px;padding-top:64px}html.teacher-mode #panel-scroll{padding:6px 22px 6px;gap:7px}html.teacher-mode #panel-footer{padding:8px 22px 10px;gap:2px}html.teacher-mode .teacher-pin{padding:8px 12px;font-size:16.5px}html.teacher-mode .step-kicker{font-size:14px}html.teacher-mode .step-question{font-size:30px}html.teacher-mode .sw-row{grid-template-columns:68px 1fr 1fr;gap:7px}html.teacher-mode .sw-who{font-size:17px}html.teacher-mode .mini-sw{min-height:42px;font-size:17px}html.teacher-mode .r-chip{font-size:16px;padding:5px 4px}html.teacher-mode .tally-card.compact{padding:9px 14px;gap:3px}html.teacher-mode .tally-header{font-size:16.5px}html.teacher-mode .hero-score{font-size:46px}html.teacher-mode .tally-sub{font-size:15px}html.teacher-mode .luck-pill{font-size:14.5px;padding:4px 10px}html.teacher-mode .btn-primary{min-height:52px;font-size:19.5px}html.teacher-mode .btn-secondary{min-height:42px;font-size:17px}html.teacher-mode .btn-depth,html.teacher-mode .btn-quiet-sm{font-size:15px;min-height:36px}}#panel-scroll{flex:1 1 auto;overflow-y:auto;padding:10px 26px 14px;display:flex;flex-direction:column;gap:13px}#panel-footer{flex:0 0 auto;padding:12px 26px 18px;border-top:1px solid var(--line);background:var(--slate);display:flex;flex-direction:column;align-items:center;gap:5px}.step-kicker{font-size:12.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold)}.step-question{font-size:24px;font-weight:700;letter-spacing:-0.02em;line-height:1.18;color:var(--ivory)}.step-sub{font-size:15px;line-height:1.42;color:var(--muted)}.bridge-diagram{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:2px 0}.br-card{padding:14px 12px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}.br-card.gold{background:rgba(230,182,85,0.13);border-color:rgba(230,182,85,0.65)}.br-badge{font-size:11px;font-weight:800;letter-spacing:0.07em;color:var(--muted)}.br-badge.gold-txt{color:var(--gold)}.br-stat{font-size:20px;font-weight:800;color:var(--ivory);font-variant-numeric:tabular-nums}.br-stat.gold-txt{color:var(--gold)}.br-stat span{font-size:13px;font-weight:600;color:var(--muted)}.br-note{font-size:12.5px;color:var(--muted)}.br-arrow{font-size:22px;font-weight:800;color:var(--gold)}.btn-primary{width:100%;min-width:220px;min-height:56px;padding:13px 20px;border:none;border-radius:14px;background:var(--gold);color:var(--night);font-family:var(--sans);font-size:16px;font-weight:800;letter-spacing:-0.01em;cursor:pointer;box-shadow:0 8px 28px rgba(230,182,85,0.25);transition:transform 90ms ease-out,filter 140ms ease-out,opacity 140ms ease-out}.btn-primary:hover{filter:brightness(1.07)}.btn-primary:active{transform:scale(0.98)}.btn-primary:disabled{opacity:0.5;cursor:default}.btn-primary.pulse-gold{animation:goldGlow 1.8s ease-in-out infinite}@keyframes goldGlow{0%,100%{box-shadow:0 8px 28px rgba(230,182,85,0.28)}50%{box-shadow:0 8px 38px rgba(230,182,85,0.68)}}.btn-secondary{flex:1 1 auto;min-height:46px;padding:10px 12px;border:1.5px solid rgba(244,239,230,0.24);border-radius:12px;background:var(--card);color:var(--ivory);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;transition:transform 90ms ease-out,background 120ms ease-out,border-color 120ms ease-out}.btn-secondary.strong{background:#2b354b;border-color:rgba(244,239,230,0.48)}.btn-secondary.reveal-outline{background:rgba(230,182,85,0.12);border-color:rgba(230,182,85,0.58);color:var(--gold)}.btn-secondary:hover{background:#313d57;border-color:rgba(244,239,230,0.48)}.btn-secondary.reveal-outline:hover{background:rgba(230,182,85,0.22)}.btn-secondary:active{transform:scale(0.97)}.btn-secondary:disabled{opacity:0.45;cursor:default}.btn-depth,.btn-quiet-sm{min-height:44px;padding:6px 12px;border:none;border-radius:10px;background:transparent;color:var(--muted);font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(194,202,219,0.45);text-underline-offset:4px;transition:color 120ms ease-out}.btn-depth:hover,.btn-quiet-sm:hover{color:var(--ivory)}.inline-actions{display:flex;flex-wrap:wrap;gap:8px}.control-block{display:flex;flex-direction:column;gap:4px}.callout-box{padding:12px 14px;border-radius:12px;background:rgba(230,182,85,0.14);border:1.5px solid rgba(230,182,85,0.5);color:var(--ivory);font-size:14.5px;line-height:1.42}.callout-box strong{color:var(--gold)}.dial-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.dial-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}.seg-group{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.seg-group.four{grid-template-columns:repeat(4,1fr)}.seg-btn{min-height:46px;padding:0 4px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--muted);font-family:var(--sans);font-size:13.5px;font-weight:700;cursor:pointer;transition:transform 80ms ease-out,background 120ms ease-out,color 120ms ease-out}.seg-btn.active{background:var(--gold);color:var(--night);border-color:var(--gold)}.seg-btn:active{transform:scale(0.95)}.big-num{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.025em;color:var(--ivory)}.big-num.hero-score{font-size:38px}.big-num.gold-txt{color:var(--gold)}.stat-label{font-size:14px;color:var(--muted)}.tally-card{padding:15px 16px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);display:flex;flex-direction:column;gap:8px}.tally-card.compact{padding:12px 14px;gap:6px}.tally-header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:14px;color:var(--muted)}.bar-track{position:relative;height:18px;border-radius:999px;background:rgba(13,16,23,0.85);overflow:visible;margin:16px 0 6px}.bar-fill{height:100%;border-radius:999px;transition:width 220ms cubic-bezier(0.22,1,0.36,1)}.bar-fill.gold{background:var(--gold)}.bar-mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:rgba(244,239,230,0.5)}.bar-mark span{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;font-weight:700;color:var(--muted)}.tally-sub{font-size:13.5px;color:var(--muted);line-height:1.38;font-variant-numeric:tabular-nums}.tally-sub strong{color:var(--ivory)}.luck-pill{align-self:flex-start;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700}.luck-pill.low{background:rgba(244,239,230,0.12);color:var(--muted)}.luck-pill.warn{background:rgba(230,182,85,0.22);color:var(--gold)}.luck-pill.gold{background:rgba(79,214,168,0.22);color:var(--jade)}.card-switches{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.lamp-switch{min-height:58px;padding:6px;border-radius:12px;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-family:var(--sans);transition:transform 90ms ease-out}.lamp-switch:active{transform:scale(0.95)}.lamp-switch.c0{background:var(--coral);color:var(--night)}.lamp-switch.c1{background:var(--jade);color:var(--night)}.sw-dial{font-size:11.5px;font-weight:600;opacity:0.82}.sw-val{font-size:13.5px;font-weight:800}.grid-3x3-wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;border-radius:14px;background:var(--card);border:1.5px solid var(--line)}.grid-axes{display:flex;flex-direction:column;align-items:center;gap:4px}.axis-bob{font-size:11px;font-weight:800;letter-spacing:0.1em;color:var(--gold);padding-left:34px}.grid-with-alice{display:flex;align-items:center;gap:6px}.axis-alice{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:800;letter-spacing:0.1em;color:var(--gold);padding-top:16px}.grid-3x3{display:grid;grid-template-columns:16px repeat(3,34px);gap:5px;align-items:center;justify-items:center}.g-hdr{font-size:12px;font-weight:700;color:var(--muted)}.g-cell{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}.g-cell.diff{background:rgba(13,16,23,0.78);border:1px solid rgba(244,239,230,0.16);color:rgba(244,239,230,0.55)}.g-cell.match.c0{background:var(--coral);color:var(--night)}.g-cell.match.c1{background:var(--jade);color:var(--night)}.grid-micro{font-size:11px;color:var(--muted);margin-top:3px;text-align:center}.grid-readout{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}.chsh-switches{display:flex;flex-direction:column;gap:7px}.sw-row{display:grid;grid-template-columns:58px 1fr 1fr;align-items:center;gap:7px}.sw-who{font-size:14px;font-weight:700;color:var(--ivory)}.mini-sw{min-height:44px;padding:0 6px;border:none;border-radius:10px;font-family:var(--sans);font-size:13.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:transform 80ms ease-out}.mini-sw:active{transform:scale(0.96)}.mini-sw.c0{background:var(--coral);color:var(--night)}.mini-sw.c1{background:var(--jade);color:var(--night)}.rule-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.r-chip{padding:6px 4px;border-radius:9px;text-align:center;font-size:13px;font-weight:800;border:1.5px solid transparent;white-space:nowrap}.r-chip.win{background:rgba(79,214,168,0.16);border-color:rgba(79,214,168,0.55);color:var(--jade)}.r-chip.lose{background:rgba(255,122,107,0.2);border-color:rgba(255,122,107,0.72);color:var(--coral)}.dot-strip-label{font-size:12px;color:var(--muted)}.dot-strip{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}.h-dot{height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}.h-dot.c0{background:rgba(255,122,107,0.24);color:var(--coral)}.h-dot.c1{background:rgba(79,214,168,0.24);color:var(--jade)}.h-dot.win{background:var(--gold);color:var(--night)}.h-dot.miss{background:rgba(13,16,23,0.7);color:var(--muted)}.bob-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:2px}.bob-slot{padding:6px 3px;border-radius:8px;background:rgba(13,16,23,0.62);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;color:var(--muted)}.bob-slot.filled{border-color:rgba(230,182,85,0.52)}.bob-slot strong{font-size:12.5px;color:var(--ivory);font-variant-numeric:tabular-nums}.real-list{display:flex;flex-direction:column;gap:10px}.real-item{padding:12px 14px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted);line-height:1.44}.real-yr{font-size:13px;font-weight:700;color:var(--gold)}.teacher-pin,.predict-banner{padding:10px 14px;border-radius:10px;background:rgba(230,182,85,0.18);border:1.5px solid rgba(230,182,85,0.62);color:var(--ivory);font-size:14px;line-height:1.35}#idle-hint{position:fixed;left:24px;bottom:24px;z-index:25;padding:10px 16px;border-radius:999px;background:rgba(22,27,38,0.94);border:1px solid rgba(230,182,85,0.42);color:var(--ivory);font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.45)}#depth-backdrop{position:fixed;inset:0;z-index:60;background:rgba(8,10,16,0.74);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px}#depth-card{width:min(560px,100%);max-height:84vh;overflow-y:auto;padding:24px;border-radius:18px;background:var(--slate);border:1px solid rgba(244,239,230,0.2);box-shadow:0 24px 64px rgba(0,0,0,0.6);display:flex;flex-direction:column;gap:14px}.depth-head{display:flex;justify-content:flex-end}.depth-title{font-size:20px;font-weight:700;color:var(--gold)}.depth-plain{font-size:16px;line-height:1.5;color:var(--ivory)}.depth-live{padding:12px 14px;border-radius:12px;background:rgba(230,182,85,0.12);border:1px solid rgba(230,182,85,0.35);display:flex;flex-direction:column;gap:5px;font-size:14px;font-variant-numeric:tabular-nums}.depth-live .muted{color:var(--muted)}.depth-detail{font-size:14.5px;line-height:1.55;color:var(--muted)}.depth-math{padding:12px 14px;border-radius:10px;background:var(--night);border:1px solid var(--line);font-family:var(--mono);font-size:13px;line-height:1.55;color:var(--ivory)}.depth-sources{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}.depth-src-label{font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--ivory)}#fps-pill{position:fixed;left:16px;bottom:16px;z-index:80;padding:5px 10px;border-radius:8px;background:rgba(13,16,23,0.85);border:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--gold)}@media (max-width:860px){html.teacher-mode{--ts:1.02}#app{flex-direction:column}#app:not(.is-hero) #stage-wrap{flex:1 1 auto;min-height:40vh;width:100%}#app.is-hero #stage-wrap{flex:1 1 100%;height:100%}#side-panel,html.teacher-mode #side-panel{width:100%;flex:0 0 auto;height:auto;max-height:58vh;border-left:none;border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding-top:0;margin-top:-8px;box-shadow:0 -12px 32px rgba(0,0,0,0.45)}#panel-scroll,html.teacher-mode #panel-scroll{padding:9px 14px 6px;gap:5px}#panel-footer,html.teacher-mode #panel-footer{padding:6px 14px 8px;gap:1px}.st-limit{padding:2px 7px}.st-limit strong,html.teacher-mode .st-limit strong{font-size:13.5px}.st-limit span,html.teacher-mode .st-limit span{font-size:8.5px}.st-ang,html.teacher-mode .st-ang{font-size:11.5px;padding:1px 5px}.grid-3x3-wrap{padding:8px 10px;gap:10px}.g-cell{width:28px;height:28px;font-size:13px}.grid-3x3{grid-template-columns:14px repeat(3,28px);gap:3px}.grid-micro{font-size:10px}#top-bar{padding:8px 10px;gap:6px}#step-dots,#btn-skip-top{display:none}#app:not(.is-hero) .brand-mark{display:none}.brand-mark{font-size:13px;color:var(--ivory)}.top-left,.top-right{gap:5px}.mode-opt{padding:0 9px;font-size:12px;min-height:36px}.icon-btn{padding:0 9px;font-size:12px;min-height:44px}#hero-overlay{padding:18px 18px 34px}.hero-headline{font-size:24px;margin-bottom:16px}.step-kicker,html.teacher-mode .step-kicker{font-size:11px}.step-question,html.teacher-mode .step-question{font-size:17.5px}.step-sub,html.teacher-mode .step-sub{font-size:12.2px;line-height:1.3}.dial-label{font-size:11.5px;margin-bottom:2px}.seg-btn{min-height:38px;font-size:12px}.btn-primary,html.teacher-mode .btn-primary{min-height:46px;padding:9px 14px;font-size:14.5px}.btn-secondary,html.teacher-mode .btn-secondary{min-height:38px;padding:6px 8px;font-size:12.5px}.btn-depth,.btn-quiet-sm,html.teacher-mode .btn-depth,html.teacher-mode .btn-quiet-sm{min-height:32px;padding:2px 8px;font-size:12px}.sw-row,html.teacher-mode .sw-row{grid-template-columns:48px 1fr 1fr;gap:5px}.sw-who,html.teacher-mode .sw-who{font-size:12.5px}.chsh-switches{gap:5px}.mini-sw,html.teacher-mode .mini-sw{min-height:36px;font-size:12px}.r-chip,html.teacher-mode .r-chip{padding:3px 2px;font-size:11.5px}.tally-card,.tally-card.compact,html.teacher-mode .tally-card,html.teacher-mode .tally-card.compact{padding:7px 10px;gap:3px}.tally-header,html.teacher-mode .tally-header{font-size:12.5px}.tally-sub,html.teacher-mode .tally-sub{font-size:11.8px;line-height:1.28}.luck-pill,html.teacher-mode .luck-pill{font-size:11.5px;padding:3px 8px}.big-num,.big-num.hero-score,html.teacher-mode .hero-score{font-size:21px}.callout-box{padding:7px 10px;font-size:12px;line-height:1.32}.teacher-pin,html.teacher-mode .teacher-pin{padding:5px 9px;font-size:11.8px}.bridge-diagram{gap:6px}.br-card{padding:9px 7px;gap:3px}.br-stat{font-size:15px}.br-note{font-size:11px}.dot-strip{gap:2.5px}.h-dot{height:15px;font-size:8.5px}.bob-slot{padding:4px 2px;font-size:10px}.bob-slot strong{font-size:11.5px}#idle-hint{left:12px;right:12px;bottom:12px;text-align:center;font-size:13px}}@media (prefers-reduced-motion:reduce){.btn-primary.pulse-gold,.loader-dot{animation:none}.bar-fill,.icon-btn,.btn-primary,.btn-secondary{transition:none}}</style>
+  <style>:root{--night:#0D1017;--slate:#161B26;--card:#1F2636;--line:rgba(244,239,230,0.16);--ivory:#F4EFE6;--muted:#C2CADB;--gold:#E6B655;--coral:#FF7A6B;--jade:#4FD6A8;--ts:1;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}html.teacher-mode{--ts:1.62;--slate:#1A2233;--card:#28344C;--line:rgba(244,239,230,0.42);--muted:#E4ECF8}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}[hidden]{display:none !important}html,body{width:100%;height:100%;overflow:hidden;background:var(--night);color:var(--ivory);font-family:var(--sans);-webkit-font-smoothing:antialiased}#loader{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--night);color:var(--muted);font-size:14px;letter-spacing:0.03em;transition:opacity 320ms ease-out}#loader.done{opacity:0;pointer-events:none}.loader-dot{width:16px;height:16px;border-radius:50%;background:var(--gold);box-shadow:0 0 24px rgba(230,182,85,0.8);animation:pulseDot 1.3s ease-in-out infinite}@keyframes pulseDot{0%,100%{transform:scale(0.9);opacity:0.7}50%{transform:scale(1.18);opacity:1}}#app{position:relative;width:100%;height:100%;display:flex;flex-direction:row;background:var(--night)}#stage-wrap{position:relative;flex:1 1 auto;height:100%;min-width:0;min-height:0;overflow:hidden}#stage-wrap canvas{display:block;width:100% !important;height:100% !important}#stage-labels{position:absolute;inset:0;pointer-events:none;z-index:12;overflow:hidden}.st-lbl{position:absolute;left:0;top:0;will-change:transform;white-space:nowrap;user-select:none}.st-limit{display:flex;flex-direction:column;align-items:center;width:max-content;line-height:1.05;padding:4px 10px;border-radius:9px;background:rgba(13,16,23,0.80);border:1px solid rgba(220,232,248,0.32);backdrop-filter:blur(4px);text-shadow:0 1px 10px rgba(0,0,0,0.75)}.st-limit::after{content:'';position:absolute;top:100%;left:50%;width:1.5px;height:14px;transform:translateX(-50%);background:linear-gradient(180deg,rgba(220,232,248,0.65),rgba(220,232,248,0))}.st-limit strong{font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#E6F2FF;font-variant-numeric:tabular-nums}.st-limit span{font-size:10px;font-weight:800;letter-spacing:0.08em;color:#C8D8EE}.st-limit.st-85{border-color:rgba(230,182,85,0.72);background:rgba(18,16,12,0.86)}.st-limit.st-85::after{height:28px;background:linear-gradient(180deg,rgba(230,182,85,0.85),rgba(230,182,85,0.1))}.st-limit.st-85 strong{color:var(--gold)}.st-limit.st-85 span{color:#F5E0A8}.st-ang{padding:1px 5px;border-radius:4px;background:rgba(13,16,23,0.52);border:1px solid rgba(244,239,230,0.16);font-size:11.5px;font-weight:700;color:rgba(244,239,230,0.74);font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,0.85)}.st-ang.is-active{background:rgba(24,20,12,0.84);border-color:rgba(230,182,85,0.82);color:var(--gold);font-weight:800}html.teacher-mode .st-limit{padding:6px 14px;border-width:1.5px}html.teacher-mode .st-limit strong{font-size:28px}html.teacher-mode .st-limit span{font-size:14px;color:#EFF5FF}html.teacher-mode .st-ang{font-size:15px;padding:2px 7px}#top-bar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px;pointer-events:none}#top-bar>*{pointer-events:auto}.top-left,.top-right{display:flex;align-items:center;gap:8px}.brand-mark{font-size:calc(13.5px * min(var(--ts),1.3));font-weight:600;letter-spacing:0.04em;color:var(--muted);padding:6px 4px}.icon-btn{min-width:44px;min-height:44px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:rgba(22,27,38,0.86);backdrop-filter:blur(10px);color:var(--ivory);font-family:var(--sans);font-size:calc(13px * min(var(--ts),1.28));font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;transition:transform 90ms ease-out,background 150ms ease-out,border-color 150ms ease-out}.icon-btn:hover{background:rgba(40,50,72,0.96);border-color:rgba(244,239,230,0.45)}.icon-btn:active{transform:scale(0.96)}.icon-btn.svg-only{padding:0;width:44px}.mode-pill{display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--line);background:rgba(22,27,38,0.88);backdrop-filter:blur(10px)}.mode-opt{min-height:38px;padding:0 12px;border:none;border-radius:999px;background:transparent;color:var(--muted);font-family:var(--sans);font-size:calc(13px * min(var(--ts),1.28));font-weight:600;cursor:pointer;white-space:nowrap;transition:background 150ms ease-out,color 150ms ease-out}.mode-opt.active{background:var(--card);color:var(--ivory)}#step-dots{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(22,27,38,0.65);backdrop-filter:blur(8px)}#step-dots .dot{width:8px;height:8px;padding:0;border:none;border-radius:50%;background:rgba(244,239,230,0.24);cursor:pointer;transition:transform 180ms ease-out,background 180ms ease-out,width 180ms ease-out}#step-dots .dot.done{background:rgba(230,182,85,0.6)}#step-dots .dot.active{width:22px;border-radius:999px;background:var(--gold)}#hero-overlay{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 24px 46px;background:linear-gradient(180deg,rgba(13,16,23,0) 0%,rgba(13,16,23,0.78) 44%,rgba(13,16,23,0.96) 100%);pointer-events:none}#hero-overlay>*{pointer-events:auto}.hero-headline{font-size:clamp(27px,3.1vw,42px);font-weight:700;letter-spacing:-0.025em;line-height:1.2;color:var(--ivory);max-width:26ch;margin-bottom:22px;text-shadow:0 2px 24px rgba(0,0,0,0.5)}html.teacher-mode .hero-headline{font-size:clamp(36px,4.4vw,56px)}.hero-actions{display:flex;flex-direction:column;align-items:center;gap:10px}#side-panel{position:relative;z-index:20;width:420px;flex:0 0 420px;height:100%;background:var(--slate);border-left:1px solid var(--line);padding-top:74px;display:flex;flex-direction:column;overflow:hidden;transition:opacity 380ms ease-out,transform 380ms cubic-bezier(0.22,1,0.36,1)}#app.shatter-focus #side-panel{opacity:0.22;transform:translateX(26px);pointer-events:none}html.teacher-mode #side-panel{width:600px;flex:0 0 600px;padding-top:78px}html.teacher-mode #panel-scroll{padding:12px 30px 14px;gap:14px}html.teacher-mode #panel-footer{padding:14px 30px 20px;gap:6px}html.teacher-mode .teacher-pin{padding:14px 18px;font-size:21px;background:rgba(230,182,85,0.22);border:2px solid rgba(230,182,85,0.85)}html.teacher-mode .step-kicker{font-size:18px}html.teacher-mode .step-question{font-size:40px}html.teacher-mode .step-sub{font-size:21px;color:#E4ECF8}html.teacher-mode .sw-row{grid-template-columns:84px 1fr 1fr;gap:10px}html.teacher-mode .sw-who{font-size:22px}html.teacher-mode .mini-sw{min-height:56px;font-size:21px}html.teacher-mode .r-chip{font-size:20px;padding:10px 6px;border-width:2px}html.teacher-mode .r-chip.win{background:rgba(79,214,168,0.24);border-color:#4FD6A8;color:#7CF0C7}html.teacher-mode .r-chip.lose{background:rgba(255,122,107,0.26);border-color:#FF7A6B;color:#FF9C90}html.teacher-mode .tally-card,html.teacher-mode .tally-card.compact{padding:16px 20px;gap:8px;border-width:2px}html.teacher-mode .tally-header{font-size:21px;color:#E4ECF8}html.teacher-mode .hero-score{font-size:62px}html.teacher-mode .tally-sub{font-size:19px;color:#E4ECF8}html.teacher-mode .luck-pill{font-size:18.5px;padding:6px 14px}html.teacher-mode .btn-primary{min-height:66px;font-size:23px}html.teacher-mode .btn-secondary{min-height:54px;font-size:21px;border-width:2px}html.teacher-mode .btn-depth,html.teacher-mode .btn-quiet-sm{font-size:19px;color:#E4ECF8}@media (max-width:1400px) and (min-width:861px){html.teacher-mode{--ts:1.32}html.teacher-mode #side-panel{width:520px;flex:0 0 520px;padding-top:62px}html.teacher-mode #panel-scroll{padding:4px 20px 4px;gap:6px}html.teacher-mode #panel-footer{padding:7px 20px 9px;gap:2px}html.teacher-mode .teacher-pin{padding:7px 12px;font-size:18px}html.teacher-mode .step-kicker{font-size:15px}html.teacher-mode .step-question{font-size:25.5px;line-height:1.14}html.teacher-mode .sw-row{grid-template-columns:72px 1fr 1fr;gap:6px}html.teacher-mode .sw-who{font-size:18.5px}html.teacher-mode .mini-sw{min-height:40px;font-size:18px}html.teacher-mode .r-chip{font-size:17px;padding:4px 4px}html.teacher-mode .tally-card.compact{padding:7px 14px;gap:3px}html.teacher-mode .tally-header{font-size:18px;color:#EEF4FF}html.teacher-mode .hero-score{font-size:42px}html.teacher-mode .tally-sub{font-size:17.5px;color:#EEF4FF;line-height:1.28}html.teacher-mode .luck-pill{font-size:16.5px;padding:3px 10px}html.teacher-mode .btn-primary{min-height:48px;font-size:19.5px}html.teacher-mode .btn-secondary,html.teacher-mode .btn-clear{min-height:44px;font-size:18px}html.teacher-mode .btn-depth{font-size:17.5px;min-height:36px;color:#EEF4FF}}#panel-scroll{flex:1 1 auto;overflow-y:auto;padding:10px 26px 14px;display:flex;flex-direction:column;gap:13px}#panel-footer{flex:0 0 auto;padding:12px 26px 18px;border-top:1px solid var(--line);background:var(--slate);display:flex;flex-direction:column;align-items:center;gap:5px}.step-kicker{font-size:12.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold)}.step-question{font-size:24px;font-weight:700;letter-spacing:-0.02em;line-height:1.18;color:var(--ivory)}.step-sub{font-size:15px;line-height:1.42;color:var(--muted)}.bridge-diagram{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:2px 0}.br-card{padding:14px 12px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}.br-card.gold{background:rgba(230,182,85,0.13);border-color:rgba(230,182,85,0.65)}.br-badge{font-size:11px;font-weight:800;letter-spacing:0.07em;color:var(--muted)}.br-badge.gold-txt{color:var(--gold)}.br-stat{font-size:20px;font-weight:800;color:var(--ivory);font-variant-numeric:tabular-nums}.br-stat.gold-txt{color:var(--gold)}.br-stat span{font-size:13px;font-weight:600;color:var(--muted)}.br-note{font-size:12.5px;color:var(--muted)}.br-arrow{font-size:22px;font-weight:800;color:var(--gold)}.btn-primary{width:100%;min-width:220px;min-height:56px;padding:13px 20px;border:none;border-radius:14px;background:var(--gold);color:var(--night);font-family:var(--sans);font-size:16px;font-weight:800;letter-spacing:-0.01em;cursor:pointer;box-shadow:0 8px 28px rgba(230,182,85,0.25);transition:transform 90ms ease-out,filter 140ms ease-out,opacity 140ms ease-out}.btn-primary:hover{filter:brightness(1.07)}.btn-primary:active{transform:scale(0.98)}.btn-primary:disabled{opacity:0.5;cursor:default}.btn-primary.pulse-gold{animation:goldGlow 1.8s ease-in-out infinite}@keyframes goldGlow{0%,100%{box-shadow:0 8px 28px rgba(230,182,85,0.28)}50%{box-shadow:0 8px 38px rgba(230,182,85,0.68)}}.btn-secondary{flex:1 1 auto;min-height:46px;padding:10px 12px;border:1.5px solid rgba(244,239,230,0.24);border-radius:12px;background:var(--card);color:var(--ivory);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;transition:transform 90ms ease-out,background 120ms ease-out,border-color 120ms ease-out}.btn-secondary.strong{background:#2b354b;border-color:rgba(244,239,230,0.48)}.btn-secondary.reveal-outline{background:rgba(230,182,85,0.12);border-color:rgba(230,182,85,0.58);color:var(--gold)}.btn-secondary:hover{background:#313d57;border-color:rgba(244,239,230,0.48)}.btn-secondary.reveal-outline:hover{background:rgba(230,182,85,0.22)}.btn-secondary:active{transform:scale(0.97)}.btn-secondary:disabled{opacity:0.45;cursor:default}.btn-clear{flex:0 0 auto;min-height:46px;min-width:72px;padding:0 16px;border:1.5px solid rgba(244,239,230,0.28);border-radius:12px;background:transparent;color:var(--muted);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;transition:transform 90ms ease-out,background 120ms ease-out,color 120ms ease-out,border-color 120ms ease-out}.btn-clear:hover{background:rgba(244,239,230,0.08);color:var(--ivory);border-color:rgba(244,239,230,0.5)}.btn-clear:active{transform:scale(0.96)}html.teacher-mode .btn-clear{min-height:54px;padding:0 22px;font-size:20px;border-width:2px;color:#EEF4FF}.btn-depth,.btn-quiet-sm{min-height:44px;padding:6px 12px;border:none;border-radius:10px;background:transparent;color:var(--muted);font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(194,202,219,0.45);text-underline-offset:4px;transition:color 120ms ease-out}.btn-depth:hover,.btn-quiet-sm:hover{color:var(--ivory)}.inline-actions{display:flex;flex-wrap:wrap;gap:8px}.control-block{display:flex;flex-direction:column;gap:4px}.callout-box{padding:12px 14px;border-radius:12px;background:rgba(230,182,85,0.14);border:1.5px solid rgba(230,182,85,0.5);color:var(--ivory);font-size:14.5px;line-height:1.42}.callout-box strong{color:var(--gold)}.dial-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.dial-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}.seg-group{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.seg-group.four{grid-template-columns:repeat(4,1fr)}.seg-btn{min-height:46px;padding:0 4px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--muted);font-family:var(--sans);font-size:13.5px;font-weight:700;cursor:pointer;transition:transform 80ms ease-out,background 120ms ease-out,color 120ms ease-out}.seg-btn.active{background:var(--gold);color:var(--night);border-color:var(--gold)}.seg-btn:active{transform:scale(0.95)}.big-num{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.025em;color:var(--ivory)}.big-num.hero-score{font-size:38px}.big-num.gold-txt{color:var(--gold)}.stat-label{font-size:14px;color:var(--muted)}.tally-card{padding:15px 16px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);display:flex;flex-direction:column;gap:8px}.tally-card.compact{padding:12px 14px;gap:6px}.tally-header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:14px;color:var(--muted)}.bar-track{position:relative;height:18px;border-radius:999px;background:rgba(13,16,23,0.85);overflow:visible;margin:16px 0 6px}.bar-fill{height:100%;border-radius:999px;transition:width 220ms cubic-bezier(0.22,1,0.36,1)}.bar-fill.gold{background:var(--gold)}.bar-mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:rgba(244,239,230,0.5)}.bar-mark span{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;font-weight:700;color:var(--muted)}.tally-sub{font-size:13.5px;color:var(--muted);line-height:1.38;font-variant-numeric:tabular-nums}.tally-sub strong{color:var(--ivory)}.luck-pill{align-self:flex-start;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700}.luck-pill.low{background:rgba(244,239,230,0.12);color:var(--muted)}.luck-pill.warn{background:rgba(230,182,85,0.22);color:var(--gold)}.luck-pill.gold{background:rgba(79,214,168,0.22);color:var(--jade)}.card-switches{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.lamp-switch{min-height:58px;padding:6px;border-radius:12px;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-family:var(--sans);transition:transform 90ms ease-out}.lamp-switch:active{transform:scale(0.95)}.lamp-switch.c0{background:var(--coral);color:var(--night)}.lamp-switch.c1{background:var(--jade);color:var(--night)}.sw-dial{font-size:11.5px;font-weight:600;opacity:0.82}.sw-val{font-size:13.5px;font-weight:800}.grid-3x3-wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;border-radius:14px;background:var(--card);border:1.5px solid var(--line)}.grid-axes{display:flex;flex-direction:column;align-items:center;gap:4px}.axis-bob{font-size:11px;font-weight:800;letter-spacing:0.1em;color:var(--gold);padding-left:34px}.grid-with-alice{display:flex;align-items:center;gap:6px}.axis-alice{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:800;letter-spacing:0.1em;color:var(--gold);padding-top:16px}.grid-3x3{display:grid;grid-template-columns:16px repeat(3,34px);gap:5px;align-items:center;justify-items:center}.g-hdr{font-size:12px;font-weight:700;color:var(--muted)}.g-cell{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}.g-cell.diff{background:rgba(13,16,23,0.78);border:1px solid rgba(244,239,230,0.16);color:rgba(244,239,230,0.55)}.g-cell.match.c0{background:var(--coral);color:var(--night)}.g-cell.match.c1{background:var(--jade);color:var(--night)}.grid-micro{font-size:11px;color:var(--muted);margin-top:3px;text-align:center}.grid-readout{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}.chsh-switches{display:flex;flex-direction:column;gap:7px}.sw-row{display:grid;grid-template-columns:58px 1fr 1fr;align-items:center;gap:7px}.sw-who{font-size:14px;font-weight:700;color:var(--ivory)}.mini-sw{min-height:44px;padding:0 6px;border:none;border-radius:10px;font-family:var(--sans);font-size:13.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:transform 80ms ease-out}.mini-sw:active{transform:scale(0.96)}.mini-sw.c0{background:var(--coral);color:var(--night)}.mini-sw.c1{background:var(--jade);color:var(--night)}.rule-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.r-chip{padding:6px 4px;border-radius:9px;text-align:center;font-size:13px;font-weight:800;border:1.5px solid transparent;white-space:nowrap}.r-chip.win{background:rgba(79,214,168,0.16);border-color:rgba(79,214,168,0.55);color:var(--jade)}.r-chip.lose{background:rgba(255,122,107,0.2);border-color:rgba(255,122,107,0.72);color:var(--coral)}.dot-strip-label{font-size:12px;color:var(--muted)}.dot-strip{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}.h-dot{height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}.h-dot.c0{background:rgba(255,122,107,0.24);color:var(--coral)}.h-dot.c1{background:rgba(79,214,168,0.24);color:var(--jade)}.h-dot.win{background:var(--gold);color:var(--night)}.h-dot.miss{background:rgba(13,16,23,0.7);color:var(--muted)}.bob-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:2px}.bob-slot{padding:6px 3px;border-radius:8px;background:rgba(13,16,23,0.62);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;color:var(--muted)}.bob-slot.filled{border-color:rgba(230,182,85,0.52)}.bob-slot strong{font-size:12.5px;color:var(--ivory);font-variant-numeric:tabular-nums}.real-list{display:flex;flex-direction:column;gap:10px}.real-item{padding:12px 14px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted);line-height:1.44}.real-yr{font-size:13px;font-weight:700;color:var(--gold)}.teacher-pin,.predict-banner{padding:10px 14px;border-radius:10px;background:rgba(230,182,85,0.18);border:1.5px solid rgba(230,182,85,0.62);color:var(--ivory);font-size:14px;line-height:1.35}#idle-hint{position:fixed;left:24px;bottom:24px;z-index:25;padding:10px 16px;border-radius:999px;background:rgba(22,27,38,0.94);border:1px solid rgba(230,182,85,0.42);color:var(--ivory);font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.45)}#depth-backdrop{position:fixed;inset:0;z-index:60;background:rgba(8,10,16,0.74);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px}#depth-card{width:min(560px,100%);max-height:84vh;overflow-y:auto;padding:24px;border-radius:18px;background:var(--slate);border:1px solid rgba(244,239,230,0.2);box-shadow:0 24px 64px rgba(0,0,0,0.6);display:flex;flex-direction:column;gap:14px}.depth-head{display:flex;justify-content:flex-end}.depth-title{font-size:20px;font-weight:700;color:var(--gold)}.depth-plain{font-size:16px;line-height:1.5;color:var(--ivory)}.depth-live{padding:12px 14px;border-radius:12px;background:rgba(230,182,85,0.12);border:1px solid rgba(230,182,85,0.35);display:flex;flex-direction:column;gap:5px;font-size:14px;font-variant-numeric:tabular-nums}.depth-live .muted{color:var(--muted)}.depth-detail{font-size:14.5px;line-height:1.55;color:var(--muted)}.depth-math{padding:12px 14px;border-radius:10px;background:var(--night);border:1px solid var(--line);font-family:var(--mono);font-size:13px;line-height:1.55;color:var(--ivory)}.depth-sources{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}.depth-src-label{font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--ivory)}#fps-pill{position:fixed;left:16px;bottom:16px;z-index:80;padding:5px 10px;border-radius:8px;background:rgba(13,16,23,0.85);border:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--gold)}@media (max-width:860px){html.teacher-mode{--ts:1.02}#app{flex-direction:column}#app:not(.is-hero) #stage-wrap{flex:1 1 auto;min-height:40vh;width:100%}#app.is-hero #stage-wrap{flex:1 1 100%;height:100%}#side-panel,html.teacher-mode #side-panel{width:100%;flex:0 0 auto;height:auto;max-height:58vh;border-left:none;border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding-top:0;margin-top:-8px;box-shadow:0 -12px 32px rgba(0,0,0,0.45)}#app.shatter-focus #side-panel{opacity:0.20;transform:translateY(16px)}#panel-scroll,html.teacher-mode #panel-scroll{padding:9px 14px 6px;gap:5px}#panel-footer,html.teacher-mode #panel-footer{padding:6px 14px 8px;gap:1px}.st-limit{padding:2px 7px}.st-limit strong,html.teacher-mode .st-limit strong{font-size:13px}.st-limit span,html.teacher-mode .st-limit span{font-size:8px}.st-limit::after{height:10px}.st-limit.st-85::after{height:22px}.st-ang,html.teacher-mode .st-ang{font-size:9.5px;padding:1px 4px}.grid-3x3-wrap{padding:8px 10px;gap:10px}.g-cell{width:28px;height:28px;font-size:13px}.grid-3x3{grid-template-columns:14px repeat(3,28px);gap:3px}.grid-micro{font-size:10px}#top-bar{padding:8px 10px;gap:6px}#btn-skip-top{display:none}#step-dots{position:fixed;top:56px;left:50%;transform:translateX(-50%);gap:5px;padding:4px 10px;background:rgba(13,16,23,0.62);border:1px solid rgba(244,239,230,0.1)}#app.is-hero #step-dots{display:none}#step-dots .dot{width:6px;height:6px}#step-dots .dot.active{width:16px}#app:not(.is-hero) .brand-mark{display:none}.brand-mark{font-size:13px;color:var(--ivory)}.top-left,.top-right{gap:5px}.mode-opt{padding:0 9px;font-size:12px;min-height:36px}.icon-btn{padding:0 9px;font-size:12px;min-height:44px}#hero-overlay{padding:18px 18px 34px}.hero-headline{font-size:24px;margin-bottom:16px}.step-kicker,html.teacher-mode .step-kicker{font-size:11px}.step-question,html.teacher-mode .step-question{font-size:17px}.step-sub,html.teacher-mode .step-sub{font-size:12px;line-height:1.28}.dial-label{font-size:11.5px;margin-bottom:2px}.seg-btn{min-height:38px;font-size:12px}.btn-primary,html.teacher-mode .btn-primary{min-height:46px;padding:9px 14px;font-size:14.5px}.btn-secondary,html.teacher-mode .btn-secondary{min-height:42px;padding:6px 8px;font-size:12.5px}.btn-clear,html.teacher-mode .btn-clear{min-height:44px;min-width:64px;padding:0 12px;font-size:12.5px}.btn-depth,.btn-quiet-sm,html.teacher-mode .btn-depth,html.teacher-mode .btn-quiet-sm{min-height:32px;padding:2px 8px;font-size:12px}.sw-row,html.teacher-mode .sw-row{grid-template-columns:48px 1fr 1fr;gap:5px}.sw-who,html.teacher-mode .sw-who{font-size:12.5px}.chsh-switches{gap:5px}.mini-sw,html.teacher-mode .mini-sw{min-height:36px;font-size:12px}.r-chip,html.teacher-mode .r-chip{padding:3px 2px;font-size:11.5px}.tally-card,.tally-card.compact,html.teacher-mode .tally-card,html.teacher-mode .tally-card.compact{padding:7px 10px;gap:3px}.tally-header,html.teacher-mode .tally-header{font-size:12.5px}.tally-sub,html.teacher-mode .tally-sub{font-size:11.8px;line-height:1.28}.luck-pill,html.teacher-mode .luck-pill{font-size:11.5px;padding:3px 8px}.big-num,.big-num.hero-score,html.teacher-mode .hero-score{font-size:21px}.callout-box{padding:7px 10px;font-size:12px;line-height:1.32}.teacher-pin,html.teacher-mode .teacher-pin{padding:5px 9px;font-size:11.8px}.bridge-diagram{gap:6px}.br-card{padding:9px 7px;gap:3px}.br-stat{font-size:15px}.br-note{font-size:11px}.dot-strip{gap:2.5px}.h-dot{height:15px;font-size:8.5px}.bob-slot{padding:4px 2px;font-size:10px}.bob-slot strong{font-size:11.5px}#idle-hint{left:12px;right:12px;bottom:12px;text-align:center;font-size:13px}}@media (prefers-reduced-motion:reduce){.btn-primary.pulse-gold,.loader-dot{animation:none}.bar-fill,.icon-btn,.btn-primary,.btn-secondary{transition:none}}</style>
 </head>
 <body>
   <div id="loader" aria-live="polite">
@@ -301,19 +301,26 @@ const tex = new THREE.CanvasTexture(c);
 tex.colorSpace = THREE.SRGBColorSpace;
 return tex;
 }
-function makeShockRingTexture() {
+function makeExponentialGlowTexture() {
 const c = document.createElement('canvas');
-c.width = c.height = 256;
+c.width = c.height = 128;
 const ctx = c.getContext('2d');
-ctx.clearRect(0, 0, 256, 256);
-const g = ctx.createRadialGradient(128, 128, 66, 128, 128, 126);
-g.addColorStop(0, 'rgba(255,235,170,0)');
-g.addColorStop(0.45, 'rgba(255,242,198,0.18)');
-g.addColorStop(0.76, 'rgba(255,248,225,0.92)');
-g.addColorStop(0.88, 'rgba(230,182,85,0.65)');
-g.addColorStop(1, 'rgba(230,182,85,0)');
-ctx.fillStyle = g;
-ctx.fillRect(0, 0, 256, 256);
+const img = ctx.createImageData(128, 128);
+for (let y = 0; y < 128; y++) {
+for (let x = 0; x < 128; x++) {
+const dx = (x - 63.5) / 63.5;
+const dy = (y - 63.5) / 63.5;
+const r2 = dx * dx + dy * dy;
+const falloff = Math.exp(-r2 * 7.2) * Math.max(0, 1 - r2);
+const core = Math.exp(-r2 * 24.0);
+const idx = (y * 128 + x) * 4;
+img.data[idx] = Math.round(255 * Math.min(1, 0.92 + core * 0.08));
+img.data[idx + 1] = Math.round(255 * Math.min(1, 0.72 + core * 0.26));
+img.data[idx + 2] = Math.round(255 * Math.min(1, 0.34 + core * 0.58));
+img.data[idx + 3] = Math.round(255 * Math.min(1, falloff));
+}
+}
+ctx.putImageData(img, 0, 0);
 const tex = new THREE.CanvasTexture(c);
 tex.colorSpace = THREE.SRGBColorSpace;
 return tex;
@@ -334,10 +341,11 @@ function makeFloorPoolTexture() {
 const c = document.createElement('canvas');
 c.width = c.height = 512;
 const ctx = c.getContext('2d');
-const g = ctx.createRadialGradient(256, 256, 12, 256, 256, 250);
+const g = ctx.createRadialGradient(256, 256, 10, 256, 256, 248);
 g.addColorStop(0, '#222b3d');
-g.addColorStop(0.32, '#161c29');
-g.addColorStop(0.65, '#0f131c');
+g.addColorStop(0.26, '#151b27');
+g.addColorStop(0.48, '#0f131c');
+g.addColorStop(0.68, '#0d1017');
 g.addColorStop(1, '#0d1017');
 ctx.fillStyle = g;
 ctx.fillRect(0, 0, 512, 512);
@@ -428,46 +436,53 @@ return tex;
 }
 function makePlaqueTexture(text) {
 const c = document.createElement('canvas');
-c.width = 320;
-c.height = 104;
+c.width = 360;
+c.height = 112;
 const ctx = c.getContext('2d');
-ctx.fillStyle = '#181e2c';
-ctx.fillRect(0, 0, 320, 104);
-ctx.strokeStyle = '#C8A86B';
-ctx.lineWidth = 6;
-ctx.strokeRect(4, 4, 312, 96);
-ctx.fillStyle = '#F4EFE6';
-ctx.font = '800 54px -apple-system, BlinkMacSystemFont, sans-serif';
+ctx.fillStyle = '#121722';
+ctx.fillRect(0, 0, 360, 112);
+ctx.strokeStyle = '#D4B26E';
+ctx.lineWidth = 7;
+ctx.strokeRect(4, 4, 352, 104);
+ctx.fillStyle = '#F7F3EC';
+ctx.font = '800 62px -apple-system, BlinkMacSystemFont, sans-serif';
 ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
-ctx.fillText(text, 160, 54);
+ctx.fillText(text, 180, 58);
 const tex = new THREE.CanvasTexture(c);
 tex.colorSpace = THREE.SRGBColorSpace;
 return tex;
 }
-function makeLeverPlateTexture() {
+function makeLeverPlateTexture(entangled = false) {
 const c = document.createElement('canvas');
 c.width = 512;
-c.height = 112;
+c.height = 128;
 const ctx = c.getContext('2d');
-ctx.fillStyle = '#151b28';
-ctx.fillRect(0, 0, 512, 112);
-ctx.strokeStyle = '#C8A86B';
-ctx.lineWidth = 5;
-ctx.strokeRect(3, 3, 506, 106);
-ctx.fillStyle = 'rgba(244,239,230,0.88)';
-ctx.font = '800 32px -apple-system, BlinkMacSystemFont, sans-serif';
-ctx.textAlign = 'left';
+ctx.fillStyle = '#141A26';
+ctx.fillRect(0, 0, 512, 128);
+ctx.strokeStyle = '#D4B26E';
+ctx.lineWidth = 6;
+ctx.strokeRect(3, 3, 506, 122);
+if (entangled) {
+ctx.fillStyle = 'rgba(230,182,85,0.18)';
+ctx.fillRect(216, 6, 290, 116);
+} else {
+ctx.fillStyle = 'rgba(244,239,230,0.12)';
+ctx.fillRect(6, 6, 206, 116);
+}
+ctx.fillStyle = entangled ? 'rgba(220,228,242,0.72)' : '#F7F3EC';
+ctx.font = '800 42px -apple-system, BlinkMacSystemFont, sans-serif';
+ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
-ctx.fillText('CARD', 26, 58);
-ctx.fillStyle = '#E6B655';
-ctx.textAlign = 'right';
-ctx.fillText('ENTANGLED', 486, 58);
-ctx.strokeStyle = 'rgba(200,168,107,0.45)';
-ctx.lineWidth = 3;
+ctx.fillText('CARD', 110, 66);
+ctx.fillStyle = entangled ? '#F2C15A' : 'rgba(230,182,85,0.76)';
+ctx.font = '800 40px -apple-system, BlinkMacSystemFont, sans-serif';
+ctx.fillText('ENTANGLED', 360, 66);
+ctx.strokeStyle = 'rgba(212,178,110,0.65)';
+ctx.lineWidth = 4;
 ctx.beginPath();
-ctx.moveTo(212, 24);
-ctx.lineTo(212, 88);
+ctx.moveTo(214, 22);
+ctx.lineTo(214, 106);
 ctx.stroke();
 const tex = new THREE.CanvasTexture(c);
 tex.colorSpace = THREE.SRGBColorSpace;
@@ -535,19 +550,20 @@ c.width = 256;
 c.height = 256;
 const ctx = c.getContext('2d');
 const g = ctx.createLinearGradient(0, 0, 256, 256);
-g.addColorStop(0, 'rgba(42,54,76,0.74)');
-g.addColorStop(0.5, 'rgba(30,40,58,0.64)');
-g.addColorStop(1, 'rgba(44,56,78,0.78)');
+g.addColorStop(0, '#2a354b');
+g.addColorStop(0.5, '#1e2738');
+g.addColorStop(1, '#29344a');
 ctx.fillStyle = g;
 ctx.fillRect(0, 0, 256, 256);
-ctx.strokeStyle = 'rgba(244,239,230,0.08)';
-ctx.lineWidth = 2;
-for (let x = 12; x < 256; x += 12) {
-ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 256); ctx.stroke();
+for (let x = 0; x < 256; x += 14) {
+ctx.fillStyle = 'rgba(244,239,230,0.045)';
+ctx.fillRect(x, 0, 5, 256);
+ctx.fillStyle = 'rgba(8,11,18,0.16)';
+ctx.fillRect(x + 6, 0, 2, 256);
 }
-ctx.fillStyle = 'rgba(255,255,255,0.06)';
+ctx.fillStyle = 'rgba(230,242,255,0.08)';
 ctx.beginPath();
-ctx.moveTo(0, 60); ctx.lineTo(256, 10); ctx.lineTo(256, 56); ctx.lineTo(0, 106);
+ctx.moveTo(0, 74); ctx.lineTo(256, 14); ctx.lineTo(256, 68); ctx.lineTo(0, 128);
 ctx.fill();
 const tex = new THREE.CanvasTexture(c);
 tex.colorSpace = THREE.SRGBColorSpace;
@@ -595,26 +611,26 @@ return tex;
 }
 function makeCardStripTexture(cardArr = [0, 0, 1]) {
 const c = document.createElement('canvas');
-c.width = 160;
-c.height = 200;
+c.width = 256;
+c.height = 300;
 const ctx = c.getContext('2d');
-ctx.fillStyle = '#F4EFE6';
-ctx.fillRect(0, 0, 160, 200);
+ctx.fillStyle = '#F7F2E8';
+ctx.fillRect(0, 0, 256, 300);
 ctx.strokeStyle = '#C8A86B';
-ctx.lineWidth = 8;
-ctx.strokeRect(4, 4, 152, 192);
-ctx.fillStyle = '#181E2C';
-ctx.font = '800 18px -apple-system, BlinkMacSystemFont, sans-serif';
+ctx.lineWidth = 12;
+ctx.strokeRect(6, 6, 244, 288);
+ctx.fillStyle = '#141925';
+ctx.font = '800 28px -apple-system, BlinkMacSystemFont, sans-serif';
 ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
-ctx.fillText('HIDDEN CARD', 80, 26);
+ctx.fillText('HIDDEN CARD', 128, 38);
 for (let i = 0; i < 3; i++) {
 const isCoral = cardArr[i] === 0;
 ctx.fillStyle = isCoral ? '#FF7A6B' : '#4FD6A8';
-ctx.fillRect(20, 44 + i * 48, 120, 36);
+ctx.fillRect(24, 68 + i * 72, 208, 56);
 ctx.fillStyle = '#0D1017';
-ctx.font = '800 22px -apple-system, BlinkMacSystemFont, sans-serif';
-ctx.fillText(`${i + 1}: ${isCoral ? '▲' : '●'}`, 80, 62 + i * 48);
+ctx.font = '800 38px -apple-system, BlinkMacSystemFont, sans-serif';
+ctx.fillText(`${i + 1}  ${isCoral ? '▲' : '●'}`, 128, 97 + i * 72);
 }
 const tex = new THREE.CanvasTexture(c);
 tex.colorSpace = THREE.SRGBColorSpace;
@@ -695,24 +711,26 @@ vec3 N = normalize(vNormalW);
 vec3 V = normalize(cameraPosition - vWorldPos);
 if (!gl_FrontFacing) N = -N;
 float ndotv = clamp(abs(dot(N, V)), 0.0, 1.0);
-float fresnel = pow(1.0 - ndotv, 2.1);
+float fresnel = pow(1.0 - ndotv, 2.35);
 vec3 Lkey = normalize(vec3(0.42, 0.85, 0.58));
-vec3 Lgold = normalize(uBurstPos - vWorldPos + vec3(-0.2, 0.05, -0.3));
+vec3 Lgold = normalize(uBurstPos - vWorldPos + vec3(-0.18, 0.06, -0.25));
 vec3 Lrim = normalize(vec3(-0.65, 0.45, -0.6));
 vec3 Hkey = normalize(Lkey + V);
 vec3 Hgold = normalize(Lgold + V);
 vec3 Hrim = normalize(Lrim + V);
-float specKey = pow(max(dot(N, Hkey), 0.0), 48.0);
-float specGold = pow(max(dot(N, Hgold), 0.0), 16.0);
-float specRim = pow(max(dot(N, Hrim), 0.0), 28.0);
-float edgeRim = smoothstep(0.68, 1.0, vEdge);
-vec3 iceBody = vTint * vec3(0.72, 0.88, 1.0);
-vec3 goldEdge = vec3(1.0, 0.86, 0.52);
-vec3 whiteSpark = vec3(1.0, 0.99, 0.95);
-vec3 col = iceBody * (0.28 + 0.55 * fresnel);
-col += goldEdge * (specGold * (0.85 + 0.65 * uFlash) + edgeRim * 0.42 * (0.5 + 0.5 * uFlash));
-col += whiteSpark * (specKey * 1.45 + specRim * 0.72 + edgeRim * 0.68 + fresnel * 0.45);
-float alpha = clamp(0.11 + fresnel * 0.56 + edgeRim * 0.58 + specKey * 0.82 + specGold * 0.48, 0.0, 0.96);
+float specKey = pow(max(dot(N, Hkey), 0.0), 56.0);
+float specGold = pow(max(dot(N, Hgold), 0.0), 14.0);
+float specRim = pow(max(dot(N, Hrim), 0.0), 32.0);
+float edgeCatch = smoothstep(0.84, 1.0, vEdge) * (0.28 + 0.72 * max(dot(N, Lkey), max(dot(N, Lgold), 0.0)));
+float distBurst = length(vWorldPos - uBurstPos);
+float caustic = exp(-distBurst * 0.75) * (0.45 + 0.55 * uFlash);
+vec3 glassBody = mix(vTint * vec3(0.54, 0.78, 0.98), vec3(0.98, 0.80, 0.42), caustic * 0.55);
+vec3 goldSpec = vec3(1.0, 0.84, 0.48);
+vec3 iceWhite = vec3(0.98, 0.99, 1.0);
+vec3 col = glassBody * (0.42 + 0.65 * fresnel);
+col += goldSpec * (specGold * (1.05 + 0.55 * uFlash) + edgeCatch * 0.46 * (0.5 + 0.5 * caustic));
+col += iceWhite * (specKey * 1.35 + specRim * 0.55 + edgeCatch * 0.34);
+float alpha = clamp(0.22 + fresnel * 0.42 + edgeCatch * 0.46 + specKey * 0.78 + specGold * 0.45, 0.0, 0.94);
 gl_FragColor = vec4(col, alpha * uOpacity);
 }
 `,
@@ -800,7 +818,7 @@ const glowIvoryTex = makeRadialTexture('rgba(255,252,245,0.95)', 'rgba(244,239,2
 const glowCoralTex = makeRadialTexture('rgba(255,148,132,0.92)', 'rgba(255,95,78,0.36)');
 const glowJadeTex = makeRadialTexture('rgba(128,245,204,0.92)', 'rgba(54,205,152,0.36)');
 const starGlintTex = makeStarGlintTexture();
-const shockRingTex = makeShockRingTexture();
+const expGlowTex = makeExponentialGlowTexture();
 const badgeCoralTex = makeLampBadgeTexture('▲', '#FF7A6B');
 const badgeJadeTex = makeLampBadgeTexture('●', '#4FD6A8');
 const dialMerminTex = makeDialFaceTexture('mermin');
@@ -866,28 +884,46 @@ sourceGroup.add(sourcePoint);
 let cardStripTex = makeCardStripTexture([0, 0, 1]);
 const cardDisplayMat = new THREE.MeshStandardMaterial({
 map: cardStripTex,
-roughness: 0.4,
-metalness: 0.05,
+roughness: 0.36,
+metalness: 0.04,
 emissive: new THREE.Color(0x3a3428),
-emissiveIntensity: 0.45,
+emissiveIntensity: 0.42,
 });
-const cardDisplay = new THREE.Mesh(new RoundedBoxGeometry(0.56, 0.70, 0.03, 2, 0.01), cardDisplayMat);
-cardDisplay.position.set(0, 0.62, 0.82);
-cardDisplay.visible = false;
-sourceGroup.add(cardDisplay);
+const cardStandGroup = new THREE.Group();
+cardStandGroup.position.set(0, 0.0, 1.08);
+cardStandGroup.visible = false;
+sourceGroup.add(cardStandGroup);
+const cardStandBase = new THREE.Mesh(new RoundedBoxGeometry(0.66, 0.06, 0.24, 2, 0.02), darkMetalMat);
+cardStandBase.position.y = 0.03;
+cardStandGroup.add(cardStandBase);
+const cardStandLip = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.04, 0.04), brassMat);
+cardStandLip.position.set(0, 0.07, 0.08);
+cardStandGroup.add(cardStandLip);
+const cardDisplay = new THREE.Mesh(new RoundedBoxGeometry(0.56, 0.64, 0.026, 2, 0.01), cardDisplayMat);
+cardDisplay.position.set(0, 0.36, -0.02);
+cardDisplay.rotation.x = -0.22;
+cardStandGroup.add(cardDisplay);
+const leverCap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.05, 28), darkMetalMat);
+leverCap.position.set(0, 0.025, 0.92);
+leverCap.visible = false;
+sourceGroup.add(leverCap);
+const leverCapRing = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.014, 10, 28), brassMat);
+leverCapRing.rotation.x = Math.PI / 2;
+leverCapRing.position.y = 0.028;
+leverCap.add(leverCapRing);
 const leverMount = new THREE.Group();
 leverMount.position.set(0, 0.12, 0.92);
 leverMount.visible = false;
 sourceGroup.add(leverMount);
-const leverBase = new THREE.Mesh(new RoundedBoxGeometry(1.16, 0.22, 0.34, 4, 0.04), darkMetalMat);
+const leverBase = new THREE.Mesh(new RoundedBoxGeometry(1.24, 0.24, 0.36, 4, 0.04), darkMetalMat);
 leverBase.castShadow = true;
 leverMount.add(leverBase);
-const leverPlateFace = new THREE.Mesh(
-new THREE.PlaneGeometry(1.06, 0.23),
-new THREE.MeshStandardMaterial({ map: makeLeverPlateTexture(), roughness: 0.38, metalness: 0.2 })
-);
-leverPlateFace.rotation.x = -0.34;
-leverPlateFace.position.set(0, 0.02, 0.19);
+const leverPlateCardTex = makeLeverPlateTexture(false);
+const leverPlateEntTex = makeLeverPlateTexture(true);
+const leverPlateMat = new THREE.MeshStandardMaterial({ map: leverPlateCardTex, roughness: 0.34, metalness: 0.16 });
+const leverPlateFace = new THREE.Mesh(new THREE.PlaneGeometry(1.16, 0.27), leverPlateMat);
+leverPlateFace.rotation.x = -0.36;
+leverPlateFace.position.set(0, 0.03, 0.20);
 leverMount.add(leverPlateFace);
 const leverCollarMat = new THREE.MeshStandardMaterial({
 color: COL_GOLD,
@@ -969,11 +1005,11 @@ shell.castShadow = true;
 shell.receiveShadow = true;
 group.add(shell);
 const ghostShellMat = new THREE.MeshPhysicalMaterial({
-color: 0xaac4e6,
-roughness: 0.12,
-metalness: 0.1,
+color: 0xbcd4f2,
+roughness: 0.1,
+metalness: 0.08,
 transparent: true,
-opacity: 0.075,
+opacity: 0.055,
 depthWrite: false,
 side: THREE.FrontSide,
 });
@@ -982,12 +1018,12 @@ ghostShell.position.copy(shell.position);
 ghostShell.visible = false;
 group.add(ghostShell);
 const edgesMat = new THREE.LineBasicMaterial({
-color: COL_BRASS,
+color: COL_IVORY,
 transparent: true,
-opacity: 0.42,
+opacity: 0.54,
 depthWrite: false,
 });
-const shellEdges = new THREE.LineSegments(new THREE.EdgesGeometry(shellGeo, 22), edgesMat);
+const shellEdges = new THREE.LineSegments(new THREE.EdgesGeometry(shellGeo, 20), edgesMat);
 shellEdges.position.copy(shell.position);
 shellEdges.visible = false;
 group.add(shellEdges);
@@ -996,20 +1032,22 @@ port.rotation.y = Math.PI / 2;
 port.position.set(side === 'left' ? 0.81 : -0.81, 0.96, 0);
 group.add(port);
 const magnetRoot = new THREE.Group();
-magnetRoot.position.set(0, 0.68, 0.10);
+magnetRoot.position.set(0, 0.65, 0.10);
 magnetRoot.visible = false;
 group.add(magnetRoot);
 const degreeDisc = new THREE.Mesh(
-new THREE.PlaneGeometry(1.12, 1.12),
+new THREE.PlaneGeometry(1.06, 1.06),
 new THREE.MeshBasicMaterial({ map: graduatedRingTex, transparent: true, opacity: 0.95, depthWrite: false })
 );
 degreeDisc.position.z = -0.14;
 magnetRoot.add(degreeDisc);
-const angleAnchors = [-90, 20, 160].map(deg => {
-const r = (deg * Math.PI) / 180;
+const angleAnchors = [
+{ x: 0.20, y: 0.43 },   // 0° tucked cleanly beside top gold tick (never covers brass lamp collar!)
+{ x: 0.52, y: -0.22 },  // 120° hugging lower-right tick inside box bounds
+{ x: -0.52, y: -0.22 }, // 240° hugging lower-left tick inside box bounds
+].map(pt => {
 const obj = new THREE.Object3D();
-const rad = deg === -90 ? 0.54 : 0.64;
-obj.position.set(Math.cos(r) * rad, -Math.sin(r) * rad + (deg === -90 ? 0 : 0.05), 0.24);
+obj.position.set(pt.x, pt.y, 0.24);
 magnetRoot.add(obj);
 return obj;
 });
@@ -1118,7 +1156,7 @@ const lampLight = new THREE.PointLight(COL_IVORY, 0, 3.8, 2);
 lampLight.position.set(0, 1.7, 0.35);
 group.add(lampLight);
 const plaqueGroup = new THREE.Group();
-plaqueGroup.position.set(0, 0.0, 1.06);
+plaqueGroup.position.set(0, 0.0, 1.15);
 plaqueGroup.visible = false;
 group.add(plaqueGroup);
 const plaqueBase = new THREE.Mesh(new RoundedBoxGeometry(1.12, 0.06, 0.32, 2, 0.02), darkMetalMat);
@@ -1187,15 +1225,14 @@ const partFrameTop = new THREE.Mesh(new THREE.BoxGeometry(2.22, 0.06, 0.08), bra
 partFrameTop.position.set(0, 2.24, 0);
 partitionGroup.add(partFrameTop);
 const partGlass = new THREE.Mesh(
-new THREE.BoxGeometry(2.10, 2.12, 0.04),
-new THREE.MeshPhysicalMaterial({
+new THREE.BoxGeometry(2.10, 2.12, 0.045),
+new THREE.MeshStandardMaterial({
 map: makePrivacyGlassBodyTexture(),
-color: 0xd0e2f8,
-roughness: 0.28,
-metalness: 0.06,
-transparent: true,
-opacity: 0.84,
-side: THREE.FrontSide,
+color: 0xdce8fa,
+roughness: 0.42,
+metalness: 0.08,
+transparent: false,
+opacity: 1.0,
 })
 );
 partGlass.position.y = 1.15;
@@ -1233,9 +1270,10 @@ const finial = new THREE.Mesh(new RoundedBoxGeometry(0.14, 0.34, 0.28, 3, 0.03),
 finial.position.set(capX, BEAM_Y, 0);
 arenaGroup.add(finial);
 }
+const channelMat = new THREE.MeshStandardMaterial({ color: 0x151b28, roughness: 0.56, metalness: 0.4 });
 const channelMesh = new THREE.Mesh(
 new RoundedBoxGeometry(BAR_LEN + 0.08, 0.26, 0.24, 4, 0.05),
-new THREE.MeshStandardMaterial({ color: 0x131824, roughness: 0.6, metalness: 0.4 })
+channelMat
 );
 channelMesh.position.y = BEAM_Y;
 arenaGroup.add(channelMesh);
@@ -1315,17 +1353,19 @@ wallGroup.add(clampTop);
 const clampBot = new THREE.Mesh(unitClampGeo, brassMat);
 clampBot.position.y = -0.654;
 wallGroup.add(clampBot);
-const postShatterStubs = new THREE.Group();
-const stubTop = new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.05, 0.30, 2, 0.01), brassMat);
-stubTop.position.y = 0.16;
-postShatterStubs.add(stubTop);
-const stubBot = new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.05, 0.30, 2, 0.01), brassMat);
-stubBot.position.y = -0.16;
-postShatterStubs.add(stubBot);
-postShatterStubs.visible = false;
-wallGroup.add(postShatterStubs);
+const mounted75Collar = new THREE.Group();
+const collarTop = new THREE.Mesh(new RoundedBoxGeometry(0.08, 0.048, 0.29, 2, 0.01), brassMat);
+collarTop.position.set(0, 0.145, -0.04);
+mounted75Collar.add(collarTop);
+const collarBot = new THREE.Mesh(new RoundedBoxGeometry(0.08, 0.048, 0.29, 2, 0.01), brassMat);
+collarBot.position.set(0, -0.145, -0.04);
+mounted75Collar.add(collarBot);
+const collarBack = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.30, 0.26), brassMat);
+collarBack.position.set(0, 0, -0.04);
+mounted75Collar.add(collarBack);
+wallGroup.add(mounted75Collar);
 const anchor75 = new THREE.Object3D();
-anchor75.position.set(0, 1.24, 0);
+anchor75.position.set(0, 0.96, 0);
 wallGroup.add(anchor75);
 const x85 = BAR_X0 + 0.853553 * BAR_LEN;
 const goldLineGroup = new THREE.Group();
@@ -1350,36 +1390,23 @@ const goldCapBot = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.04, 0.05, 
 goldCapBot.position.y = -0.63;
 goldLineGroup.add(goldCapBot);
 const anchor85 = new THREE.Object3D();
-anchor85.position.set(0.32, 1.24, 0);
+anchor85.position.set(0, 1.48, 0);
 goldLineGroup.add(anchor85);
 let luckWidthTarget = 0.28;
 let luckWidthCurrent = 0.28;
 const shatterFlash = new THREE.Sprite(
 new THREE.SpriteMaterial({
-map: glowGoldTex,
+map: expGlowTex,
 transparent: true,
 blending: THREE.AdditiveBlending,
 depthWrite: false,
 opacity: 0.0,
 })
 );
-shatterFlash.position.set(x75 + 0.1, BEAM_Y, 0.42);
+shatterFlash.position.set(x75 + 0.08, BEAM_Y, 0.36);
 shatterFlash.scale.set(1.0, 1.0, 1);
 shatterFlash.visible = false;
 arenaGroup.add(shatterFlash);
-const shatterRing = new THREE.Sprite(
-new THREE.SpriteMaterial({
-map: shockRingTex,
-transparent: true,
-blending: THREE.AdditiveBlending,
-depthWrite: false,
-opacity: 0.0,
-})
-);
-shatterRing.position.set(x75 + 0.12, BEAM_Y, 0.44);
-shatterRing.scale.set(0.6, 0.6, 1);
-shatterRing.visible = false;
-arenaGroup.add(shatterRing);
 const shatterPoint = new THREE.PointLight(COL_GOLD, 0, 11, 2);
 shatterPoint.position.set(x75 + 0.2, BEAM_Y, 0.85);
 arenaGroup.add(shatterPoint);
@@ -1388,10 +1415,10 @@ const shardGeo = makeCrystalShardGeometry();
 const shardMat = makeCrystalShardMaterial();
 const shardMesh = new THREE.InstancedMesh(shardGeo, shardMat, SHARD_COUNT);
 const shardPalette = [
-new THREE.Color(0xe6f6ff),
-new THREE.Color(0xcce8ff),
-new THREE.Color(0xfff4d6),
-new THREE.Color(0xdcf0ff),
+new THREE.Color(0xc8e8ff),
+new THREE.Color(0x98ccf4),
+new THREE.Color(0xffe6a8),
+new THREE.Color(0xbce0ff),
 ];
 for (let i = 0; i < SHARD_COUNT; i++) {
 shardMesh.setColorAt(i, shardPalette[i % shardPalette.length]);
@@ -1497,6 +1524,9 @@ compareOrb.visible = false;
 scene.add(compareOrb);
 let isReducedMotion = reducedMotion;
 let teacherMode = false;
+let leverRevealed = true;
+let leverRiseCurrent = 1;
+let showQuantumLabel = false;
 let peelTarget = 0;
 let peelCurrent = 0;
 let wallState = 'intact';
@@ -1525,14 +1555,14 @@ const h = container.clientHeight || window.innerHeight;
 const aspect = w / Math.max(1, h);
 const isTallPortrait = aspect < 0.72;
 const isPhoneStage = aspect < 1.25 && stepIndex > 0;
-const halfSpan = stepIndex === 5 || stepIndex === 6 ? 3.92 : stepIndex === 0 && isTallPortrait ? 4.05 : 3.58;
+const halfSpan = stepIndex === 5 || stepIndex === 6 ? 3.92 : stepIndex === 0 && isTallPortrait ? 3.74 : 3.58;
 const vFovRad = (camera.fov * Math.PI) / 180;
 const minZForWidth = halfSpan / (Math.tan(vFovRad / 2) * Math.max(0.42, aspect));
 if (stepIndex === 0) {
 if (isTallPortrait) {
-const z = Math.max(11.4, minZForWidth * 1.07);
-camTargetPos.set(0, 2.15, z);
-camTargetLook.set(0, 0.52, 0.15);
+const z = Math.max(10.1, minZForWidth * 1.0);
+camTargetPos.set(0, 1.98, z);
+camTargetLook.set(0, 0.46, 0.15);
 } else {
 const z = Math.max(7.9, minZForWidth * 1.02);
 camTargetPos.set(0, 2.3, z);
@@ -1610,27 +1640,47 @@ coreMat.emissive.setHex(val ? COL_GOLD : COL_IVORY);
 sourceHalo.material.map = val ? glowGoldTex : glowIvoryTex;
 sourcePoint.color.setHex(val ? COL_GOLD : COL_IVORY);
 leverTargetAngle = val ? -0.58 : 0.58;
+leverPlateMat.map = val ? leverPlateEntTex : leverPlateCardTex;
+leverPlateMat.needsUpdate = true;
 leverKnobMat.color.setHex(val ? COL_GOLD : COL_IVORY);
 leverKnobMat.emissiveIntensity = val ? 1.45 : 0.42;
 leverCollarMat.emissiveIntensity = val ? 1.2 : 0.35;
 leverGlow.material.opacity = val ? 0.85 : 0.3;
 }
+function setLeverRevealed(revealed, { snap = false } = {}) {
+leverRevealed = !!revealed;
+if (snap) leverRiseCurrent = leverRevealed ? 1 : 0;
+}
+function setShowQuantumLabel(show) {
+showQuantumLabel = !!show;
+}
+function setStep4ActiveAngles(idxA, idxB) {
+for (let i = 0; i < 3; i++) {
+angleLabels.left[i].classList.toggle('is-active', i === idxA);
+angleLabels.right[i].classList.toggle('is-active', i === idxB);
+}
+}
 function setTeacherMode(on) {
 teacherMode = !!on;
-keyLight.intensity = teacherMode ? 2.6 : 2.0;
-rimLight.intensity = teacherMode ? 1.5 : 1.12;
-hemi.intensity = teacherMode ? 1.0 : 0.74;
-scene.environmentIntensity = teacherMode ? 0.88 : 0.68;
+keyLight.intensity = teacherMode ? 2.75 : 2.0;
+rimLight.intensity = teacherMode ? 1.95 : 1.12;
+hemi.intensity = teacherMode ? 1.15 : 0.74;
+scene.environmentIntensity = teacherMode ? 0.96 : 0.68;
+channelMat.color.setHex(teacherMode ? 0x263148 : 0x151b28);
+boxLeft.shellMat.color.setHex(teacherMode ? 0x2f3a50 : COL_BOX_SHELL);
+boxRight.shellMat.color.setHex(teacherMode ? 0x2f3a50 : COL_BOX_SHELL);
 }
 function setStep(step) {
 stepIndex = step;
 showStationPlaques = step >= 1;
 showLampBadges = step >= 1;
 arenaGroup.visible = step === 5 || step === 6;
-leverMount.visible = step === 5 || step === 6;
-cardDisplay.visible = step === 3;
+cardStandGroup.visible = step === 3;
 partitionGroup.visible = step === 7;
-if (step !== 6) breakthroughZoom = 0;
+if (step !== 6) {
+breakthroughZoom = 0;
+showQuantumLabel = false;
+}
 setDialMode(step >= 4.5 && step <= 7 ? 'chsh' : 'mermin');
 boxLeft.dimmed = false;
 boxRight.dimmed = false;
@@ -1659,20 +1709,13 @@ luckWidthCurrent = luckWidthTarget;
 }
 function stepShatterPhysics(simDt) {
 shatterAge += simDt;
-const fl = Math.max(0, 1 - shatterAge / 0.52);
+const fl = Math.max(0, 1 - shatterAge / 0.48);
 if (shatterFlash.visible) {
-shatterFlash.material.opacity = fl * 0.96;
-const sc = 1.4 + (1 - fl) * 4.4;
-shatterFlash.scale.set(sc, sc, 1);
+shatterFlash.material.opacity = fl * 0.95;
+const sc = 1.2 + (1 - fl) * 3.0;
+shatterFlash.scale.set(sc, sc * 0.85, 1);
 shatterPoint.intensity = fl * 5.0;
 if (fl <= 0.01) shatterFlash.visible = false;
-}
-if (shatterRing.visible) {
-const rProg = Math.min(1, shatterAge / 0.42);
-shatterRing.material.opacity = (1 - rProg) * 0.42;
-const rsc = 0.7 + rProg * 4.0;
-shatterRing.scale.set(rsc, rsc * 0.82, 1);
-if (rProg >= 0.99) shatterRing.visible = false;
 }
 const fade = Math.max(0, 1 - shatterAge / 2.2);
 shardMat.uniforms.uOpacity.value = fade;
@@ -1680,11 +1723,15 @@ shardMat.uniforms.uFlash.value = Math.max(0.25, fl);
 sparkMat.opacity = fade * 0.96;
 for (let i = 0; i < SHARD_COUNT; i++) {
 const s = shards[i];
-s.vel.y -= 4.1 * simDt;
+s.vel.y -= 3.6 * simDt;
 s.pos.addScaledVector(s.vel, simDt);
-if (s.pos.y > BEAM_Y + 0.58) {
-s.pos.y = BEAM_Y + 0.58;
+if (s.pos.y > BEAM_Y + 0.56) {
+s.pos.y = BEAM_Y + 0.56;
 if (s.vel.y > 0) s.vel.y *= -0.25;
+}
+if (s.pos.y < BEAM_Y - 0.56 && s.pos.x > x75 + 0.25 && shatterAge < 0.35) {
+s.pos.y = BEAM_Y - 0.56;
+if (s.vel.y < 0) s.vel.y *= -0.15;
 }
 s.rot.x += s.angVel.x * simDt;
 s.rot.y += s.angVel.y * simDt;
@@ -1702,16 +1749,16 @@ const s = shards[i * 4];
 sp.position.copy(s.pos);
 sp.position.z += 0.08;
 const twinkle = 0.6 + 0.4 * Math.sin(shatterAge * 18 + i * 2.1);
-sp.material.opacity = fade * twinkle * 0.95;
-const sz = (0.28 + (i % 3) * 0.14) * (0.7 + 0.45 * twinkle);
+sp.material.opacity = fade * twinkle * 0.92;
+const sz = (0.26 + (i % 3) * 0.12) * (0.7 + 0.45 * twinkle);
 sp.scale.set(sz, sz, 1);
 sp.visible = fade > 0.05;
 }
 for (let i = 0; i < SPARK_COUNT; i++) {
 const sp = sparks[i];
-sp.vel.y -= 2.2 * simDt;
+sp.vel.y -= 2.0 * simDt;
 sp.pos.addScaledVector(sp.vel, simDt);
-if (sp.pos.y > BEAM_Y + 0.75) sp.pos.y = BEAM_Y + 0.75;
+if (sp.pos.y > BEAM_Y + 0.62) sp.pos.y = BEAM_Y + 0.62;
 dummy.position.copy(sp.pos);
 dummy.rotation.set(shatterAge * 7 + i, shatterAge * 5 + i * 0.5, 0);
 dummy.scale.setScalar(0.75 + fade * 0.85);
@@ -1736,7 +1783,6 @@ glassEdgeLines.visible = true;
 frontFace75.visible = true;
 clampTop.visible = true;
 clampBot.visible = true;
-postShatterStubs.visible = false;
 glassPaneMat.map = glassIntactTex;
 glassPaneMat.emissive.setHex(0x5e8cc4);
 glassPaneMat.emissiveIntensity = 0.36;
@@ -1745,11 +1791,11 @@ glassPaneMat.needsUpdate = true;
 shardMesh.visible = false;
 sparkMesh.visible = false;
 shatterFlash.visible = false;
-shatterRing.visible = false;
 shatterPoint.intensity = 0;
 for (const sp of starSprites) sp.visible = false;
 goldLineGroup.visible = false;
 goldLineMat.opacity = 0.0;
+showQuantumLabel = false;
 breakthroughZoom = 0;
 updateCameraTargets();
 } else if (next === 'cracked') {
@@ -1771,9 +1817,9 @@ frontFace75.visible = false;
 clampTop.visible = false;
 clampBot.visible = false;
 dentGlow.material.opacity = 0;
-postShatterStubs.visible = true;
 goldLineGroup.visible = true;
-goldLineMat.opacity = 1.0;
+goldLineMat.opacity = settled ? 1.0 : 0.35;
+showQuantumLabel = settled;
 if (!isReducedMotion && !settled) {
 shatterAge = 0;
 shatterWallElapsed = 0;
@@ -1783,9 +1829,7 @@ updateCameraTargets();
 shardMesh.visible = true;
 sparkMesh.visible = true;
 shatterFlash.visible = true;
-shatterRing.visible = true;
-shatterFlash.material.opacity = 0.96;
-shatterRing.material.opacity = 0.88;
+shatterFlash.material.opacity = 0.95;
 shatterPoint.intensity = 5.0;
 shardMat.uniforms.uOpacity.value = 1.0;
 shardMat.uniforms.uFlash.value = 1.0;
@@ -1796,27 +1840,27 @@ const rnd = midShatter
 : Math.random;
 for (let i = 0; i < SHARD_COUNT; i++) {
 const s = shards[i];
-const spread = (rnd() - 0.5) * Math.PI * 1.45;
-const speed = 2.6 + rnd() * 5.8;
-const startY = (rnd() - 0.5) * 1.15;
-const startZ = (rnd() - 0.5) * 0.65;
-s.pos.set(x75 + rnd() * Math.max(0.18, luckWidthCurrent), BEAM_Y + startY, startZ);
+const spread = (rnd() - 0.5) * Math.PI * 1.25;
+const speed = 2.4 + rnd() * 5.2;
+const startY = (rnd() - 0.5) * 0.95;
+const startZ = (rnd() - 0.5) * 0.60;
+s.pos.set(x75 + rnd() * Math.max(0.16, luckWidthCurrent), BEAM_Y + startY, startZ);
 s.vel.set(
-1.6 + Math.cos(spread) * speed * 0.88 + rnd() * 2.2,
-Math.min(2.1, Math.sin(spread) * speed * 0.44 + startY * 0.85),
-1.6 + rnd() * 4.6
+1.4 + Math.cos(spread) * speed * 0.84 + rnd() * 1.9,
+Math.max(-1.4, Math.min(1.8, Math.sin(spread) * speed * 0.38 + startY * 0.7)),
+1.6 + rnd() * 4.4
 );
 s.rot.set(rnd() * 6.28, rnd() * 6.28, rnd() * 6.28);
 s.angVel.set((rnd() - 0.5) * 16, (rnd() - 0.5) * 16, (rnd() - 0.5) * 16);
-const sc = 0.52 + rnd() * 1.18;
-s.scale.set(sc * (0.75 + rnd() * 0.45), sc * (0.85 + rnd() * 0.6), sc);
+const sc = 0.48 + rnd() * 1.05;
+s.scale.set(sc * (0.72 + rnd() * 0.45), sc * (0.85 + rnd() * 0.55), sc);
 }
 for (let i = 0; i < SPARK_COUNT; i++) {
 const sp = sparks[i];
-const a = (rnd() - 0.5) * Math.PI * 1.5;
-const r = 3.0 + rnd() * 5.6;
-sp.pos.set(x75 + rnd() * 0.22, BEAM_Y + (rnd() - 0.5) * 0.9, (rnd() - 0.5) * 0.4);
-sp.vel.set(1.8 + Math.cos(a) * r * 0.85, Math.min(2.2, Math.sin(a) * r * 0.48), 1.8 + rnd() * 4.4);
+const a = (rnd() - 0.5) * Math.PI * 1.3;
+const r = 2.6 + rnd() * 5.0;
+sp.pos.set(x75 + rnd() * 0.22, BEAM_Y + (rnd() - 0.5) * 0.8, (rnd() - 0.5) * 0.4);
+sp.vel.set(1.6 + Math.cos(a) * r * 0.8, Math.max(-1.3, Math.min(1.8, Math.sin(a) * r * 0.42)), 1.6 + rnd() * 4.2);
 }
 if (midShatter) {
 for (let step = 0; step < 12; step++) stepShatterPhysics(0.02);
@@ -1829,7 +1873,6 @@ freezeBurstForShot = true;
 shardMesh.visible = false;
 sparkMesh.visible = false;
 shatterFlash.visible = false;
-shatterRing.visible = false;
 shatterPoint.intensity = 0;
 for (const sp of starSprites) sp.visible = false;
 breakthroughZoom = 0;
@@ -1862,36 +1905,20 @@ el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) trans
 }
 function updateStageLabels() {
 const isPhone = (container.clientWidth || window.innerWidth) < 861;
-const topSafe = isPhone ? 58 : 74;
+const topSafe = isPhone ? 68 : 74;
 if (arenaGroup.visible) {
-const p75 = projectPoint(anchor75, { minTop: topSafe, clampX: 46 });
-const show85 = goldLineGroup.visible && goldLineMat.opacity > 0.2;
-const p85 = show85 ? projectPoint(anchor85, { minTop: topSafe, clampX: 56 }) : null;
-if (p75 && p85) {
-lbl75.hidden = false;
-lbl85.hidden = false;
-const w75 = lbl75.offsetWidth || 72;
-const w85 = lbl85.offsetWidth || 104;
-let x75 = p75.x;
-let x85 = p85.x;
-const minGap = (w75 + w85) / 2 + 10;
-if (x85 - x75 < minGap) {
-const mid = (x75 + x85) / 2;
-x75 = mid - w75 / 2 - 5;
-x85 = mid + w85 / 2 + 5;
-if (x85 + w85 / 2 > p85.w - 8) {
-const shift = x85 + w85 / 2 - (p85.w - 8);
-x85 -= shift;
-x75 -= shift;
-}
-if (x75 - w75 / 2 < 8) {
-const shift = 8 - (x75 - w75 / 2);
-x75 += shift;
-x85 += shift;
-}
-}
-placeLabel(lbl75, x75, p75.y);
-placeLabel(lbl85, x85, p85.y);
+const p75 = projectPoint(anchor75, { minTop: topSafe, clampX: 44 });
+const show85 = goldLineGroup.visible && showQuantumLabel;
+const p85 = show85 ? projectPoint(anchor85, { minTop: topSafe, clampX: 54 }) : null;
+const isActiveBurst = shardMesh.visible && !showQuantumLabel;
+if (isActiveBurst) {
+lbl75.hidden = true;
+lbl85.hidden = true;
+} else if (p75 && p85) {
+const y75 = p75.y;
+const y85 = Math.max(topSafe, Math.min(p85.y, y75 - (isPhone ? 40 : 52)));
+placeLabel(lbl75, p75.x, y75);
+placeLabel(lbl85, p85.x, y85);
 } else if (p75) {
 placeLabel(lbl75, p75.x, p75.y);
 lbl85.hidden = true;
@@ -1906,8 +1933,8 @@ lbl85.hidden = true;
 const showAngles = stepIndex === 4 && peelCurrent > 0.55;
 for (let i = 0; i < 3; i++) {
 if (showAngles) {
-const pL = projectPoint(boxLeft.angleAnchors[i], { minTop: topSafe, clampX: 22 });
-const pR = projectPoint(boxRight.angleAnchors[i], { minTop: topSafe, clampX: 22 });
+const pL = projectPoint(boxLeft.angleAnchors[i], { minTop: topSafe, clampX: 18 });
+const pR = projectPoint(boxRight.angleAnchors[i], { minTop: topSafe, clampX: 18 });
 if (pL) placeLabel(angleLabels.left[i], pL.x, pL.y); else angleLabels.left[i].hidden = true;
 if (pR) placeLabel(angleLabels.right[i], pR.x, pR.y); else angleLabels.right[i].hidden = true;
 } else {
@@ -1957,11 +1984,18 @@ gimbalInner.rotation.y = Math.cos(elapsed * 0.5) * 0.32;
 const pulse = 1 + Math.sin(elapsed * 2.4) * 0.08;
 sourceHalo.scale.set(1.26 * pulse, 1.26 * pulse, 1);
 coreMat.emissiveIntensity = (sourceEntangled ? 1.95 : 1.15) + Math.sin(elapsed * 2.4) * 0.24;
-if (cardDisplay.visible) {
-cardDisplay.position.y = 0.60 + Math.sin(elapsed * 2.2) * 0.035;
-cardDisplay.rotation.y = Math.sin(elapsed * 1.1) * 0.14;
+if (cardStandGroup.visible) {
+cardDisplay.rotation.y = Math.sin(elapsed * 1.1) * 0.08;
 }
 }
+const onLeverStep = stepIndex === 5 || stepIndex === 6;
+const leverTargetRise = onLeverStep && leverRevealed ? 1 : 0;
+leverRiseCurrent += (leverTargetRise - leverRiseCurrent) * Math.min(1, rawDt * 7.5);
+if (leverTargetRise === 0 && leverRiseCurrent < 0.02) leverRiseCurrent = 0;
+if (leverTargetRise === 1 && leverRiseCurrent > 0.98) leverRiseCurrent = 1;
+leverMount.visible = onLeverStep && leverRiseCurrent > 0.03;
+leverMount.position.y = -0.68 + leverRiseCurrent * 0.80;
+leverCap.visible = onLeverStep && !leverRevealed && leverRiseCurrent < 0.12;
 leverCurrentAngle += (leverTargetAngle - leverCurrentAngle) * Math.min(1, rawDt * 12);
 leverPivot.rotation.z = leverCurrentAngle;
 if (partitionGroup.visible) {
@@ -2006,7 +2040,7 @@ box.dialKnob.rotation.z = box.currentDialRad;
 box.magnetRotor.rotation.z = box.currentMagRad;
 if (box.lampBloom > 0.01) box.lampBloom = Math.max(0.38, box.lampBloom - rawDt * 0.42);
 const bloom = box.lampColor >= 0 ? box.lampBloom : 0;
-const dimMul = box.dimmed ? 0.30 : 1.0;
+const dimMul = box.dimmed ? 0.0 : 1.0; // Completely opaque privacy screen hides Alice's glow!
 box.lampMat.emissiveIntensity = (0.35 + bloom * 0.72) * dimMul;
 box.lampHalo.material.opacity = bloom * 0.62 * dimMul;
 box.lampLight.intensity = bloom * 2.0 * dimMul;
@@ -2086,6 +2120,10 @@ if (shatterWallElapsed > 0.85 && breakthroughZoom > 0) {
 breakthroughZoom = Math.max(0, breakthroughZoom - rawDt * 1.4);
 updateCameraTargets();
 }
+if (shatterWallElapsed > 0.90) {
+showQuantumLabel = true;
+goldLineMat.opacity = Math.min(1.0, goldLineMat.opacity + rawDt * 2.4);
+}
 stepShatterPhysics(dt);
 }
 }
@@ -2111,6 +2149,9 @@ setDial,
 setPeel,
 setCardStrip,
 setSourceEntangled,
+setLeverRevealed,
+setShowQuantumLabel,
+setStep4ActiveAngles,
 setTeacherMode,
 setAlicePartition,
 setArenaProgress,
@@ -2325,6 +2366,35 @@ osc.start(t);
 osc.stop(t + 0.48);
 });
 }
+function playLeverReveal() {
+const c = ensure();
+if (!c) return;
+const now = c.currentTime;
+const osc = c.createOscillator();
+osc.type = 'triangle';
+osc.frequency.setValueAtTime(196, now);
+osc.frequency.exponentialRampToValueAtTime(392, now + 0.28);
+const g = c.createGain();
+g.gain.setValueAtTime(0.001, now);
+g.gain.linearRampToValueAtTime(0.08, now + 0.06);
+g.gain.exponentialRampToValueAtTime(0.0008, now + 0.36);
+osc.connect(g).connect(c.destination);
+osc.start(now);
+osc.stop(now + 0.38);
+[587.33, 880.0].forEach((f, i) => {
+const t = now + 0.22 + i * 0.055;
+const ch = c.createOscillator();
+ch.type = 'sine';
+ch.frequency.setValueAtTime(f, t);
+const cg = c.createGain();
+cg.gain.setValueAtTime(0.001, t);
+cg.gain.linearRampToValueAtTime(0.075, t + 0.012);
+cg.gain.exponentialRampToValueAtTime(0.0006, t + 0.42);
+ch.connect(cg).connect(c.destination);
+ch.start(t);
+ch.stop(t + 0.45);
+});
+}
 return {
 unlock,
 setMuted,
@@ -2335,6 +2405,7 @@ playRoundTick,
 playGlassCrack,
 playShatterChord,
 playCompareArrive,
+playLeverReveal,
 };
 }
 return{createAudio};
@@ -2660,6 +2731,7 @@ chshCard: { a0: 0, a1: 0, b0: 0, b1: 0 },
 chshMode: 'card',
 chshRun: createChshRun(),
 chshSettled: false,
+shatterBeat: false,
 wallHitBy75: false,
 classVoted: false,
 burstRunning: false,
@@ -2678,6 +2750,7 @@ lastInteract: performance.now(),
 };
 let idlePairTimer = null;
 let burstTimer = null;
+let shatterBeatTimer = null;
 const elBackBtn = root.querySelector('#btn-back');
 const elResetBtn = root.querySelector('#btn-reset');
 const elSkipTop = root.querySelector('#btn-skip-top');
@@ -2703,6 +2776,7 @@ elHintPill.hidden = true;
 function stopTimers() {
 if (idlePairTimer) { clearInterval(idlePairTimer); idlePairTimer = null; }
 if (burstTimer) { clearInterval(burstTimer); burstTimer = null; }
+if (shatterBeatTimer) { clearTimeout(shatterBeatTimer); shatterBeatTimer = null; }
 state.burstRunning = false;
 }
 function startIdleHeroLoop() {
@@ -2717,11 +2791,25 @@ stage.spawnMotePair({
 colorA: draw.colorA,
 colorB: draw.colorB,
 entangled: true,
-duration: 0.58,
+duration: 1.05,
 });
 };
-setTimeout(fireOnce, 250);
-idlePairTimer = setInterval(fireOnce, 2100);
+setTimeout(fireOnce, 180);
+idlePairTimer = setInterval(fireOnce, 1250);
+}
+function syncLeverVisibility({ snap = true } = {}) {
+const revealed = !state.teacher || state.classVoted || state.step === 6;
+stage.setLeverRevealed(revealed, { snap });
+}
+function createFreshBobRun() {
+return {
+n0: 0, b0WhenA0: 0,
+n1: 0, b0WhenA1: 0,
+nRand: 0, b0WhenRand: 0,
+nOff: 0, b0WhenOff: 0,
+total: 0, wins: 0, compared: false,
+recent: [],
+};
 }
 function syncCardStageVisual() {
 stage.setCardStrip(state.merminCard);
@@ -2756,6 +2844,7 @@ const s = Math.max(0, Math.min(STEP_COUNT - 1, nextStep));
 stopTimers();
 state.step = s;
 state.bridgeOpen = false;
+state.shatterBeat = false;
 state.depthKey = null;
 elDepthBackdrop.hidden = true;
 state.idleHint = '';
@@ -2763,6 +2852,7 @@ elHintPill.hidden = true;
 state.lastInteract = performance.now();
 stage.setStep(s);
 stage.setTeacherMode(state.teacher);
+syncLeverVisibility({ snap: true });
 if (s === 0) {
 state.dialA = 0; state.dialB = 0;
 state.peeled = false;
@@ -2801,6 +2891,7 @@ stage.setPeel(true);
 stage.setSourceEntangled(true);
 stage.setDial('left', 0, 'mermin');
 stage.setDial('right', 1, 'mermin');
+stage.setStep4ActiveAngles(0, 1);
 } else if (s === 5) {
 if (state.chshMode !== 'card') {
 state.chshRun = createChshRun();
@@ -2819,11 +2910,13 @@ rounds: state.chshRun.rounds,
 });
 stage.setDial('left', 0, 'chsh');
 stage.setDial('right', 0, 'chsh');
+syncLeverVisibility({ snap: true });
 } else if (s === 6) {
 state.chshMode = 'entangled';
 state.peeled = false;
 stage.setPeel(false, { snap: true });
 stage.setSourceEntangled(true);
+stage.setLeverRevealed(true, { snap: true });
 stage.setDial('left', 0, 'chsh');
 stage.setDial('right', 0, 'chsh');
 if (state.chshRun.rounds === 0) {
@@ -2832,9 +2925,11 @@ stage.setArenaProgress(0, { isQuantum: true, snap: true, rounds: 0 });
 }
 } else if (s === 7) {
 state.peeled = false;
+state.alicePolicy = '0';
+state.bobRun = createFreshBobRun(); // Always start from an honest fresh tally, never stale!
 stage.setPeel(false, { snap: true });
 stage.setSourceEntangled(true);
-stage.setAlicePartition(!state.bobRun.compared);
+stage.setAlicePartition(true);
 } else if (s === 8) {
 state.peeled = true;
 stage.setPeel(true);
@@ -2976,6 +3071,15 @@ if (emitAudio) audio.playGlassCrack();
 if (!prevBroken && nowBroken) {
 stage.setWallState('shattered');
 if (emitAudio) audio.playShatterChord();
+if (!instant) {
+state.shatterBeat = true;
+if (shatterBeatTimer) clearTimeout(shatterBeatTimer);
+shatterBeatTimer = setTimeout(() => {
+state.shatterBeat = false;
+stage.setShowQuantumLabel(true);
+render();
+}, 1200);
+}
 }
 return r;
 };
@@ -3055,6 +3159,7 @@ state.chshRun = createChshRun();
 state.chshSettled = false;
 goto(6);
 if (midShatter) {
+state.shatterBeat = true;
 stage.setWallState('intact');
 for (let i = 0; i < 1500 && state.chshRun.brokenAt === null; i++) {
 const r = sampleChshRound({ mode: 'entangled' });
@@ -3070,9 +3175,11 @@ requestAnimationFrame(() => stage.resize());
 } else {
 fireChsh(targetRounds, { instant });
 if (settled) {
+state.shatterBeat = false;
 state.chshSettled = true;
 const st = computeChshS(state.chshRun);
 stage.setWallState('shattered', { settled: true });
+stage.setShowQuantumLabel(true);
 stage.setArenaProgress(st.winRate, { isQuantum: true, snap: true, rounds: state.chshRun.rounds });
 render();
 requestAnimationFrame(() => stage.resize());
@@ -3207,6 +3314,7 @@ function render() {
 renderTopBar();
 const isHero = state.step === 0;
 root.classList.toggle('is-hero', isHero);
+root.classList.toggle('shatter-focus', state.shatterBeat);
 elHeroOverlay.hidden = !isHero;
 elPanel.hidden = isHero;
 if (isHero) {
@@ -3413,7 +3521,7 @@ ${state.teacher ? `
 </div>
 ` : ''}
 <div class="step-kicker">Step 5 · The team game</div>
-<h2 class="step-question">${state.teacher ? 'Can any card beat 75%?' : 'Can any hidden card beat 75%?'}</h2>
+<h2 class="step-question">${state.teacher ? 'Can any card beat 75% — and keep it there?' : 'Can any hidden card beat 75% — and keep it there?'}</h2>
 ${!state.teacher ? `<p class="step-sub">Same boxes, now 0 or 1: match — unless both get 1, then differ. Build the best hidden card you can.</p>` : ''}
 <div class="chsh-switches">
 <div class="sw-row">
@@ -3434,12 +3542,12 @@ ${ev.tiles.map(t => `
 </div>
 <div class="tally-card compact">
 <div class="tally-header">
-<span>Plan max: ${Math.round(ev.rate * 100)}.0% (${ev.wins}/4)</span>
+<span>Plan average max: ${Math.round(ev.rate * 100)}.0% (${ev.wins}/4)</span>
 <span class="big-num hero-score">${hasRun ? `${pct.toFixed(1)}%` : '—'}</span>
 </div>
 <div class="tally-sub">
 ${hasRun
-? `<strong>Luck can dent the glass. It can't break it.</strong> (${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()})`
+? `<strong>A lucky streak can poke past 75% — not keep it there.</strong> (${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()})`
 : 'Every card leaves a red ✗. Test it against the frosted 75% glass wall.'}
 </div>
 ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>` : ''}
@@ -3448,12 +3556,12 @@ ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">${luckInfo.label}</div>` : ''
 ${!state.teacher ? `<button class="btn-secondary" data-fire="1" ${state.burstRunning ? 'disabled' : ''}>×1</button>` : ''}
 ${!state.teacher ? `<button class="btn-secondary" data-fire="100" ${state.burstRunning ? 'disabled' : ''}>×100</button>` : ''}
 <button class="btn-secondary" data-fire="${state.teacher ? teacherFireN : 1000}" ${state.burstRunning ? 'disabled' : ''}>Fire ${state.teacher ? '2,000' : '1,000'}</button>
-${hasRun ? `<button class="btn-quiet-sm" id="btn-clear-chsh">Clear</button>` : ''}
+${hasRun ? `<button class="btn-clear" id="btn-clear-chsh">Clear</button>` : ''}
 </div>
 `;
 footerHtml = `
 ${leverReady
-? `<button class="btn-primary pulse-gold" id="btn-entangled-lever">Pull brass lever: Entangled pairs →</button>`
+? `<button class="btn-primary pulse-gold" id="btn-entangled-lever">Pull lever: Entangled pairs →</button>`
 : state.teacher
 ? `<button class="btn-primary" id="btn-class-voted">The class has voted — reveal lever</button>`
 : `<button class="btn-primary" data-fire="1000" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 rounds</button>`}
@@ -3494,15 +3602,15 @@ ${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()
 </div>
 ${broken ? `
 <div class="callout-box">
-<strong>No hidden card — no plan made in advance without talking — can do this.</strong> Real entangled pairs in nature do.
+<strong>No hidden card — no plan made in advance without talking — can keep this up.</strong> Real entangled pairs in nature do.
 </div>
 ` : ''}
 <div class="inline-actions">
-<button class="btn-secondary" id="btn-refire-entangled" ${state.burstRunning ? 'disabled' : ''}>Run fresh 2,000 rounds</button>
+<button class="btn-secondary" id="btn-refire-entangled" ${state.burstRunning || state.shatterBeat ? 'disabled' : ''}>Run fresh 2,000 rounds</button>
 </div>
 `;
 footerHtml = `
-<button class="btn-primary" data-next="7" ${state.burstRunning ? 'disabled' : ''}>Can Alice text Bob? →</button>
+<button class="btn-primary" data-next="7" ${state.burstRunning || state.shatterBeat ? 'disabled' : ''}>${state.shatterBeat ? 'Wall shattered…' : 'Can Alice text Bob? →'}</button>
 <button class="btn-depth" data-depth="breakthrough">How do we know?</button>
 `;
 } else if (state.step === 7) {
@@ -3512,6 +3620,8 @@ const pct1 = br.n1 > 0 ? `${((br.b0WhenA1 / br.n1) * 100).toFixed(1)}%` : '—';
 const pctR = br.nRand > 0 ? `${((br.b0WhenRand / br.nRand) * 100).toFixed(1)}%` : '—';
 const pctOff = br.nOff > 0 ? `${((br.b0WhenOff / br.nOff) * 100).toFixed(1)}%` : '—';
 const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : pctR;
+const curN = state.alicePolicy === '0' ? br.n0 : state.alicePolicy === '1' ? br.n1 : state.alicePolicy === 'off' ? br.nOff : br.nRand;
+const curHits = state.alicePolicy === '0' ? br.b0WhenA0 : state.alicePolicy === '1' ? br.b0WhenA1 : state.alicePolicy === 'off' ? br.b0WhenOff : br.b0WhenRand;
 const winPct = br.total > 0 ? ((br.wins / br.total) * 100).toFixed(1) : '—';
 const dots = br.compared
 ? [...br.recent].sort((a, b) => Number(b.win) - Number(a.win))
@@ -3534,8 +3644,11 @@ bodyHtml += `
 <span>Bob's ▲ Coral rate</span>
 <span class="big-num">${curPct}</span>
 </div>
+<div class="tally-sub">
+${curN > 0 ? `${curHits.toLocaleString()} / ${curN.toLocaleString()} flashes — steady near 50%` : 'Tap Fire 2,000 to watch Bob\'s lamp alone.'}
+</div>
 ${dots.length > 0 ? `
-<div class="dot-strip-label">${br.compared ? `Notes combined — ${winPct}% winning pairs (gold):` : 'Bob\'s last 24 flashes (pure coin flips):'}</div>
+<div class="dot-strip-label">${br.compared ? `Notes combined — ${winPct}% winning pairs (gold):` : 'Bob\'s last 24 flashes (looks like pure coin flips):'}</div>
 <div class="dot-strip">
 ${dots.map(d => br.compared
 ? `<span class="h-dot ${d.win ? 'win' : 'miss'}">${d.win ? '✓' : '·'}</span>`
@@ -3551,7 +3664,7 @@ ${dots.map(d => br.compared
 </div>
 </div>
 <div class="inline-actions">
-<button class="btn-secondary strong" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
+<button class="btn-secondary strong" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 2,000</button>
 <button class="btn-secondary reveal-outline" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Bring notes together</button>
 </div>
 `;
@@ -3605,8 +3718,8 @@ return;
 if (t.id === 'btn-open-bridge') { audio.playDialClick(); openBridge(); return; }
 if (t.id === 'btn-reset' || t.id === 'btn-play-again') { audio.playDialClick(); resetAll(); return; }
 if (t.id === 'btn-sound') { audio.setMuted(!audio.isMuted()); if (!audio.isMuted()) audio.playDialClick(); renderTopBar(); return; }
-if (t.id === 'mode-self') { state.teacher = false; audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
-if (t.id === 'mode-teacher') { state.teacher = true; audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
+if (t.id === 'mode-self') { state.teacher = false; syncLeverVisibility({ snap: true }); audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
+if (t.id === 'mode-teacher') { state.teacher = true; syncLeverVisibility({ snap: true }); audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
 if (t.id === 'btn-switch-teacher') { state.teacher = !state.teacher; audio.playDialClick(); goto(0); return; }
 if (t.id === 'depth-close') { state.depthKey = null; elDepthBackdrop.hidden = true; return; }
 if (t.dataset.goto !== undefined) { audio.playDialClick(); goto(Number(t.dataset.goto)); return; }
@@ -3617,6 +3730,7 @@ const [side, idxStr] = t.dataset.dial.split(':');
 const idx = Number(idxStr);
 if (side === 'left') state.dialA = idx; else state.dialB = idx;
 stage.setDial(side, idx, 'mermin');
+stage.setStep4ActiveAngles(state.dialA, state.dialB);
 audio.playDialClick();
 if (state.step === 4 && !state.bridgeOpen) fireMerminSingle(false);
 else render();
@@ -3669,7 +3783,8 @@ return;
 }
 if (t.id === 'btn-class-voted') {
 state.classVoted = true;
-audio.playDialClick();
+stage.setLeverRevealed(true, { snap: false }); // Smoothly rises out of the stage pedestal!
+audio.playLeverReveal();
 render();
 return;
 }
@@ -3681,10 +3796,10 @@ return;
 if (t.dataset.apol) {
 state.alicePolicy = t.dataset.apol;
 audio.playDialClick();
-fireBobAlone(1000);
+fireBobAlone(2000);
 return;
 }
-if (t.id === 'btn-fire-bob') { fireBobAlone(1000); return; }
+if (t.id === 'btn-fire-bob') { fireBobAlone(2000); return; }
 if (t.id === 'btn-compare-notes') { compareNotes(); return; }
 });
 elDepthBackdrop.addEventListener('click', e => {
@@ -3745,6 +3860,8 @@ fireBobAlone(n, { instant: true });
 triggerBreakthrough,
 setTeacher(val) {
 state.teacher = !!val;
+if (state.teacher) state.classVoted = false;
+syncLeverVisibility({ snap: true });
 render();
 requestAnimationFrame(() => stage.resize());
 },

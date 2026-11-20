@@ -69,20 +69,27 @@ function makeStarGlintTexture() {
   return tex;
 }
 
-// Expanding golden radial shockwave ring for shatter impact
-function makeShockRingTexture() {
+// Smooth Gaussian exponential golden bloom (ZERO hard outer circle or ring artifact!)
+function makeExponentialGlowTexture() {
   const c = document.createElement('canvas');
-  c.width = c.height = 256;
+  c.width = c.height = 128;
   const ctx = c.getContext('2d');
-  ctx.clearRect(0, 0, 256, 256);
-  const g = ctx.createRadialGradient(128, 128, 66, 128, 128, 126);
-  g.addColorStop(0, 'rgba(255,235,170,0)');
-  g.addColorStop(0.45, 'rgba(255,242,198,0.18)');
-  g.addColorStop(0.76, 'rgba(255,248,225,0.92)');
-  g.addColorStop(0.88, 'rgba(230,182,85,0.65)');
-  g.addColorStop(1, 'rgba(230,182,85,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 256, 256);
+  const img = ctx.createImageData(128, 128);
+  for (let y = 0; y < 128; y++) {
+    for (let x = 0; x < 128; x++) {
+      const dx = (x - 63.5) / 63.5;
+      const dy = (y - 63.5) / 63.5;
+      const r2 = dx * dx + dy * dy;
+      const falloff = Math.exp(-r2 * 7.2) * Math.max(0, 1 - r2);
+      const core = Math.exp(-r2 * 24.0);
+      const idx = (y * 128 + x) * 4;
+      img.data[idx] = Math.round(255 * Math.min(1, 0.92 + core * 0.08));
+      img.data[idx + 1] = Math.round(255 * Math.min(1, 0.72 + core * 0.26));
+      img.data[idx + 2] = Math.round(255 * Math.min(1, 0.34 + core * 0.58));
+      img.data[idx + 3] = Math.round(255 * Math.min(1, falloff));
+    }
+  }
+  ctx.putImageData(img, 0, 0);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
@@ -101,15 +108,16 @@ function makeShadowTexture() {
   return new THREE.CanvasTexture(c);
 }
 
-// Seamless dark studio spotlight pool — fades smoothly into #0D1017 with zero horizon seam
+// Seamless dark studio spotlight pool — fades into #0D1017 well inside radius (zero curved horizon seam!)
 function makeFloorPoolTexture() {
   const c = document.createElement('canvas');
   c.width = c.height = 512;
   const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(256, 256, 12, 256, 256, 250);
+  const g = ctx.createRadialGradient(256, 256, 10, 256, 256, 248);
   g.addColorStop(0, '#222b3d');
-  g.addColorStop(0.32, '#161c29');
-  g.addColorStop(0.65, '#0f131c');
+  g.addColorStop(0.26, '#151b27');
+  g.addColorStop(0.48, '#0f131c');
+  g.addColorStop(0.68, '#0d1017');
   g.addColorStop(1, '#0d1017');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 512, 512);
@@ -211,52 +219,60 @@ function makePoleDecalTexture(letter, bg, fg) {
 
 function makePlaqueTexture(text) {
   const c = document.createElement('canvas');
-  c.width = 320;
-  c.height = 104;
+  c.width = 360;
+  c.height = 112;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#181e2c';
-  ctx.fillRect(0, 0, 320, 104);
-  ctx.strokeStyle = '#C8A86B';
-  ctx.lineWidth = 6;
-  ctx.strokeRect(4, 4, 312, 96);
-  ctx.fillStyle = '#F4EFE6';
-  ctx.font = '800 54px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillStyle = '#121722';
+  ctx.fillRect(0, 0, 360, 112);
+  ctx.strokeStyle = '#D4B26E';
+  ctx.lineWidth = 7;
+  ctx.strokeRect(4, 4, 352, 104);
+  ctx.fillStyle = '#F7F3EC';
+  ctx.font = '800 62px -apple-system, BlinkMacSystemFont, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, 160, 54);
+  ctx.fillText(text, 180, 58);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 
-// Engraved brass switch base markings: CARD (left) / ENTANGLED (right)
-function makeLeverPlateTexture() {
+// High-contrast engraved brass switch base plate: CARD (left) / ENTANGLED (right), active side lit gold!
+function makeLeverPlateTexture(entangled = false) {
   const c = document.createElement('canvas');
   c.width = 512;
-  c.height = 112;
+  c.height = 128;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#151b28';
-  ctx.fillRect(0, 0, 512, 112);
-  ctx.strokeStyle = '#C8A86B';
-  ctx.lineWidth = 5;
-  ctx.strokeRect(3, 3, 506, 106);
+  ctx.fillStyle = '#141A26';
+  ctx.fillRect(0, 0, 512, 128);
+  ctx.strokeStyle = '#D4B26E';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, 506, 122);
 
-  ctx.fillStyle = 'rgba(244,239,230,0.88)';
-  ctx.font = '800 32px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.textAlign = 'left';
+  // Subtle active side highlight band
+  if (entangled) {
+    ctx.fillStyle = 'rgba(230,182,85,0.18)';
+    ctx.fillRect(216, 6, 290, 116);
+  } else {
+    ctx.fillStyle = 'rgba(244,239,230,0.12)';
+    ctx.fillRect(6, 6, 206, 116);
+  }
+
+  ctx.fillStyle = entangled ? 'rgba(220,228,242,0.72)' : '#F7F3EC';
+  ctx.font = '800 42px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('CARD', 26, 58);
+  ctx.fillText('CARD', 110, 66);
 
-  ctx.fillStyle = '#E6B655';
-  ctx.textAlign = 'right';
-  ctx.fillText('ENTANGLED', 486, 58);
+  ctx.fillStyle = entangled ? '#F2C15A' : 'rgba(230,182,85,0.76)';
+  ctx.font = '800 40px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('ENTANGLED', 360, 66);
 
-  // Subtle center notch
-  ctx.strokeStyle = 'rgba(200,168,107,0.45)';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(212,178,110,0.65)';
+  ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.moveTo(212, 24);
-  ctx.lineTo(212, 88);
+  ctx.moveTo(214, 22);
+  ctx.lineTo(214, 106);
   ctx.stroke();
 
   const tex = new THREE.CanvasTexture(c);
@@ -332,26 +348,29 @@ function makeFrostedLuckTexture(cracked = false) {
   return tex;
 }
 
-// Wide front-facing frosted privacy screen (plain frosted glass body — NO mirrored back-face text echo!)
+// Fully opaque frosted architectural privacy screen (hides Alice's lamp & dial completely!)
 function makePrivacyGlassBodyTexture() {
   const c = document.createElement('canvas');
   c.width = 256;
   c.height = 256;
   const ctx = c.getContext('2d');
   const g = ctx.createLinearGradient(0, 0, 256, 256);
-  g.addColorStop(0, 'rgba(42,54,76,0.74)');
-  g.addColorStop(0.5, 'rgba(30,40,58,0.64)');
-  g.addColorStop(1, 'rgba(44,56,78,0.78)');
+  g.addColorStop(0, '#2a354b');
+  g.addColorStop(0.5, '#1e2738');
+  g.addColorStop(1, '#29344a');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 256, 256);
-  ctx.strokeStyle = 'rgba(244,239,230,0.08)';
-  ctx.lineWidth = 2;
-  for (let x = 12; x < 256; x += 12) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 256); ctx.stroke();
+  // Crisp frosted architectural vertical flutes
+  for (let x = 0; x < 256; x += 14) {
+    ctx.fillStyle = 'rgba(244,239,230,0.045)';
+    ctx.fillRect(x, 0, 5, 256);
+    ctx.fillStyle = 'rgba(8,11,18,0.16)';
+    ctx.fillRect(x + 6, 0, 2, 256);
   }
-  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  // Soft diagonal frost specular band
+  ctx.fillStyle = 'rgba(230,242,255,0.08)';
   ctx.beginPath();
-  ctx.moveTo(0, 60); ctx.lineTo(256, 10); ctx.lineTo(256, 56); ctx.lineTo(0, 106);
+  ctx.moveTo(0, 74); ctx.lineTo(256, 14); ctx.lineTo(256, 68); ctx.lineTo(0, 128);
   ctx.fill();
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -403,28 +422,28 @@ function makeLampBadgeTexture(symbol, hexColor) {
 
 function makeCardStripTexture(cardArr = [0, 0, 1]) {
   const c = document.createElement('canvas');
-  c.width = 160;
-  c.height = 200;
+  c.width = 256;
+  c.height = 300;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#F4EFE6';
-  ctx.fillRect(0, 0, 160, 200);
+  ctx.fillStyle = '#F7F2E8';
+  ctx.fillRect(0, 0, 256, 300);
   ctx.strokeStyle = '#C8A86B';
-  ctx.lineWidth = 8;
-  ctx.strokeRect(4, 4, 152, 192);
+  ctx.lineWidth = 12;
+  ctx.strokeRect(6, 6, 244, 288);
 
-  ctx.fillStyle = '#181E2C';
-  ctx.font = '800 18px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillStyle = '#141925';
+  ctx.font = '800 28px -apple-system, BlinkMacSystemFont, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('HIDDEN CARD', 80, 26);
+  ctx.fillText('HIDDEN CARD', 128, 38);
 
   for (let i = 0; i < 3; i++) {
     const isCoral = cardArr[i] === 0;
     ctx.fillStyle = isCoral ? '#FF7A6B' : '#4FD6A8';
-    ctx.fillRect(20, 44 + i * 48, 120, 36);
+    ctx.fillRect(24, 68 + i * 72, 208, 56);
     ctx.fillStyle = '#0D1017';
-    ctx.font = '800 22px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillText(`${i + 1}: ${isCoral ? '▲' : '●'}`, 80, 62 + i * 48);
+    ctx.font = '800 38px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillText(`${i + 1}  ${isCoral ? '▲' : '●'}`, 128, 97 + i * 72);
   }
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -520,37 +539,38 @@ function makeCrystalShardMaterial() {
         vec3 V = normalize(cameraPosition - vWorldPos);
         if (!gl_FrontFacing) N = -N;
 
-        // Glancing-angle Fresnel reflection — see-through face-on, blazing crystal at angles!
+        // Tinted refractive crystal body + directional specular thin beveled edges (NO uniform flat white sticker outlines!)
         float ndotv = clamp(abs(dot(N, V)), 0.0, 1.0);
-        float fresnel = pow(1.0 - ndotv, 2.1);
+        float fresnel = pow(1.0 - ndotv, 2.35);
 
-        // Key studio light + warm golden breakthrough backlight + cool rim
         vec3 Lkey = normalize(vec3(0.42, 0.85, 0.58));
-        vec3 Lgold = normalize(uBurstPos - vWorldPos + vec3(-0.2, 0.05, -0.3));
+        vec3 Lgold = normalize(uBurstPos - vWorldPos + vec3(-0.18, 0.06, -0.25));
         vec3 Lrim = normalize(vec3(-0.65, 0.45, -0.6));
 
         vec3 Hkey = normalize(Lkey + V);
         vec3 Hgold = normalize(Lgold + V);
         vec3 Hrim = normalize(Lrim + V);
 
-        float specKey = pow(max(dot(N, Hkey), 0.0), 48.0);
-        float specGold = pow(max(dot(N, Hgold), 0.0), 16.0);
-        float specRim = pow(max(dot(N, Hrim), 0.0), 28.0);
+        float specKey = pow(max(dot(N, Hkey), 0.0), 56.0);
+        float specGold = pow(max(dot(N, Hgold), 0.0), 14.0);
+        float specRim = pow(max(dot(N, Hrim), 0.0), 32.0);
 
-        // Crisp razor edge highlight (pure cut glass edge!)
-        float edgeRim = smoothstep(0.68, 1.0, vEdge);
+        // Ultra-thin light-modulated edge catch (only lit bevels sparkle, never flat uniform white outline!)
+        float edgeCatch = smoothstep(0.84, 1.0, vEdge) * (0.28 + 0.72 * max(dot(N, Lkey), max(dot(N, Lgold), 0.0)));
 
-        // Refractive icy body + warm gold edge & burst catch
-        vec3 iceBody = vTint * vec3(0.72, 0.88, 1.0);
-        vec3 goldEdge = vec3(1.0, 0.86, 0.52);
-        vec3 whiteSpark = vec3(1.0, 0.99, 0.95);
+        // Subtle refractive body tint with warm golden caustic transmission near breach
+        float distBurst = length(vWorldPos - uBurstPos);
+        float caustic = exp(-distBurst * 0.75) * (0.45 + 0.55 * uFlash);
+        vec3 glassBody = mix(vTint * vec3(0.54, 0.78, 0.98), vec3(0.98, 0.80, 0.42), caustic * 0.55);
+        vec3 goldSpec = vec3(1.0, 0.84, 0.48);
+        vec3 iceWhite = vec3(0.98, 0.99, 1.0);
 
-        vec3 col = iceBody * (0.28 + 0.55 * fresnel);
-        col += goldEdge * (specGold * (0.85 + 0.65 * uFlash) + edgeRim * 0.42 * (0.5 + 0.5 * uFlash));
-        col += whiteSpark * (specKey * 1.45 + specRim * 0.72 + edgeRim * 0.68 + fresnel * 0.45);
+        vec3 col = glassBody * (0.42 + 0.65 * fresnel);
+        col += goldSpec * (specGold * (1.05 + 0.55 * uFlash) + edgeCatch * 0.46 * (0.5 + 0.5 * caustic));
+        col += iceWhite * (specKey * 1.35 + specRim * 0.55 + edgeCatch * 0.34);
 
-        // Truly translucent glass body, opaque-bright on Fresnel rim & specular facet glints!
-        float alpha = clamp(0.11 + fresnel * 0.56 + edgeRim * 0.58 + specKey * 0.82 + specGold * 0.48, 0.0, 0.96);
+        // Translucent tinted glass interior (0.24..0.44) + gleaming directional facets & thin bevel sparkle
+        float alpha = clamp(0.22 + fresnel * 0.42 + edgeCatch * 0.46 + specKey * 0.78 + specGold * 0.45, 0.0, 0.94);
         gl_FragColor = vec4(col, alpha * uOpacity);
       }
     `,
@@ -652,7 +672,7 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   const glowCoralTex = makeRadialTexture('rgba(255,148,132,0.92)', 'rgba(255,95,78,0.36)');
   const glowJadeTex = makeRadialTexture('rgba(128,245,204,0.92)', 'rgba(54,205,152,0.36)');
   const starGlintTex = makeStarGlintTexture();
-  const shockRingTex = makeShockRingTexture();
+  const expGlowTex = makeExponentialGlowTexture();
   const badgeCoralTex = makeLampBadgeTexture('▲', '#FF7A6B');
   const badgeJadeTex = makeLampBadgeTexture('●', '#4FD6A8');
   const dialMerminTex = makeDialFaceTexture('mermin');
@@ -727,37 +747,59 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   sourcePoint.position.set(0, 0.96, 0.25);
   sourceGroup.add(sourcePoint);
 
-  // Step 3 visible Hidden-Card Ticket hovering cleanly in front of the source pedestal
+  // Step 3 visible Hidden-Card Ticket seated in a small brushed-brass easel forward & BELOW the gimbal ring!
   let cardStripTex = makeCardStripTexture([0, 0, 1]);
   const cardDisplayMat = new THREE.MeshStandardMaterial({
     map: cardStripTex,
-    roughness: 0.4,
-    metalness: 0.05,
+    roughness: 0.36,
+    metalness: 0.04,
     emissive: new THREE.Color(0x3a3428),
-    emissiveIntensity: 0.45,
+    emissiveIntensity: 0.42,
   });
-  const cardDisplay = new THREE.Mesh(new RoundedBoxGeometry(0.56, 0.70, 0.03, 2, 0.01), cardDisplayMat);
-  cardDisplay.position.set(0, 0.62, 0.82);
-  cardDisplay.visible = false;
-  sourceGroup.add(cardDisplay);
+  const cardStandGroup = new THREE.Group();
+  cardStandGroup.position.set(0, 0.0, 1.08);
+  cardStandGroup.visible = false;
+  sourceGroup.add(cardStandGroup);
 
-  // Heroic Brushed-Brass Laboratory Switch Lever — positioned cleanly forward/below gimbal with CARD / ENTANGLED plate!
+  const cardStandBase = new THREE.Mesh(new RoundedBoxGeometry(0.66, 0.06, 0.24, 2, 0.02), darkMetalMat);
+  cardStandBase.position.y = 0.03;
+  cardStandGroup.add(cardStandBase);
+  const cardStandLip = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.04, 0.04), brassMat);
+  cardStandLip.position.set(0, 0.07, 0.08);
+  cardStandGroup.add(cardStandLip);
+
+  const cardDisplay = new THREE.Mesh(new RoundedBoxGeometry(0.56, 0.64, 0.026, 2, 0.01), cardDisplayMat);
+  cardDisplay.position.set(0, 0.36, -0.02);
+  cardDisplay.rotation.x = -0.22;
+  cardStandGroup.add(cardDisplay);
+
+  // Subtle flush matte-brass plinth cap shown in Teacher mode BEFORE "The class has voted — reveal lever"
+  const leverCap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.05, 28), darkMetalMat);
+  leverCap.position.set(0, 0.025, 0.92);
+  leverCap.visible = false;
+  sourceGroup.add(leverCap);
+  const leverCapRing = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.014, 10, 28), brassMat);
+  leverCapRing.rotation.x = Math.PI / 2;
+  leverCapRing.position.y = 0.028;
+  leverCap.add(leverCapRing);
+
+  // Heroic Brushed-Brass Laboratory Switch Lever — retracted/hidden in Teacher mode until class votes!
   const leverMount = new THREE.Group();
   leverMount.position.set(0, 0.12, 0.92);
   leverMount.visible = false;
   sourceGroup.add(leverMount);
 
-  const leverBase = new THREE.Mesh(new RoundedBoxGeometry(1.16, 0.22, 0.34, 4, 0.04), darkMetalMat);
+  const leverBase = new THREE.Mesh(new RoundedBoxGeometry(1.24, 0.24, 0.36, 4, 0.04), darkMetalMat);
   leverBase.castShadow = true;
   leverMount.add(leverBase);
 
-  // Engraved CARD / ENTANGLED angled brass nameplate on front of lever housing
-  const leverPlateFace = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.06, 0.23),
-    new THREE.MeshStandardMaterial({ map: makeLeverPlateTexture(), roughness: 0.38, metalness: 0.2 })
-  );
-  leverPlateFace.rotation.x = -0.34;
-  leverPlateFace.position.set(0, 0.02, 0.19);
+  // High-contrast engraved CARD / ENTANGLED angled brass nameplate (illuminates active side in gold!)
+  const leverPlateCardTex = makeLeverPlateTexture(false);
+  const leverPlateEntTex = makeLeverPlateTexture(true);
+  const leverPlateMat = new THREE.MeshStandardMaterial({ map: leverPlateCardTex, roughness: 0.34, metalness: 0.16 });
+  const leverPlateFace = new THREE.Mesh(new THREE.PlaneGeometry(1.16, 0.27), leverPlateMat);
+  leverPlateFace.rotation.x = -0.36;
+  leverPlateFace.position.set(0, 0.03, 0.20);
   leverMount.add(leverPlateFace);
 
   const leverCollarMat = new THREE.MeshStandardMaterial({
@@ -850,13 +892,13 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     shell.receiveShadow = true;
     group.add(shell);
 
-    // Crisp architectural smoked-crystal ghost shell (clean, non-muddy cutaway!)
+    // Crisp architectural glass cutaway ghost shell with fine warm-ivory rim-edge outline
     const ghostShellMat = new THREE.MeshPhysicalMaterial({
-      color: 0xaac4e6,
-      roughness: 0.12,
-      metalness: 0.1,
+      color: 0xbcd4f2,
+      roughness: 0.1,
+      metalness: 0.08,
       transparent: true,
-      opacity: 0.075,
+      opacity: 0.055,
       depthWrite: false,
       side: THREE.FrontSide,
     });
@@ -866,12 +908,12 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     group.add(ghostShell);
 
     const edgesMat = new THREE.LineBasicMaterial({
-      color: COL_BRASS,
+      color: COL_IVORY,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0.54,
       depthWrite: false,
     });
-    const shellEdges = new THREE.LineSegments(new THREE.EdgesGeometry(shellGeo, 22), edgesMat);
+    const shellEdges = new THREE.LineSegments(new THREE.EdgesGeometry(shellGeo, 20), edgesMat);
     shellEdges.position.copy(shell.position);
     shellEdges.visible = false;
     group.add(shellEdges);
@@ -881,25 +923,27 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     port.position.set(side === 'left' ? 0.81 : -0.81, 0.96, 0);
     group.add(port);
 
-    // ---- Internal Tilted Magnet Assembly (degree numbers projected razor-sharp in screen-space!) ----
+    // ---- Internal Tilted Magnet Assembly (compact etched markers hugging outer ring, zero collar/plaque overlap!) ----
     const magnetRoot = new THREE.Group();
-    magnetRoot.position.set(0, 0.68, 0.10);
+    magnetRoot.position.set(0, 0.65, 0.10);
     magnetRoot.visible = false;
     group.add(magnetRoot);
 
     const degreeDisc = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.12, 1.12),
+      new THREE.PlaneGeometry(1.06, 1.06),
       new THREE.MeshBasicMaterial({ map: graduatedRingTex, transparent: true, opacity: 0.95, depthWrite: false })
     );
     degreeDisc.position.z = -0.14;
     magnetRoot.add(degreeDisc);
 
-    // 3D anchor points radially outside the ring for crisp screen-space 0°, 120°, 240° labels (zero plaque overlap!)
-    const angleAnchors = [-90, 20, 160].map(deg => {
-      const r = (deg * Math.PI) / 180;
+    // Tight etched degree marker anchors: 0° safely below lamp collar, 120°/240° hugging ring inside box bounds!
+    const angleAnchors = [
+      { x: 0.20, y: 0.43 },   // 0° tucked cleanly beside top gold tick (never covers brass lamp collar!)
+      { x: 0.52, y: -0.22 },  // 120° hugging lower-right tick inside box bounds
+      { x: -0.52, y: -0.22 }, // 240° hugging lower-left tick inside box bounds
+    ].map(pt => {
       const obj = new THREE.Object3D();
-      const rad = deg === -90 ? 0.54 : 0.64;
-      obj.position.set(Math.cos(r) * rad, -Math.sin(r) * rad + (deg === -90 ? 0 : 0.05), 0.24);
+      obj.position.set(pt.x, pt.y, 0.24);
       magnetRoot.add(obj);
       return obj;
     });
@@ -1030,9 +1074,9 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     lampLight.position.set(0, 1.7, 0.35);
     group.add(lampLight);
 
-    // Perspective-grounded matte-brass angled museum easel nameplate
+    // Perspective-grounded matte-brass angled museum easel nameplate (nudged cleanly forward of dial rim!)
     const plaqueGroup = new THREE.Group();
-    plaqueGroup.position.set(0, 0.0, 1.06);
+    plaqueGroup.position.set(0, 0.0, 1.15);
     plaqueGroup.visible = false;
     group.add(plaqueGroup);
 
@@ -1111,16 +1155,16 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   partFrameTop.position.set(0, 2.24, 0);
   partitionGroup.add(partFrameTop);
 
+  // Fully opaque fluted frosted glass — hides Alice's lamp & dial completely behind ALICE — HIDDEN!
   const partGlass = new THREE.Mesh(
-    new THREE.BoxGeometry(2.10, 2.12, 0.04),
-    new THREE.MeshPhysicalMaterial({
+    new THREE.BoxGeometry(2.10, 2.12, 0.045),
+    new THREE.MeshStandardMaterial({
       map: makePrivacyGlassBodyTexture(),
-      color: 0xd0e2f8,
-      roughness: 0.28,
-      metalness: 0.06,
-      transparent: true,
-      opacity: 0.84,
-      side: THREE.FrontSide,
+      color: 0xdce8fa,
+      roughness: 0.42,
+      metalness: 0.08,
+      transparent: false,
+      opacity: 1.0,
     })
   );
   partGlass.position.y = 1.15;
@@ -1170,10 +1214,11 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     arenaGroup.add(finial);
   }
 
-  // Sleek recessed obsidian optical channel
+  // Sleek recessed obsidian optical channel (lifts slightly in Teacher mode for bright-room projectors)
+  const channelMat = new THREE.MeshStandardMaterial({ color: 0x151b28, roughness: 0.56, metalness: 0.4 });
   const channelMesh = new THREE.Mesh(
     new RoundedBoxGeometry(BAR_LEN + 0.08, 0.26, 0.24, 4, 0.05),
-    new THREE.MeshStandardMaterial({ color: 0x131824, roughness: 0.6, metalness: 0.4 })
+    channelMat
   );
   channelMesh.position.y = BEAM_Y;
   arenaGroup.add(channelMesh);
@@ -1271,20 +1316,22 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   clampBot.position.y = -0.654;
   wallGroup.add(clampBot);
 
-  // Tidy flush brass rail notch stubs left at 75% AFTER shatter (zero stray grey blocks!)
-  const postShatterStubs = new THREE.Group();
-  const stubTop = new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.05, 0.30, 2, 0.01), brassMat);
-  stubTop.position.y = 0.16;
-  postShatterStubs.add(stubTop);
-  const stubBot = new THREE.Mesh(new RoundedBoxGeometry(0.06, 0.05, 0.30, 2, 0.01), brassMat);
-  stubBot.position.y = -0.16;
-  postShatterStubs.add(stubBot);
-  postShatterStubs.visible = false;
-  wallGroup.add(postShatterStubs);
+  // Persistent brass collar brackets mounted directly onto the obsidian channel at exact 75% (NEVER vanish or pop!)
+  const mounted75Collar = new THREE.Group();
+  const collarTop = new THREE.Mesh(new RoundedBoxGeometry(0.08, 0.048, 0.29, 2, 0.01), brassMat);
+  collarTop.position.set(0, 0.145, -0.04);
+  mounted75Collar.add(collarTop);
+  const collarBot = new THREE.Mesh(new RoundedBoxGeometry(0.08, 0.048, 0.29, 2, 0.01), brassMat);
+  collarBot.position.set(0, -0.145, -0.04);
+  mounted75Collar.add(collarBot);
+  const collarBack = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.30, 0.26), brassMat);
+  collarBack.position.set(0, 0, -0.04);
+  mounted75Collar.add(collarBack);
+  wallGroup.add(mounted75Collar);
 
-  // 3D anchor for crisp screen-space "75% PLAN LIMIT" label (clean dark air above glass & shards!)
+  // 3D anchor for crisp screen-space "75% PLAN LIMIT" badge locked dead-center above exact x75!
   const anchor75 = new THREE.Object3D();
-  anchor75.position.set(0, 1.24, 0);
+  anchor75.position.set(0, 0.96, 0);
   wallGroup.add(anchor75);
 
   // ---- Slender Luminous 85.4% Quantum Gold Horizon Hairline (HIDDEN until Breakthrough!) ----
@@ -1303,7 +1350,6 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     transparent: true,
     opacity: 0.0,
   });
-  // Refined slender horizon hairline + delicate brass end-caps (not a chunky vertical stick!)
   const goldLine = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 1.24, 12), goldLineMat);
   goldLineGroup.add(goldLine);
   const goldCapTop = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.025, 0.05, 16), brassMat);
@@ -1313,56 +1359,43 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   goldCapBot.position.y = -0.63;
   goldLineGroup.add(goldCapBot);
 
+  // Staggered higher vertical tier dead-center above exact x85 (NEVER collides with 75% AND never drifts off-mark!)
   const anchor85 = new THREE.Object3D();
-  anchor85.position.set(0.32, 1.24, 0);
+  anchor85.position.set(0, 1.48, 0);
   goldLineGroup.add(anchor85);
 
   let luckWidthTarget = 0.28;
   let luckWidthCurrent = 0.28;
 
-  // ---- Gasp-Worthy Crystal Glass Shatter FX (Fresnel Crystal Shards + 4-Point Star Sparkles + Golden Shockwave) ----
+  // ---- Gasp-Worthy Crystal Glass Shatter FX (Smooth Exponential Bloom + Tinted Fresnel Shards + 4-Point Stars) ----
   const shatterFlash = new THREE.Sprite(
     new THREE.SpriteMaterial({
-      map: glowGoldTex,
+      map: expGlowTex,
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       opacity: 0.0,
     })
   );
-  shatterFlash.position.set(x75 + 0.1, BEAM_Y, 0.42);
+  shatterFlash.position.set(x75 + 0.08, BEAM_Y, 0.36);
   shatterFlash.scale.set(1.0, 1.0, 1);
   shatterFlash.visible = false;
   arenaGroup.add(shatterFlash);
-
-  const shatterRing = new THREE.Sprite(
-    new THREE.SpriteMaterial({
-      map: shockRingTex,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      opacity: 0.0,
-    })
-  );
-  shatterRing.position.set(x75 + 0.12, BEAM_Y, 0.44);
-  shatterRing.scale.set(0.6, 0.6, 1);
-  shatterRing.visible = false;
-  arenaGroup.add(shatterRing);
 
   const shatterPoint = new THREE.PointLight(COL_GOLD, 0, 11, 2);
   shatterPoint.position.set(x75 + 0.2, BEAM_Y, 0.85);
   arenaGroup.add(shatterPoint);
 
-  // 120 Razor-Thin Beveled Refractive Crystal Glass Shards (custom Fresnel-Rim Golden-Backlight Shader!)
+  // 120 Razor-Thin Beveled Tinted Refractive Crystal Shards
   const SHARD_COUNT = 120;
   const shardGeo = makeCrystalShardGeometry();
   const shardMat = makeCrystalShardMaterial();
   const shardMesh = new THREE.InstancedMesh(shardGeo, shardMat, SHARD_COUNT);
   const shardPalette = [
-    new THREE.Color(0xe6f6ff),
-    new THREE.Color(0xcce8ff),
-    new THREE.Color(0xfff4d6),
-    new THREE.Color(0xdcf0ff),
+    new THREE.Color(0xc8e8ff),
+    new THREE.Color(0x98ccf4),
+    new THREE.Color(0xffe6a8),
+    new THREE.Color(0xbce0ff),
   ];
   for (let i = 0; i < SHARD_COUNT; i++) {
     shardMesh.setColorAt(i, shardPalette[i % shardPalette.length]);
@@ -1484,6 +1517,9 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   // ---- Internal Stage State ----
   let isReducedMotion = reducedMotion;
   let teacherMode = false;
+  let leverRevealed = true;
+  let leverRiseCurrent = 1;
+  let showQuantumLabel = false;
   let peelTarget = 0;
   let peelCurrent = 0;
   let wallState = 'intact';
@@ -1517,16 +1553,16 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     const isTallPortrait = aspect < 0.72;
     const isPhoneStage = aspect < 1.25 && stepIndex > 0;
 
-    const halfSpan = stepIndex === 5 || stepIndex === 6 ? 3.92 : stepIndex === 0 && isTallPortrait ? 4.05 : 3.58;
+    const halfSpan = stepIndex === 5 || stepIndex === 6 ? 3.92 : stepIndex === 0 && isTallPortrait ? 3.74 : 3.58;
     const vFovRad = (camera.fov * Math.PI) / 180;
     const minZForWidth = halfSpan / (Math.tan(vFovRad / 2) * Math.max(0.42, aspect));
 
     if (stepIndex === 0) {
       if (isTallPortrait) {
-        // Both boxes sit 100% inside phone screen with generous side margins — zero horizontal cropping!
-        const z = Math.max(11.4, minZForWidth * 1.07);
-        camTargetPos.set(0, 2.15, z);
-        camTargetLook.set(0, 0.52, 0.15);
+        // Close, tactile, sculptural phone hero: boxes fill ~86% width with clean side margins!
+        const z = Math.max(10.1, minZForWidth * 1.0);
+        camTargetPos.set(0, 1.98, z);
+        camTargetLook.set(0, 0.46, 0.15);
       } else {
         const z = Math.max(7.9, minZForWidth * 1.02);
         camTargetPos.set(0, 2.3, z);
@@ -1611,18 +1647,40 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     sourceHalo.material.map = val ? glowGoldTex : glowIvoryTex;
     sourcePoint.color.setHex(val ? COL_GOLD : COL_IVORY);
     leverTargetAngle = val ? -0.58 : 0.58;
+    leverPlateMat.map = val ? leverPlateEntTex : leverPlateCardTex;
+    leverPlateMat.needsUpdate = true;
     leverKnobMat.color.setHex(val ? COL_GOLD : COL_IVORY);
     leverKnobMat.emissiveIntensity = val ? 1.45 : 0.42;
     leverCollarMat.emissiveIntensity = val ? 1.2 : 0.35;
     leverGlow.material.opacity = val ? 0.85 : 0.3;
   }
 
+  function setLeverRevealed(revealed, { snap = false } = {}) {
+    leverRevealed = !!revealed;
+    if (snap) leverRiseCurrent = leverRevealed ? 1 : 0;
+  }
+
+  function setShowQuantumLabel(show) {
+    showQuantumLabel = !!show;
+  }
+
+  function setStep4ActiveAngles(idxA, idxB) {
+    for (let i = 0; i < 3; i++) {
+      angleLabels.left[i].classList.toggle('is-active', i === idxA);
+      angleLabels.right[i].classList.toggle('is-active', i === idxB);
+    }
+  }
+
   function setTeacherMode(on) {
     teacherMode = !!on;
-    keyLight.intensity = teacherMode ? 2.6 : 2.0;
-    rimLight.intensity = teacherMode ? 1.5 : 1.12;
-    hemi.intensity = teacherMode ? 1.0 : 0.74;
-    scene.environmentIntensity = teacherMode ? 0.88 : 0.68;
+    // Bright-room classroom projector lift: crisp rim separation on boxes & clear unfilled bar track
+    keyLight.intensity = teacherMode ? 2.75 : 2.0;
+    rimLight.intensity = teacherMode ? 1.95 : 1.12;
+    hemi.intensity = teacherMode ? 1.15 : 0.74;
+    scene.environmentIntensity = teacherMode ? 0.96 : 0.68;
+    channelMat.color.setHex(teacherMode ? 0x263148 : 0x151b28);
+    boxLeft.shellMat.color.setHex(teacherMode ? 0x2f3a50 : COL_BOX_SHELL);
+    boxRight.shellMat.color.setHex(teacherMode ? 0x2f3a50 : COL_BOX_SHELL);
   }
 
   function setStep(step) {
@@ -1630,10 +1688,12 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     showStationPlaques = step >= 1;
     showLampBadges = step >= 1;
     arenaGroup.visible = step === 5 || step === 6;
-    leverMount.visible = step === 5 || step === 6;
-    cardDisplay.visible = step === 3;
+    cardStandGroup.visible = step === 3;
     partitionGroup.visible = step === 7;
-    if (step !== 6) breakthroughZoom = 0;
+    if (step !== 6) {
+      breakthroughZoom = 0;
+      showQuantumLabel = false;
+    }
     setDialMode(step >= 4.5 && step <= 7 ? 'chsh' : 'mermin');
     boxLeft.dimmed = false;
     boxRight.dimmed = false;
@@ -1667,20 +1727,13 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
 
   function stepShatterPhysics(simDt) {
     shatterAge += simDt;
-    const fl = Math.max(0, 1 - shatterAge / 0.52);
+    const fl = Math.max(0, 1 - shatterAge / 0.48);
     if (shatterFlash.visible) {
-      shatterFlash.material.opacity = fl * 0.96;
-      const sc = 1.4 + (1 - fl) * 4.4;
-      shatterFlash.scale.set(sc, sc, 1);
+      shatterFlash.material.opacity = fl * 0.95;
+      const sc = 1.2 + (1 - fl) * 3.0;
+      shatterFlash.scale.set(sc, sc * 0.85, 1);
       shatterPoint.intensity = fl * 5.0;
       if (fl <= 0.01) shatterFlash.visible = false;
-    }
-    if (shatterRing.visible) {
-      const rProg = Math.min(1, shatterAge / 0.42);
-      shatterRing.material.opacity = (1 - rProg) * 0.42;
-      const rsc = 0.7 + rProg * 4.0;
-      shatterRing.scale.set(rsc, rsc * 0.82, 1);
-      if (rProg >= 0.99) shatterRing.visible = false;
     }
 
     const fade = Math.max(0, 1 - shatterAge / 2.2);
@@ -1690,12 +1743,16 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
 
     for (let i = 0; i < SHARD_COUNT; i++) {
       const s = shards[i];
-      s.vel.y -= 4.1 * simDt;
+      s.vel.y -= 3.6 * simDt;
       s.pos.addScaledVector(s.vel, simDt);
-      // Cap shard ceiling safely BELOW the 75% / 85.4% screen-space labels!
-      if (s.pos.y > BEAM_Y + 0.58) {
-        s.pos.y = BEAM_Y + 0.58;
+      // Keep shards cleanly framed between the bar labels above and Bob's ▲ badge below!
+      if (s.pos.y > BEAM_Y + 0.56) {
+        s.pos.y = BEAM_Y + 0.56;
         if (s.vel.y > 0) s.vel.y *= -0.25;
+      }
+      if (s.pos.y < BEAM_Y - 0.56 && s.pos.x > x75 + 0.25 && shatterAge < 0.35) {
+        s.pos.y = BEAM_Y - 0.56;
+        if (s.vel.y < 0) s.vel.y *= -0.15;
       }
       s.rot.x += s.angVel.x * simDt;
       s.rot.y += s.angVel.y * simDt;
@@ -1708,24 +1765,23 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     }
     shardMesh.instanceMatrix.needsUpdate = true;
 
-    // 4-point optical crystal star glints riding the 18 brightest forward shards
     for (let i = 0; i < STAR_COUNT; i++) {
       const sp = starSprites[i];
       const s = shards[i * 4];
       sp.position.copy(s.pos);
       sp.position.z += 0.08;
       const twinkle = 0.6 + 0.4 * Math.sin(shatterAge * 18 + i * 2.1);
-      sp.material.opacity = fade * twinkle * 0.95;
-      const sz = (0.28 + (i % 3) * 0.14) * (0.7 + 0.45 * twinkle);
+      sp.material.opacity = fade * twinkle * 0.92;
+      const sz = (0.26 + (i % 3) * 0.12) * (0.7 + 0.45 * twinkle);
       sp.scale.set(sz, sz, 1);
       sp.visible = fade > 0.05;
     }
 
     for (let i = 0; i < SPARK_COUNT; i++) {
       const sp = sparks[i];
-      sp.vel.y -= 2.2 * simDt;
+      sp.vel.y -= 2.0 * simDt;
       sp.pos.addScaledVector(sp.vel, simDt);
-      if (sp.pos.y > BEAM_Y + 0.75) sp.pos.y = BEAM_Y + 0.75;
+      if (sp.pos.y > BEAM_Y + 0.62) sp.pos.y = BEAM_Y + 0.62;
       dummy.position.copy(sp.pos);
       dummy.rotation.set(shatterAge * 7 + i, shatterAge * 5 + i * 0.5, 0);
       dummy.scale.setScalar(0.75 + fade * 0.85);
@@ -1752,7 +1808,6 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       frontFace75.visible = true;
       clampTop.visible = true;
       clampBot.visible = true;
-      postShatterStubs.visible = false;
       glassPaneMat.map = glassIntactTex;
       glassPaneMat.emissive.setHex(0x5e8cc4);
       glassPaneMat.emissiveIntensity = 0.36;
@@ -1761,11 +1816,11 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       shardMesh.visible = false;
       sparkMesh.visible = false;
       shatterFlash.visible = false;
-      shatterRing.visible = false;
       shatterPoint.intensity = 0;
       for (const sp of starSprites) sp.visible = false;
       goldLineGroup.visible = false;
       goldLineMat.opacity = 0.0;
+      showQuantumLabel = false;
       breakthroughZoom = 0;
       updateCameraTargets();
     } else if (next === 'cracked') {
@@ -1787,9 +1842,9 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       clampTop.visible = false;
       clampBot.visible = false;
       dentGlow.material.opacity = 0;
-      postShatterStubs.visible = true;
       goldLineGroup.visible = true;
-      goldLineMat.opacity = 1.0;
+      goldLineMat.opacity = settled ? 1.0 : 0.35;
+      showQuantumLabel = settled;
 
       if (!isReducedMotion && !settled) {
         shatterAge = 0;
@@ -1800,15 +1855,12 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
         shardMesh.visible = true;
         sparkMesh.visible = true;
         shatterFlash.visible = true;
-        shatterRing.visible = true;
-        shatterFlash.material.opacity = 0.96;
-        shatterRing.material.opacity = 0.88;
+        shatterFlash.material.opacity = 0.95;
         shatterPoint.intensity = 5.0;
         shardMat.uniforms.uOpacity.value = 1.0;
         shardMat.uniforms.uFlash.value = 1.0;
         sparkMat.opacity = 0.98;
 
-        // Deterministic-seeded spread when midShatter=true for consistently dazzling showcase burst, random in live play
         let seed = 0x91e7a5c3;
         const rnd = midShatter
           ? () => { seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; return (seed >>> 0) / 4294967296; }
@@ -1816,32 +1868,30 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
 
         for (let i = 0; i < SHARD_COUNT; i++) {
           const s = shards[i];
-          const spread = (rnd() - 0.5) * Math.PI * 1.45;
-          const speed = 2.6 + rnd() * 5.8;
-          const startY = (rnd() - 0.5) * 1.15;
-          const startZ = (rnd() - 0.5) * 0.65;
-          s.pos.set(x75 + rnd() * Math.max(0.18, luckWidthCurrent), BEAM_Y + startY, startZ);
-          // Directional rightward surge + forward toward camera (+z) + gentle fan, capped below top labels!
+          const spread = (rnd() - 0.5) * Math.PI * 1.25;
+          const speed = 2.4 + rnd() * 5.2;
+          const startY = (rnd() - 0.5) * 0.95;
+          const startZ = (rnd() - 0.5) * 0.60;
+          s.pos.set(x75 + rnd() * Math.max(0.16, luckWidthCurrent), BEAM_Y + startY, startZ);
           s.vel.set(
-            1.6 + Math.cos(spread) * speed * 0.88 + rnd() * 2.2,
-            Math.min(2.1, Math.sin(spread) * speed * 0.44 + startY * 0.85),
-            1.6 + rnd() * 4.6
+            1.4 + Math.cos(spread) * speed * 0.84 + rnd() * 1.9,
+            Math.max(-1.4, Math.min(1.8, Math.sin(spread) * speed * 0.38 + startY * 0.7)),
+            1.6 + rnd() * 4.4
           );
           s.rot.set(rnd() * 6.28, rnd() * 6.28, rnd() * 6.28);
           s.angVel.set((rnd() - 0.5) * 16, (rnd() - 0.5) * 16, (rnd() - 0.5) * 16);
-          const sc = 0.52 + rnd() * 1.18;
-          s.scale.set(sc * (0.75 + rnd() * 0.45), sc * (0.85 + rnd() * 0.6), sc);
+          const sc = 0.48 + rnd() * 1.05;
+          s.scale.set(sc * (0.72 + rnd() * 0.45), sc * (0.85 + rnd() * 0.55), sc);
         }
         for (let i = 0; i < SPARK_COUNT; i++) {
           const sp = sparks[i];
-          const a = (rnd() - 0.5) * Math.PI * 1.5;
-          const r = 3.0 + rnd() * 5.6;
-          sp.pos.set(x75 + rnd() * 0.22, BEAM_Y + (rnd() - 0.5) * 0.9, (rnd() - 0.5) * 0.4);
-          sp.vel.set(1.8 + Math.cos(a) * r * 0.85, Math.min(2.2, Math.sin(a) * r * 0.48), 1.8 + rnd() * 4.4);
+          const a = (rnd() - 0.5) * Math.PI * 1.3;
+          const r = 2.6 + rnd() * 5.0;
+          sp.pos.set(x75 + rnd() * 0.22, BEAM_Y + (rnd() - 0.5) * 0.8, (rnd() - 0.5) * 0.4);
+          sp.vel.set(1.6 + Math.cos(a) * r * 0.8, Math.max(-1.3, Math.min(1.8, Math.sin(a) * r * 0.42)), 1.6 + rnd() * 4.2);
         }
 
         if (midShatter) {
-          // Advance cleanly to the dramatic peak radial crystal burst frame (~0.24s physics) and hold gently for screenshot!
           for (let step = 0; step < 12; step++) stepShatterPhysics(0.02);
           camera.position.copy(camTargetPos);
           camCurLook.copy(camTargetLook);
@@ -1852,7 +1902,6 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
         shardMesh.visible = false;
         sparkMesh.visible = false;
         shatterFlash.visible = false;
-        shatterRing.visible = false;
         shatterPoint.intensity = 0;
         for (const sp of starSprites) sp.visible = false;
         breakthroughZoom = 0;
@@ -1890,39 +1939,25 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
 
   function updateStageLabels() {
     const isPhone = (container.clientWidth || window.innerWidth) < 861;
-    const topSafe = isPhone ? 58 : 74;
+    const topSafe = isPhone ? 68 : 74;
 
     if (arenaGroup.visible) {
-      const p75 = projectPoint(anchor75, { minTop: topSafe, clampX: 46 });
-      const show85 = goldLineGroup.visible && goldLineMat.opacity > 0.2;
-      const p85 = show85 ? projectPoint(anchor85, { minTop: topSafe, clampX: 56 }) : null;
+      // Stagger vertical height of 75% and 85.4% while keeping BOTH locked to their EXACT X marks on the bar!
+      const p75 = projectPoint(anchor75, { minTop: topSafe, clampX: 44 });
+      const show85 = goldLineGroup.visible && showQuantumLabel;
+      const p85 = show85 ? projectPoint(anchor85, { minTop: topSafe, clampX: 54 }) : null;
 
-      if (p75 && p85) {
-        // Explicit horizontal separation so 75% and 85.4% NEVER collide even on 390px phone!
-        lbl75.hidden = false;
-        lbl85.hidden = false;
-        const w75 = lbl75.offsetWidth || 72;
-        const w85 = lbl85.offsetWidth || 104;
-        let x75 = p75.x;
-        let x85 = p85.x;
-        const minGap = (w75 + w85) / 2 + 10;
-        if (x85 - x75 < minGap) {
-          const mid = (x75 + x85) / 2;
-          x75 = mid - w75 / 2 - 5;
-          x85 = mid + w85 / 2 + 5;
-          if (x85 + w85 / 2 > p85.w - 8) {
-            const shift = x85 + w85 / 2 - (p85.w - 8);
-            x85 -= shift;
-            x75 -= shift;
-          }
-          if (x75 - w75 / 2 < 8) {
-            const shift = 8 - (x75 - w75 / 2);
-            x75 += shift;
-            x85 += shift;
-          }
-        }
-        placeLabel(lbl75, x75, p75.y);
-        placeLabel(lbl85, x85, p85.y);
+      // During unobstructed mid-shatter burst, keep stage uncluttered of overlay pills over the shards!
+      const isActiveBurst = shardMesh.visible && !showQuantumLabel;
+      if (isActiveBurst) {
+        lbl75.hidden = true;
+        lbl85.hidden = true;
+      } else if (p75 && p85) {
+        // Guaranteed vertical stagger so they NEVER collide AND stay 100% locked above exact x75 & x85!
+        const y75 = p75.y;
+        const y85 = Math.max(topSafe, Math.min(p85.y, y75 - (isPhone ? 40 : 52)));
+        placeLabel(lbl75, p75.x, y75);
+        placeLabel(lbl85, p85.x, y85);
       } else if (p75) {
         placeLabel(lbl75, p75.x, p75.y);
         lbl85.hidden = true;
@@ -1938,8 +1973,8 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     const showAngles = stepIndex === 4 && peelCurrent > 0.55;
     for (let i = 0; i < 3; i++) {
       if (showAngles) {
-        const pL = projectPoint(boxLeft.angleAnchors[i], { minTop: topSafe, clampX: 22 });
-        const pR = projectPoint(boxRight.angleAnchors[i], { minTop: topSafe, clampX: 22 });
+        const pL = projectPoint(boxLeft.angleAnchors[i], { minTop: topSafe, clampX: 18 });
+        const pR = projectPoint(boxRight.angleAnchors[i], { minTop: topSafe, clampX: 18 });
         if (pL) placeLabel(angleLabels.left[i], pL.x, pL.y); else angleLabels.left[i].hidden = true;
         if (pR) placeLabel(angleLabels.right[i], pR.x, pR.y); else angleLabels.right[i].hidden = true;
       } else {
@@ -1997,11 +2032,20 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       const pulse = 1 + Math.sin(elapsed * 2.4) * 0.08;
       sourceHalo.scale.set(1.26 * pulse, 1.26 * pulse, 1);
       coreMat.emissiveIntensity = (sourceEntangled ? 1.95 : 1.15) + Math.sin(elapsed * 2.4) * 0.24;
-      if (cardDisplay.visible) {
-        cardDisplay.position.y = 0.60 + Math.sin(elapsed * 2.2) * 0.035;
-        cardDisplay.rotation.y = Math.sin(elapsed * 1.1) * 0.14;
+      if (cardStandGroup.visible) {
+        cardDisplay.rotation.y = Math.sin(elapsed * 1.1) * 0.08;
       }
     }
+
+    // Teacher-mode concealed lever: truly hidden flush below stage until revealed, then smoothly rises!
+    const onLeverStep = stepIndex === 5 || stepIndex === 6;
+    const leverTargetRise = onLeverStep && leverRevealed ? 1 : 0;
+    leverRiseCurrent += (leverTargetRise - leverRiseCurrent) * Math.min(1, rawDt * 7.5);
+    if (leverTargetRise === 0 && leverRiseCurrent < 0.02) leverRiseCurrent = 0;
+    if (leverTargetRise === 1 && leverRiseCurrent > 0.98) leverRiseCurrent = 1;
+    leverMount.visible = onLeverStep && leverRiseCurrent > 0.03;
+    leverMount.position.y = -0.68 + leverRiseCurrent * 0.80;
+    leverCap.visible = onLeverStep && !leverRevealed && leverRiseCurrent < 0.12;
 
     leverCurrentAngle += (leverTargetAngle - leverCurrentAngle) * Math.min(1, rawDt * 12);
     leverPivot.rotation.z = leverCurrentAngle;
@@ -2054,8 +2098,7 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
 
       if (box.lampBloom > 0.01) box.lampBloom = Math.max(0.38, box.lampBloom - rawDt * 0.42);
       const bloom = box.lampColor >= 0 ? box.lampBloom : 0;
-      const dimMul = box.dimmed ? 0.30 : 1.0;
-      // Rich saturated Coral/Jade glow without clipping to pale white under ACESFilmic!
+      const dimMul = box.dimmed ? 0.0 : 1.0; // Completely opaque privacy screen hides Alice's glow!
       box.lampMat.emissiveIntensity = (0.35 + bloom * 0.72) * dimMul;
       box.lampHalo.material.opacity = bloom * 0.62 * dimMul;
       box.lampLight.intensity = bloom * 2.0 * dimMul;
@@ -2147,6 +2190,10 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
           breakthroughZoom = Math.max(0, breakthroughZoom - rawDt * 1.4);
           updateCameraTargets();
         }
+        if (shatterWallElapsed > 0.90) {
+          showQuantumLabel = true;
+          goldLineMat.opacity = Math.min(1.0, goldLineMat.opacity + rawDt * 2.4);
+        }
         stepShatterPhysics(dt);
       }
     }
@@ -2176,6 +2223,9 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     setPeel,
     setCardStrip,
     setSourceEntangled,
+    setLeverRevealed,
+    setShowQuantumLabel,
+    setStep4ActiveAngles,
     setTeacherMode,
     setAlicePartition,
     setArenaProgress,

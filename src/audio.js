@@ -228,6 +228,41 @@ export function createAudio() {
     });
   }
 
+  // Mechanical brass lever rise + warm golden unlock chime (Teacher reveal lever)
+  function playLeverReveal() {
+    const c = ensure();
+    if (!c) return;
+    const now = c.currentTime;
+
+    // Smooth rising brass hum
+    const osc = c.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(196, now);
+    osc.frequency.exponentialRampToValueAtTime(392, now + 0.28);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(0.08, now + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.0008, now + 0.36);
+    osc.connect(g).connect(c.destination);
+    osc.start(now);
+    osc.stop(now + 0.38);
+
+    // Crisp mechanical latch click + warm fifth chime
+    [587.33, 880.0].forEach((f, i) => {
+      const t = now + 0.22 + i * 0.055;
+      const ch = c.createOscillator();
+      ch.type = 'sine';
+      ch.frequency.setValueAtTime(f, t);
+      const cg = c.createGain();
+      cg.gain.setValueAtTime(0.001, t);
+      cg.gain.linearRampToValueAtTime(0.075, t + 0.012);
+      cg.gain.exponentialRampToValueAtTime(0.0006, t + 0.42);
+      ch.connect(cg).connect(c.destination);
+      ch.start(t);
+      ch.stop(t + 0.45);
+    });
+  }
+
   return {
     unlock,
     setMuted,
@@ -238,5 +273,6 @@ export function createAudio() {
     playGlassCrack,
     playShatterChord,
     playCompareArrive,
+    playLeverReveal,
   };
 }

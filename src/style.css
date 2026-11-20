@@ -116,44 +116,67 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: max-content;
   line-height: 1.05;
   padding: 4px 10px;
   border-radius: 9px;
-  background: rgba(13, 16, 23, 0.72);
-  border: 1px solid rgba(220, 232, 248, 0.28);
+  background: rgba(13, 16, 23, 0.80);
+  border: 1px solid rgba(220, 232, 248, 0.32);
   backdrop-filter: blur(4px);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.75);
 }
+/* Delicate hairline tick connecting each badge directly to its exact X mark on the bar */
+.st-limit::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1.5px;
+  height: 14px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(220, 232, 248, 0.65), rgba(220, 232, 248, 0));
+}
 .st-limit strong {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #E6F2FF;
   font-variant-numeric: tabular-nums;
 }
 .st-limit span {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: #C8D8EE;
 }
 .st-limit.st-85 {
-  border-color: rgba(230, 182, 85, 0.62);
-  background: rgba(18, 16, 12, 0.80);
+  border-color: rgba(230, 182, 85, 0.72);
+  background: rgba(18, 16, 12, 0.86);
+}
+.st-limit.st-85::after {
+  height: 28px;
+  background: linear-gradient(180deg, rgba(230, 182, 85, 0.85), rgba(230, 182, 85, 0.1));
 }
 .st-limit.st-85 strong { color: var(--gold); }
 .st-limit.st-85 span { color: #F5E0A8; }
 
+/* Compact etched degree markers hugging the outer magnet ring (active angle highlighted in warm gold!) */
 .st-ang {
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(13, 16, 23, 0.82);
-  border: 1px solid rgba(200, 168, 107, 0.52);
-  font-size: 13.5px;
-  font-weight: 800;
-  color: var(--ivory);
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(13, 16, 23, 0.52);
+  border: 1px solid rgba(244, 239, 230, 0.16);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(244, 239, 230, 0.74);
   font-variant-numeric: tabular-nums;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+}
+.st-ang.is-active {
+  background: rgba(24, 20, 12, 0.84);
+  border-color: rgba(230, 182, 85, 0.82);
+  color: var(--gold);
+  font-weight: 800;
 }
 
 html.teacher-mode .st-limit {
@@ -162,7 +185,7 @@ html.teacher-mode .st-limit {
 }
 html.teacher-mode .st-limit strong { font-size: 28px; }
 html.teacher-mode .st-limit span { font-size: 14px; color: #EFF5FF; }
-html.teacher-mode .st-ang { font-size: 18px; padding: 3px 9px; }
+html.teacher-mode .st-ang { font-size: 15px; padding: 2px 7px; }
 
 /* Minimal floating top bar */
 #top-bar {
@@ -303,6 +326,13 @@ html.teacher-mode .hero-headline { font-size: clamp(36px, 4.4vw, 56px); }
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: opacity 380ms ease-out, transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Unobstructed shatter beat: UI rail softly dims & recedes for ~1.2s so the crystal explosion owns the stage! */
+#app.shatter-focus #side-panel {
+  opacity: 0.22;
+  transform: translateX(26px);
+  pointer-events: none;
 }
 
 /* True 1080p back-of-classroom Teacher rail */
@@ -351,31 +381,31 @@ html.teacher-mode .btn-primary { min-height: 66px; font-size: 23px; }
 html.teacher-mode .btn-secondary { min-height: 54px; font-size: 21px; border-width: 2px; }
 html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 19px; color: #E4ECF8; }
 
-/* 1280x720 classroom projector tuning: huge legible type, compact rhythm, zero clipping */
+/* 1280x720 classroom projector tuning: ALL copy >= 17.5-18px, bright lit-room contrast, zero clipping */
 @media (max-width: 1400px) and (min-width: 861px) {
-  html.teacher-mode { --ts: 1.30; }
+  html.teacher-mode { --ts: 1.32; }
   html.teacher-mode #side-panel {
-    width: 492px;
-    flex: 0 0 492px;
-    padding-top: 64px;
+    width: 520px;
+    flex: 0 0 520px;
+    padding-top: 62px;
   }
-  html.teacher-mode #panel-scroll { padding: 6px 22px 6px; gap: 7px; }
-  html.teacher-mode #panel-footer { padding: 8px 22px 10px; gap: 2px; }
-  html.teacher-mode .teacher-pin { padding: 8px 12px; font-size: 16.5px; }
-  html.teacher-mode .step-kicker { font-size: 14px; }
-  html.teacher-mode .step-question { font-size: 30px; }
-  html.teacher-mode .sw-row { grid-template-columns: 68px 1fr 1fr; gap: 7px; }
-  html.teacher-mode .sw-who { font-size: 17px; }
-  html.teacher-mode .mini-sw { min-height: 42px; font-size: 17px; }
-  html.teacher-mode .r-chip { font-size: 16px; padding: 5px 4px; }
-  html.teacher-mode .tally-card.compact { padding: 9px 14px; gap: 3px; }
-  html.teacher-mode .tally-header { font-size: 16.5px; }
-  html.teacher-mode .hero-score { font-size: 46px; }
-  html.teacher-mode .tally-sub { font-size: 15px; }
-  html.teacher-mode .luck-pill { font-size: 14.5px; padding: 4px 10px; }
-  html.teacher-mode .btn-primary { min-height: 52px; font-size: 19.5px; }
-  html.teacher-mode .btn-secondary { min-height: 42px; font-size: 17px; }
-  html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 15px; min-height: 36px; }
+  html.teacher-mode #panel-scroll { padding: 4px 20px 4px; gap: 6px; }
+  html.teacher-mode #panel-footer { padding: 7px 20px 9px; gap: 2px; }
+  html.teacher-mode .teacher-pin { padding: 7px 12px; font-size: 18px; }
+  html.teacher-mode .step-kicker { font-size: 15px; }
+  html.teacher-mode .step-question { font-size: 25.5px; line-height: 1.14; }
+  html.teacher-mode .sw-row { grid-template-columns: 72px 1fr 1fr; gap: 6px; }
+  html.teacher-mode .sw-who { font-size: 18.5px; }
+  html.teacher-mode .mini-sw { min-height: 40px; font-size: 18px; }
+  html.teacher-mode .r-chip { font-size: 17px; padding: 4px 4px; }
+  html.teacher-mode .tally-card.compact { padding: 7px 14px; gap: 3px; }
+  html.teacher-mode .tally-header { font-size: 18px; color: #EEF4FF; }
+  html.teacher-mode .hero-score { font-size: 42px; }
+  html.teacher-mode .tally-sub { font-size: 17.5px; color: #EEF4FF; line-height: 1.28; }
+  html.teacher-mode .luck-pill { font-size: 16.5px; padding: 3px 10px; }
+  html.teacher-mode .btn-primary { min-height: 48px; font-size: 19.5px; }
+  html.teacher-mode .btn-secondary, html.teacher-mode .btn-clear { min-height: 44px; font-size: 18px; }
+  html.teacher-mode .btn-depth { font-size: 17.5px; min-height: 36px; color: #EEF4FF; }
 }
 
 #panel-scroll {
@@ -523,6 +553,25 @@ html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 19px;
 .btn-secondary.reveal-outline:hover { background: rgba(230, 182, 85, 0.22); }
 .btn-secondary:active { transform: scale(0.97); }
 .btn-secondary:disabled { opacity: 0.45; cursor: default; }
+
+.btn-clear {
+  flex: 0 0 auto;
+  min-height: 46px;
+  min-width: 72px;
+  padding: 0 16px;
+  border: 1.5px solid rgba(244, 239, 230, 0.28);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 90ms ease-out, background 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out;
+}
+.btn-clear:hover { background: rgba(244, 239, 230, 0.08); color: var(--ivory); border-color: rgba(244, 239, 230, 0.5); }
+.btn-clear:active { transform: scale(0.96); }
+html.teacher-mode .btn-clear { min-height: 54px; padding: 0 22px; font-size: 20px; border-width: 2px; color: #EEF4FF; }
 
 .btn-depth, .btn-quiet-sm {
   min-height: 44px;
@@ -906,6 +955,10 @@ html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 19px;
     margin-top: -8px;
     box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.45);
   }
+  #app.shatter-focus #side-panel {
+    opacity: 0.20;
+    transform: translateY(16px);
+  }
   #panel-scroll, html.teacher-mode #panel-scroll {
     padding: 9px 14px 6px;
     gap: 5px;
@@ -915,9 +968,11 @@ html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 19px;
     gap: 1px;
   }
   .st-limit { padding: 2px 7px; }
-  .st-limit strong, html.teacher-mode .st-limit strong { font-size: 13.5px; }
-  .st-limit span, html.teacher-mode .st-limit span { font-size: 8.5px; }
-  .st-ang, html.teacher-mode .st-ang { font-size: 11.5px; padding: 1px 5px; }
+  .st-limit strong, html.teacher-mode .st-limit strong { font-size: 13px; }
+  .st-limit span, html.teacher-mode .st-limit span { font-size: 8px; }
+  .st-limit::after { height: 10px; }
+  .st-limit.st-85::after { height: 22px; }
+  .st-ang, html.teacher-mode .st-ang { font-size: 9.5px; padding: 1px 4px; }
 
   .grid-3x3-wrap { padding: 8px 10px; gap: 10px; }
   .g-cell { width: 28px; height: 28px; font-size: 13px; }
@@ -925,7 +980,21 @@ html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 19px;
   .grid-micro { font-size: 10px; }
 
   #top-bar { padding: 8px 10px; gap: 6px; }
-  #step-dots, #btn-skip-top { display: none; }
+  #btn-skip-top { display: none; }
+  /* Slim phone step-progress bar cleanly seated below top chrome! */
+  #step-dots {
+    position: fixed;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(13, 16, 23, 0.62);
+    border: 1px solid rgba(244, 239, 230, 0.1);
+  }
+  #app.is-hero #step-dots { display: none; }
+  #step-dots .dot { width: 6px; height: 6px; }
+  #step-dots .dot.active { width: 16px; }
   #app:not(.is-hero) .brand-mark { display: none; }
   .brand-mark { font-size: 13px; color: var(--ivory); }
   .top-left, .top-right { gap: 5px; }
@@ -935,13 +1004,14 @@ html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { font-size: 19px;
   .hero-headline { font-size: 24px; margin-bottom: 16px; }
 
   .step-kicker, html.teacher-mode .step-kicker { font-size: 11px; }
-  .step-question, html.teacher-mode .step-question { font-size: 17.5px; }
-  .step-sub, html.teacher-mode .step-sub { font-size: 12.2px; line-height: 1.3; }
+  .step-question, html.teacher-mode .step-question { font-size: 17px; }
+  .step-sub, html.teacher-mode .step-sub { font-size: 12px; line-height: 1.28; }
   .dial-label { font-size: 11.5px; margin-bottom: 2px; }
   .seg-btn { min-height: 38px; font-size: 12px; }
 
   .btn-primary, html.teacher-mode .btn-primary { min-height: 46px; padding: 9px 14px; font-size: 14.5px; }
-  .btn-secondary, html.teacher-mode .btn-secondary { min-height: 38px; padding: 6px 8px; font-size: 12.5px; }
+  .btn-secondary, html.teacher-mode .btn-secondary { min-height: 42px; padding: 6px 8px; font-size: 12.5px; }
+  .btn-clear, html.teacher-mode .btn-clear { min-height: 44px; min-width: 64px; padding: 0 12px; font-size: 12.5px; }
   .btn-depth, .btn-quiet-sm, html.teacher-mode .btn-depth, html.teacher-mode .btn-quiet-sm { min-height: 32px; padding: 2px 8px; font-size: 12px; }
 
   .sw-row, html.teacher-mode .sw-row { grid-template-columns: 48px 1fr 1fr; gap: 5px; }
