@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Bell Test Lab — Two Boxes, No Wires</title>
+  <style>/*__CSS__*/</style>
+</head>
+<body>
+  <div id="loader" aria-live="polite">
+    <div class="loader-dot"></div>
+    <div>Setting the stage…</div>
+  </div>
+
+  <div id="app" class="is-hero">
+    <header id="top-bar">
+      <div class="top-left">
+        <button id="btn-back" class="icon-btn" hidden aria-label="Go back">← Back</button>
+        <span class="brand-mark">Bell Test Lab</span>
+      </div>
+      <nav id="step-dots" aria-label="Progress"></nav>
+      <div class="top-right">
+        <div class="mode-pill" role="group" aria-label="Mode">
+          <button id="mode-self" class="mode-opt active">Self-guided</button>
+          <button id="mode-teacher" class="mode-opt">Teacher</button>
+        </div>
+        <button id="btn-sound" class="icon-btn" aria-label="Toggle sound">🔊</button>
+        <button id="btn-reset" class="icon-btn" hidden aria-label="Start over">Start over</button>
+      </div>
+    </header>
+
+    <main id="stage-wrap" aria-label="Interactive 3D Bell test stage"></main>
+
+    <section id="hero-overlay" aria-label="Introduction"></section>
+
+    <aside id="side-panel" hidden aria-label="Controls">
+      <div id="panel-body"></div>
+    </aside>
+
+    <div id="idle-hint" hidden role="status"></div>
+
+    <div id="depth-backdrop" hidden role="dialog" aria-modal="true" aria-label="How do we know">
+      <div id="depth-card">
+        <div class="depth-head">
+          <button id="depth-close" class="icon-btn" aria-label="Close">Close ✕</button>
+        </div>
+        <div id="depth-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>/*__JS__*/</script>
+</body>
+</html>
