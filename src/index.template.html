@@ -17,6 +17,7 @@
       <div class="top-left">
         <button id="btn-back" class="icon-btn" hidden aria-label="Go back">← Back</button>
         <span class="brand-mark">Bell Test Lab</span>
+        <button id="btn-skip-top" class="icon-btn" hidden aria-label="Skip to the game">Skip to game</button>
       </div>
       <nav id="step-dots" aria-label="Progress"></nav>
       <div class="top-right">
@@ -24,7 +25,7 @@
           <button id="mode-self" class="mode-opt active">Self-guided</button>
           <button id="mode-teacher" class="mode-opt">Teacher</button>
         </div>
-        <button id="btn-sound" class="icon-btn" aria-label="Toggle sound">🔊</button>
+        <button id="btn-sound" class="icon-btn svg-only" aria-label="Toggle sound"></button>
         <button id="btn-reset" class="icon-btn" hidden aria-label="Start over">Start over</button>
       </div>
     </header>
@@ -34,7 +35,8 @@
     <section id="hero-overlay" aria-label="Introduction"></section>
 
     <aside id="side-panel" hidden aria-label="Controls">
-      <div id="panel-body"></div>
+      <div id="panel-scroll"></div>
+      <div id="panel-footer"></div>
     </aside>
 
     <div id="idle-hint" hidden role="status"></div>

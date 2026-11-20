@@ -1,5 +1,4 @@
 import {
-  P_QUANTUM_OPT,
   EVIDENCE_CRACK_LOG10,
   EVIDENCE_BREAK_LOG10,
   MERMIN_SPIN_ANGLES,
@@ -17,6 +16,9 @@ import { STEP_COUNT, DEPTH_DRAWERS } from './content.js';
 const COLOR_NAMES = ['Coral', 'Jade'];
 const COLOR_SYMS = ['▲', '●'];
 
+const SVG_SOUND_ON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
+const SVG_SOUND_OFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+
 export function createApp({ stage, audio, root }) {
   const state = {
     step: 0,
@@ -29,18 +31,18 @@ export function createApp({ stage, audio, root }) {
     merminSameMatches: 0,
     merminRandCount: 0,
     merminRandMatches: 0,
-    // Step 3 Mermin Card (default RRG -> 5/9)
+    // Step 3 Mermin hidden card (default Coral, Coral, Jade -> 5/9)
     merminCard: [0, 0, 1],
     // Step 5-6 CHSH
-    chshCard: { a0: 0, a1: 0, b0: 0, b1: 0 }, // 75% card by default
+    chshCard: { a0: 0, a1: 0, b0: 0, b1: 0 },
     chshMode: 'card', // 'card' | 'entangled'
     chshRun: createChshRun(),
+    chshSettled: false,
     wallHitBy75: false,
     classVoted: false,
-    predictRevealed: false,
     burstRunning: false,
     // Step 7 Bob alone (no-signaling)
-    alicePolicy: '0', // '0' | '1' | 'random' | 'off'
+    alicePolicy: '0',
     bobRun: { n0: 0, b0WhenA0: 0, n1: 0, b0WhenA1: 0, nOff: 0, b0WhenOff: 0, total: 0, wins: 0, compared: false },
     // UI
     depthKey: null,
@@ -50,22 +52,20 @@ export function createApp({ stage, audio, root }) {
 
   let idlePairTimer = null;
   let burstTimer = null;
-  let hintTimer = null;
 
-  // ---- DOM references ----
-  const elTopBar = root.querySelector('#top-bar');
   const elBackBtn = root.querySelector('#btn-back');
   const elResetBtn = root.querySelector('#btn-reset');
+  const elSkipTop = root.querySelector('#btn-skip-top');
   const elSoundBtn = root.querySelector('#btn-sound');
   const elModeSelf = root.querySelector('#mode-self');
   const elModeTeacher = root.querySelector('#mode-teacher');
   const elStepDots = root.querySelector('#step-dots');
   const elHeroOverlay = root.querySelector('#hero-overlay');
   const elPanel = root.querySelector('#side-panel');
-  const elPanelBody = root.querySelector('#panel-body');
+  const elPanelScroll = root.querySelector('#panel-scroll');
+  const elPanelFooter = root.querySelector('#panel-footer');
   const elDepthBackdrop = root.querySelector('#depth-backdrop');
   const elDepthContent = root.querySelector('#depth-content');
-  const elDepthClose = root.querySelector('#depth-close');
   const elHintPill = root.querySelector('#idle-hint');
 
   function touchInteraction() {
@@ -83,10 +83,8 @@ export function createApp({ stage, audio, root }) {
     state.burstRunning = false;
   }
 
-  // ---- Step 0 automatic idle mystery-box fire every 2.2s ----
   function startIdleHeroLoop() {
     stopTimers();
-    // Pre-bloom matched lamps gently on frame 1 so the first 5s immediately showcase twin agreement + gliding motes
     const initDraw = sampleMerminQuantum(0, 0);
     stage.bloomLampLeft(initDraw.colorA);
     stage.bloomLampRight(initDraw.colorB);
@@ -104,7 +102,17 @@ export function createApp({ stage, audio, root }) {
     idlePairTimer = setInterval(fireOnce, 2100);
   }
 
-  // ---- Step navigation ----
+  function syncCardStageVisual() {
+    stage.setCardStrip(state.merminCard);
+    // Show Alice on dial 1 and Bob on dial 3 so both colours on the card are visibly demonstrated on stage!
+    state.dialA = 0;
+    state.dialB = 2;
+    stage.setDial('left', 0, 'mermin');
+    stage.setDial('right', 2, 'mermin');
+    stage.bloomLampLeft(state.merminCard[0]);
+    stage.bloomLampRight(state.merminCard[2]);
+  }
+
   function goto(nextStep) {
     const s = Math.max(0, Math.min(STEP_COUNT - 1, nextStep));
     stopTimers();
@@ -115,45 +123,56 @@ export function createApp({ stage, audio, root }) {
     elHintPill.hidden = true;
     state.lastInteract = performance.now();
 
-    // Sync 3D stage visual mood per step
     stage.setStep(s);
+    stage.setTeacherMode(state.teacher);
+
     if (s === 0) {
       state.dialA = 0; state.dialB = 0;
       state.peeled = false;
-      stage.setPeel(false);
+      stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
       stage.setDial('left', 0, 'mermin');
       stage.setDial('right', 0, 'mermin');
       startIdleHeroLoop();
     } else if (s === 1) {
+      state.dialA = 0; state.dialB = 0;
       state.peeled = false;
-      stage.setPeel(false);
+      stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
       stage.setDial('left', state.dialA, 'mermin');
       stage.setDial('right', state.dialB, 'mermin');
     } else if (s === 2) {
       state.peeled = false;
-      stage.setPeel(false);
+      stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
     } else if (s === 3) {
       state.peeled = false;
-      stage.setPeel(false);
+      stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(false);
-      stage.setDial('left', state.dialA, 'mermin');
-      stage.setDial('right', state.dialB, 'mermin');
+      syncCardStageVisual();
+      stage.spawnMotePair({
+        colorA: state.merminCard[0],
+        colorB: state.merminCard[2],
+        entangled: false,
+        duration: 0.45,
+      });
     } else if (s === 4) {
+      // Default to DIFFERENT angles (Alice 0°, Bob 120°) so tilted magnets read in 1 second!
+      state.dialA = 0;
+      state.dialB = 1;
       state.peeled = true;
       stage.setPeel(true);
       stage.setSourceEntangled(true);
-      stage.setDial('left', state.dialA, 'mermin');
-      stage.setDial('right', state.dialB, 'mermin');
+      stage.setDial('left', 0, 'mermin');
+      stage.setDial('right', 1, 'mermin');
     } else if (s === 5) {
       if (state.chshMode !== 'card') {
         state.chshRun = createChshRun();
+        state.chshSettled = false;
       }
       state.chshMode = 'card';
       state.peeled = false;
-      stage.setPeel(false);
+      stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(false);
       stage.setWallState('intact');
       const stats = computeChshS(state.chshRun);
@@ -162,18 +181,18 @@ export function createApp({ stage, audio, root }) {
       stage.setDial('right', 0, 'chsh');
     } else if (s === 6) {
       state.chshMode = 'entangled';
-      state.peeled = true;
-      stage.setPeel(true);
+      state.peeled = false; // Keep clean solid boxes on Step 6 so 0/1 dials read crisply
+      stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
       stage.setDial('left', 0, 'chsh');
       stage.setDial('right', 0, 'chsh');
       if (state.chshRun.rounds === 0) {
         stage.setWallState('intact');
-        stage.setArenaProgress(0, { isQuantum: true });
+        stage.setArenaProgress(0, { isQuantum: true, snap: true });
       }
     } else if (s === 7) {
       state.peeled = false;
-      stage.setPeel(false);
+      stage.setPeel(false, { snap: true });
       stage.setSourceEntangled(true);
       stage.setAliceDimmed(!state.bobRun.compared);
     } else if (s === 8) {
@@ -184,7 +203,7 @@ export function createApp({ stage, audio, root }) {
     }
 
     render();
-    // Stage container size can change between Step 0 (full bleed) and Steps 1-8 (side panel)
+    elPanelScroll.scrollTop = 0;
     requestAnimationFrame(() => stage.resize());
   }
 
@@ -198,16 +217,15 @@ export function createApp({ stage, audio, root }) {
     state.chshCard = { a0: 0, a1: 0, b0: 0, b1: 0 };
     state.chshMode = 'card';
     state.chshRun = createChshRun();
+    state.chshSettled = false;
     state.wallHitBy75 = false;
     state.classVoted = false;
-    state.predictRevealed = false;
     state.bobRun = { n0: 0, b0WhenA0: 0, n1: 0, b0WhenA1: 0, nOff: 0, b0WhenOff: 0, total: 0, wins: 0, compared: false };
     stage.setWallState('intact');
-    stage.setArenaProgress(0, { isQuantum: false });
+    stage.setArenaProgress(0, { isQuantum: false, snap: true });
     goto(0);
   }
 
-  // ---- Interactive Physics Actions ----
   function fireMerminSingle(randomDials = false) {
     touchInteraction();
     const dA = randomDials ? cryptoInt(3) : state.dialA;
@@ -262,7 +280,7 @@ export function createApp({ stage, audio, root }) {
 
     state.burstRunning = true;
     let remaining = n;
-    const chunk = Math.max(1, Math.ceil(n / 26));
+    const chunk = Math.max(1, Math.ceil(n / 24));
     burstTimer = setInterval(() => {
       const k = Math.min(chunk, remaining);
       let last = null;
@@ -301,9 +319,11 @@ export function createApp({ stage, audio, root }) {
     const isQuantum = state.chshMode === 'entangled';
     if (resetIfNewMode) {
       state.chshRun = createChshRun();
+      state.chshSettled = false;
       stage.setWallState('intact');
-      stage.setArenaProgress(0, { isQuantum });
+      stage.setArenaProgress(0, { isQuantum, snap: true });
     }
+    if (isQuantum) state.chshSettled = false;
 
     const stepOne = (emitAudio = true) => {
       const prevCracked = state.chshRun.crackedAt !== null;
@@ -327,11 +347,13 @@ export function createApp({ stage, audio, root }) {
     if (instant || n === 1) {
       let last = null;
       for (let i = 0; i < n; i++) last = stepOne(n === 1);
-      // Per PLAN M2: if entangled & still only cracked at target rounds, keep playing until broken
       if (isQuantum && state.chshRun.brokenAt === null) {
         for (let extra = 0; extra < 1500 && state.chshRun.brokenAt === null; extra++) {
           last = stepOne(false);
         }
+      }
+      if (isQuantum && state.chshRun.rounds >= 1500 && state.chshRun.brokenAt !== null) {
+        state.chshSettled = true;
       }
       const stats = computeChshS(state.chshRun);
       stage.setArenaProgress(stats.winRate, { isQuantum, se: stats.seWin, snap: instant });
@@ -357,25 +379,20 @@ export function createApp({ stage, audio, root }) {
       return;
     }
 
-    // Animated accelerating drumroll burst!
     state.burstRunning = true;
     let remaining = n;
     let tickIdx = 0;
-    const totalTicks = isQuantum ? 46 : 30;
+    const totalTicks = isQuantum ? 46 : 28;
     const baseChunk = Math.max(1, Math.ceil(n / totalTicks));
 
     burstTimer = setInterval(() => {
-      // Gentle acceleration for Breakthrough drumroll
       const accel = isQuantum ? Math.min(2.2, 0.55 + tickIdx * 0.065) : 1.0;
       const k = Math.max(1, Math.min(remaining, Math.round(baseChunk * accel)));
       let last = null;
-      for (let i = 0; i < k; i++) {
-        last = stepOne(true);
-      }
+      for (let i = 0; i < k; i++) last = stepOne(true);
       remaining -= k;
       tickIdx++;
 
-      // If entangled run hits 0 remaining rounds while still cracked, keep going until shattered (PLAN M2)
       if (remaining <= 0 && isQuantum && state.chshRun.brokenAt === null && state.chshRun.rounds < 3000) {
         remaining = 60;
       }
@@ -387,15 +404,14 @@ export function createApp({ stage, audio, root }) {
         stage.setDial('right', last.y, 'chsh');
         stage.spawnMotePair({ colorA: last.a, colorB: last.b, entangled: isQuantum, duration: 0.22 });
         const evProg = Math.max(0, state.chshRun.log10B / EVIDENCE_BREAK_LOG10);
-        if (state.chshRun.brokenAt === null || tickIdx % 2 === 0) {
-          audio.playRoundTick(evProg);
-        }
+        if (state.chshRun.brokenAt === null || tickIdx % 2 === 0) audio.playRoundTick(evProg);
       }
 
       if (remaining <= 0) {
         clearInterval(burstTimer);
         burstTimer = null;
         state.burstRunning = false;
+        if (isQuantum && state.chshRun.brokenAt !== null) state.chshSettled = true;
         if (!isQuantum && evaluateChshCard(state.chshCard).wins === 3 && state.chshRun.rounds >= 100) {
           state.wallHitBy75 = true;
         }
@@ -404,14 +420,34 @@ export function createApp({ stage, audio, root }) {
     }, 55);
   }
 
-  function triggerBreakthrough({ instant = false, targetRounds = 2000 } = {}) {
+  function triggerBreakthrough({ instant = false, targetRounds = 2000, midShatter = false, settled = false } = {}) {
     touchInteraction();
     state.chshMode = 'entangled';
     state.chshRun = createChshRun();
-    stage.setWallState('intact');
-    stage.setArenaProgress(0, { isQuantum: true });
+    state.chshSettled = false;
     goto(6);
-    fireChsh(targetRounds, { instant });
+    if (midShatter) {
+      stage.setWallState('intact');
+      for (let i = 0; i < 1500 && state.chshRun.brokenAt === null; i++) {
+        const r = sampleChshRound({ mode: 'entangled' });
+        recordChshRound(state.chshRun, r);
+      }
+      const st = computeChshS(state.chshRun);
+      stage.setWallState('shattered', { settled: false });
+      stage.setArenaProgress(st.winRate, { isQuantum: true, se: st.seWin, snap: true });
+      stage.bloomLampLeft(0);
+      stage.bloomLampRight(0);
+      render();
+    } else {
+      fireChsh(targetRounds, { instant });
+      if (settled) {
+        state.chshSettled = true;
+        const st = computeChshS(state.chshRun);
+        stage.setWallState('shattered', { settled: true });
+        stage.setArenaProgress(st.winRate, { isQuantum: true, se: st.seWin, snap: true });
+        render();
+      }
+    }
   }
 
   function fireBobAlone(n = 1000, { instant = false } = {}) {
@@ -482,7 +518,6 @@ export function createApp({ stage, audio, root }) {
     });
   }
 
-  // ---- Depth Drawer ("How do we know?") ----
   function openDepth(key) {
     touchInteraction();
     const d = DEPTH_DRAWERS[key];
@@ -518,19 +553,25 @@ export function createApp({ stage, audio, root }) {
     elDepthBackdrop.hidden = false;
   }
 
-  // ---- Render UI ----
+  function formatLuckProof(log10B) {
+    if (log10B >= EVIDENCE_BREAK_LOG10) return { label: '1 in 1,000,000+ proof', cls: 'gold' };
+    if (log10B >= EVIDENCE_CRACK_LOG10) return { label: '1 in 1,000+ (cracking)', cls: 'warn' };
+    return { label: 'Not proven (could be luck)', cls: 'low' };
+  }
+
   function renderTopBar() {
     elBackBtn.hidden = state.step === 0;
     elResetBtn.hidden = state.step === 0;
+    if (elSkipTop) elSkipTop.hidden = state.step === 0 || state.step >= 5;
     elModeSelf.classList.toggle('active', !state.teacher);
     elModeTeacher.classList.toggle('active', state.teacher);
     elSoundBtn.setAttribute('aria-pressed', String(!audio.isMuted()));
-    elSoundBtn.textContent = audio.isMuted() ? '🔇' : '🔊';
+    elSoundBtn.innerHTML = audio.isMuted() ? SVG_SOUND_OFF : SVG_SOUND_ON;
     elSoundBtn.title = audio.isMuted() ? 'Sound off (tap to unmute)' : 'Sound on (tap to mute)';
 
     document.documentElement.classList.toggle('teacher-mode', state.teacher);
+    stage.setTeacherMode(state.teacher);
 
-    // Step dots
     elStepDots.innerHTML = Array.from({ length: STEP_COUNT }, (_, i) => {
       const cls = i === state.step ? 'dot active' : i < state.step ? 'dot done' : 'dot';
       return `<button class="${cls}" data-goto="${i}" aria-label="Step ${i + 1}"></button>`;
@@ -549,65 +590,63 @@ export function createApp({ stage, audio, root }) {
         <h1 class="hero-headline">Two boxes. No wires.<br>How do they always agree?</h1>
         <div class="hero-actions">
           <button class="btn-primary" id="btn-investigate">Investigate</button>
-          <button class="btn-quiet" id="btn-skip-game">Skip to the 75% game →</button>
         </div>
       `;
       return;
     }
 
-    let html = '';
-
-    // Teacher pinned rule reminder on game steps
-    if (state.teacher && (state.step === 5 || state.step === 6)) {
-      html += `
-        <div class="teacher-pin">
-          <strong>Rule:</strong> Both get 0 or 1 · <strong>Match</strong> unless both get 1 (then <strong>differ</strong>) · No talking
-        </div>
-      `;
-    }
+    let bodyHtml = '';
+    let footerHtml = '';
 
     if (state.step === 1) {
-      const samePct = state.merminSameCount > 0 ? Math.round((state.merminSameMatches / state.merminSameCount) * 100) : null;
-      html += `
+      const tested = state.merminSameCount > 0;
+      const samePct = tested ? Math.round((state.merminSameMatches / state.merminSameCount) * 100) : 0;
+      bodyHtml += `
         <div class="step-kicker">Step 1 · The mystery boxes</div>
         <h2 class="step-question">Same dial, same colour. Every time. How?</h2>
-        <p class="step-sub">Set both dials to the same number and fire. Einstein thought each pair's answers must be settled before they part — like a hidden card.</p>
+        <p class="step-sub">Match Alice and Bob's dials and fire. Einstein thought each pair's answers must be settled before they part — like a hidden card.</p>
         <div class="dial-pair">
           <div class="dial-col">
-            <div class="dial-label">Left dial</div>
+            <div class="dial-label">Alice's dial</div>
             <div class="seg-group">
               ${[0, 1, 2].map(d => `<button class="seg-btn ${state.dialA === d ? 'active' : ''}" data-dial="left:${d}">${d + 1}</button>`).join('')}
             </div>
           </div>
           <div class="dial-col">
-            <div class="dial-label">Right dial</div>
+            <div class="dial-label">Bob's dial</div>
             <div class="seg-group">
               ${[0, 1, 2].map(d => `<button class="seg-btn ${state.dialB === d ? 'active' : ''}" data-dial="right:${d}">${d + 1}</button>`).join('')}
             </div>
           </div>
         </div>
+        <div class="tally-card compact">
+          <div class="tally-header">
+            <span>Same-dial agreement</span>
+            <span class="big-num ${tested ? 'gold-txt' : ''}">${tested ? `${samePct}%` : '—'}</span>
+          </div>
+          <div class="tally-sub">
+            ${tested ? `${state.merminSameMatches} / ${state.merminSameCount} same colour — zero misses.` : 'Fire a burst to test if they ever disagree.'}
+          </div>
+        </div>
         <div class="inline-actions">
           <button class="btn-secondary" id="btn-fire-one">Fire 1 pair</button>
-          <button class="btn-secondary" id="btn-fire-50-same">Fire 50 matched</button>
+          ${tested ? `<button class="btn-secondary" id="btn-fire-50-same">Fire 50 more</button>` : ''}
         </div>
-        ${state.merminSameCount > 0 ? `
-          <div class="friendly-stat">
-            <span class="big-num">${state.merminSameMatches} / ${state.merminSameCount}</span>
-            <span class="stat-label">matched when dials agreed (${samePct}%)</span>
-          </div>
-        ` : ''}
-        <div class="panel-footer">
-          <button class="btn-primary" data-next="2">Let the dials spin →</button>
-          <button class="btn-depth" data-depth="merminSame">How do we know?</button>
-        </div>
+      `;
+      footerHtml = `
+        ${tested
+          ? `<button class="btn-primary" data-next="2">Let the dials spin →</button>`
+          : `<button class="btn-primary" id="btn-fire-50-same">Fire 50 same-dial pairs</button>
+             <button class="btn-quiet-sm" data-next="2">Skip to spinning dials →</button>`}
+        <button class="btn-depth" data-depth="merminSame">How do we know?</button>
       `;
     } else if (state.step === 2) {
       const hasRun = state.merminRandCount > 0;
       const pct = hasRun ? (state.merminRandMatches / state.merminRandCount) * 100 : 0;
-      html += `
+      bodyHtml += `
         <div class="step-kicker">Step 2 · Random dials</div>
         <h2 class="step-question">Now let both dials spin at random.</h2>
-        <p class="step-sub">Fire 1,000 random pairs. Watch how often the two lamps flash the same colour.</p>
+        <p class="step-sub">Fire 1,000 random pairs. Watch how often Alice and Bob flash the same colour.</p>
         ${state.teacher && !hasRun ? `<div class="predict-banner">Predict first: how often will random dials match?</div>` : ''}
         <div class="tally-card">
           <div class="tally-header">
@@ -616,27 +655,34 @@ export function createApp({ stage, audio, root }) {
           </div>
           <div class="bar-track">
             <div class="bar-fill gold" style="width:${hasRun ? pct : 0}%"></div>
-            <div class="bar-mark" style="left:50%" title="50%"><span>50%</span></div>
+            <div class="bar-mark" style="left:50%"><span>50%</span></div>
           </div>
           <div class="tally-sub">
             ${hasRun ? `${state.merminRandMatches.toLocaleString()} matches out of ${state.merminRandCount.toLocaleString()} random pairs` : 'Ready to fire 1,000 fresh pairs'}
           </div>
         </div>
-        <div class="panel-footer">
-          ${!hasRun
-            ? `<button class="btn-primary" id="btn-fire-1000-rand" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 random pairs</button>`
-            : `<button class="btn-primary" data-next="3">Could a secret card do that? →</button>
-               <button class="btn-secondary small" id="btn-fire-1000-rand">Fire 1,000 more</button>`}
-          <button class="btn-depth" data-depth="merminRandom">How do we know?</button>
-        </div>
+        ${hasRun ? `
+          <div class="callout-box">
+            <strong>Here's the catch:</strong> 100% when dials match, yet only <strong>50%</strong> overall. Can any hidden card pull that off?
+          </div>
+          <div class="inline-actions">
+            <button class="btn-secondary" id="btn-fire-1000-rand" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 more</button>
+          </div>
+        ` : ''}
+      `;
+      footerHtml = `
+        ${!hasRun
+          ? `<button class="btn-primary" id="btn-fire-1000-rand" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 random pairs</button>`
+          : `<button class="btn-primary" data-next="3">Test a hidden card →</button>`}
+        <button class="btn-depth" data-depth="merminRandom">How do we know?</button>
       `;
     } else if (state.step === 3) {
       const ev = evaluateMerminCard(state.merminCard);
       const pct = (ev.rate * 100).toFixed(1);
-      html += `
+      bodyHtml += `
         <div class="step-kicker">Step 3 · Test a hidden card</div>
-        <h2 class="step-question">Could a secret card hit 50%?</h2>
-        <p class="step-sub">Tap each dial's colour to write a hidden instruction card for both particles. Try to get below 5 of 9.</p>
+        <h2 class="step-question">Could a hidden card hit 50%?</h2>
+        <p class="step-sub">Tap each dial to write a hidden card for both particles. Every pair of Alice &amp; Bob dials is scored below.</p>
         <div class="card-switches">
           ${[0, 1, 2].map(i => {
             const c = state.merminCard[i];
@@ -649,42 +695,50 @@ export function createApp({ stage, audio, root }) {
           }).join('')}
         </div>
         <div class="grid-3x3-wrap">
-          <div class="grid-3x3" role="grid" aria-label="9 dial combinations">
-            <div></div><div class="g-hdr">1</div><div class="g-hdr">2</div><div class="g-hdr">3</div>
-            ${[0, 1, 2].map(i => `
-              <div class="g-hdr">${i + 1}</div>
-              ${[0, 1, 2].map(j => {
-                const same = ev.grid[i][j];
-                const c = state.merminCard[i];
-                return `<div class="g-cell ${same ? `match c${c}` : 'diff'}">${same ? COLOR_SYMS[c] : '·'}</div>`;
-              }).join('')}
-            `).join('')}
+          <div class="grid-axes">
+            <div class="axis-bob">BOB</div>
+            <div class="grid-with-alice">
+              <div class="axis-alice">ALICE</div>
+              <div class="grid-3x3" role="grid" aria-label="9 dial combinations">
+                <div></div><div class="g-hdr">1</div><div class="g-hdr">2</div><div class="g-hdr">3</div>
+                ${[0, 1, 2].map(i => `
+                  <div class="g-hdr">${i + 1}</div>
+                  ${[0, 1, 2].map(j => {
+                    const same = ev.grid[i][j];
+                    const c = state.merminCard[i];
+                    return `<div class="g-cell ${same ? `match c${c}` : 'diff'}" title="${same ? 'Same colour' : 'Different colours'}">${same ? COLOR_SYMS[c] : '≠'}</div>`;
+                  }).join('')}
+                `).join('')}
+              </div>
+            </div>
           </div>
           <div class="grid-readout">
             <div class="big-num">${ev.matches} / 9</div>
             <div class="stat-label">${pct}% match</div>
-            <div class="wall-note">Boxes hit <strong>50%</strong>. Every card scores at least <strong>55.6%</strong>.</div>
           </div>
         </div>
-        <div class="panel-footer">
-          <button class="btn-primary" data-next="4">Peel off the casing →</button>
-          <button class="btn-depth" data-depth="merminCard">How do we know?</button>
+        <div class="callout-box">
+          <strong>Impossible!</strong> Every hidden card matches at least <strong>5 of 9 (55.6%)</strong> — yet the real boxes hit <strong>50%</strong>.
         </div>
       `;
+      footerHtml = `
+        <button class="btn-primary" data-next="4">No card works — peel off the casing →</button>
+        <button class="btn-depth" data-depth="merminCard">How do we know?</button>
+      `;
     } else if (state.step === 4) {
-      html += `
+      bodyHtml += `
         <div class="step-kicker">Step 4 · Inside the boxes</div>
-        <h2 class="step-question">No wires. No cards. Just tilted magnets.</h2>
-        <p class="step-sub">Turn either dial to watch the magnet inside snap to 0°, 120°, or 240°. The glowing source sends paired particles.</p>
+        <h2 class="step-question">No wires. No hidden cards. Just tilted magnets.</h2>
+        <p class="step-sub">Each box holds a magnet tilted to 0°, 120°, or 240°. Turn Alice or Bob's dial to rotate the N/S poles inside.</p>
         <div class="dial-pair">
           <div class="dial-col">
-            <div class="dial-label">Left magnet (${MERMIN_SPIN_ANGLES[state.dialA]}°)</div>
+            <div class="dial-label">Alice (${MERMIN_SPIN_ANGLES[state.dialA]}°)</div>
             <div class="seg-group">
               ${[0, 1, 2].map(d => `<button class="seg-btn ${state.dialA === d ? 'active' : ''}" data-dial="left:${d}">${MERMIN_SPIN_ANGLES[d]}°</button>`).join('')}
             </div>
           </div>
           <div class="dial-col">
-            <div class="dial-label">Right magnet (${MERMIN_SPIN_ANGLES[state.dialB]}°)</div>
+            <div class="dial-label">Bob (${MERMIN_SPIN_ANGLES[state.dialB]}°)</div>
             <div class="seg-group">
               ${[0, 1, 2].map(d => `<button class="seg-btn ${state.dialB === d ? 'active' : ''}" data-dial="right:${d}">${MERMIN_SPIN_ANGLES[d]}°</button>`).join('')}
             </div>
@@ -694,33 +748,40 @@ export function createApp({ stage, audio, root }) {
           <button class="btn-secondary" id="btn-toggle-peel">${state.peeled ? 'Close casing' : 'Peel off casing'}</button>
           <button class="btn-secondary" id="btn-fire-one">Fire pair</button>
         </div>
-        <div class="panel-footer">
-          <button class="btn-primary" data-next="5">Play the 75% game →</button>
-          <button class="btn-depth" data-depth="peelOff">How do we know?</button>
-        </div>
+      `;
+      footerHtml = `
+        <button class="btn-primary" data-next="5">Now put those magnets to a real test →</button>
+        <button class="btn-depth" data-depth="peelOff">How do we know?</button>
       `;
     } else if (state.step === 5) {
       const ev = evaluateChshCard(state.chshCard);
       const st = computeChshS(state.chshRun);
       const hasRun = state.chshRun.rounds > 0;
       const pct = hasRun ? st.winRate * 100 : 0;
+      const isLuckyStreak = hasRun && st.winRate > 0.75;
+      const luckInfo = formatLuckProof(state.chshRun.maxLog10B);
       const leverReady = state.teacher ? state.classVoted : state.wallHitBy75;
 
-      html += `
+      bodyHtml += `
+        ${state.teacher ? `
+          <div class="teacher-pin">
+            <strong>Game rule:</strong> Alice &amp; Bob each get 0 or 1 · <strong>Match</strong> unless both get 1 (then <strong>differ</strong>) · No talking
+          </div>
+        ` : ''}
         <div class="step-kicker">Step 5 · The team game</div>
-        <h2 class="step-question">Can you beat 75%?</h2>
-        <p class="step-sub">Alice and Bob each get a random 0 or 1. They win if their answers match — unless both got 1, then they must differ. No talking.</p>
+        <h2 class="step-question">Can any hidden card beat 75%?</h2>
+        ${!state.teacher ? `<p class="step-sub">Alice and Bob each get a random 0 or 1. Win if they match — unless both got 1, then they must differ. No talking.</p>` : ''}
 
         <div class="chsh-switches">
           <div class="sw-row">
             <span class="sw-who">Alice</span>
-            <button class="mini-sw c${state.chshCard.a0}" data-ccard="a0">If 0 → ${COLOR_SYMS[state.chshCard.a0]}</button>
-            <button class="mini-sw c${state.chshCard.a1}" data-ccard="a1">If 1 → ${COLOR_SYMS[state.chshCard.a1]}</button>
+            <button class="mini-sw c${state.chshCard.a0}" data-ccard="a0">0 → ${COLOR_SYMS[state.chshCard.a0]} ${COLOR_NAMES[state.chshCard.a0]}</button>
+            <button class="mini-sw c${state.chshCard.a1}" data-ccard="a1">1 → ${COLOR_SYMS[state.chshCard.a1]} ${COLOR_NAMES[state.chshCard.a1]}</button>
           </div>
           <div class="sw-row">
             <span class="sw-who">Bob</span>
-            <button class="mini-sw c${state.chshCard.b0}" data-ccard="b0">If 0 → ${COLOR_SYMS[state.chshCard.b0]}</button>
-            <button class="mini-sw c${state.chshCard.b1}" data-ccard="b1">If 1 → ${COLOR_SYMS[state.chshCard.b1]}</button>
+            <button class="mini-sw c${state.chshCard.b0}" data-ccard="b0">0 → ${COLOR_SYMS[state.chshCard.b0]} ${COLOR_NAMES[state.chshCard.b0]}</button>
+            <button class="mini-sw c${state.chshCard.b1}" data-ccard="b1">1 → ${COLOR_SYMS[state.chshCard.b1]} ${COLOR_NAMES[state.chshCard.b1]}</button>
           </div>
         </div>
 
@@ -736,18 +797,17 @@ export function createApp({ stage, audio, root }) {
 
         <div class="tally-card compact">
           <div class="tally-header">
-            <span>Card score (${ev.wins} of 4 = ${Math.round(ev.rate * 100)}%)</span>
+            <span>Hidden card (${ev.wins} of 4 = ${Math.round(ev.rate * 100)}%)</span>
             <span class="big-num">${hasRun ? `${pct.toFixed(1)}%` : '—'}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ivory" style="width:${hasRun ? Math.min(pct, 75) : 0}%"></div>
-            <div class="bar-wall" style="left:75%"><span>75% wall</span></div>
           </div>
           <div class="tally-sub">
             ${hasRun
-              ? `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins · Wall holds solid`
-              : 'Flip switches to see the unavoidable losing tile, then fire.'}
+              ? isLuckyStreak
+                ? `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} — a lucky streak! Keep firing and luck fades back to 75%.`
+                : `${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins — stuck at the 75% ceiling.`
+              : 'Every card leaves at least one red ✗ tile. Test it against the glass wall.'}
           </div>
+          ${hasRun ? `<div class="luck-pill ${luckInfo.cls}">Proof against luck: ${luckInfo.label}</div>` : ''}
         </div>
 
         <div class="inline-actions">
@@ -756,71 +816,87 @@ export function createApp({ stage, audio, root }) {
           <button class="btn-secondary" data-fire="1000" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000</button>
           ${hasRun ? `<button class="btn-quiet-sm" id="btn-clear-chsh">Clear</button>` : ''}
         </div>
+      `;
 
-        <div class="panel-footer">
-          ${leverReady
-            ? `<button class="btn-primary pulse-gold" id="btn-entangled-lever">Pull lever: Use entangled pairs →</button>`
-            : state.teacher
-              ? `<button class="btn-primary" id="btn-class-voted">The class has voted — reveal switch</button>`
-              : `<button class="btn-primary" data-fire="1000" ${state.burstRunning ? 'disabled' : ''}>Test this card (1,000 rounds)</button>`}
-          <button class="btn-depth" data-depth="chshCard">How do we know?</button>
-        </div>
+      footerHtml = `
+        ${leverReady
+          ? `<button class="btn-primary pulse-gold" id="btn-entangled-lever">Pull brass lever: Entangled pairs →</button>`
+          : state.teacher
+            ? `<button class="btn-primary" id="btn-class-voted">The class has voted — reveal lever</button>`
+            : `<button class="btn-primary" data-fire="1000" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 rounds</button>`}
+        <button class="btn-depth" data-depth="chshCard">How do we know?</button>
       `;
     } else if (state.step === 6) {
       const st = computeChshS(state.chshRun);
       const pct = state.chshRun.rounds > 0 ? st.winRate * 100 : 0;
       const cracked = state.chshRun.crackedAt !== null;
       const broken = state.chshRun.brokenAt !== null;
-      const statusText = broken
-        ? `Wall shattered at round ${state.chshRun.brokenAt}! Less than a 1-in-a-million chance of luck.`
-        : cracked
-          ? `Glass cracking at round ${state.chshRun.crackedAt} — luck ruled out past 1 in 1,000…`
-          : 'Firing entangled pairs at the best magnet angles…';
+      const settled = state.chshSettled && broken;
+      const luckInfo = formatLuckProof(state.chshRun.maxLog10B);
 
-      html += `
+      const headline = settled
+        ? '85.4% — past the impossible wall.'
+        : broken
+          ? 'The 75% glass wall just shattered!'
+          : 'Entangled pairs vs. the 75% wall…';
+
+      const statusText = settled
+        ? `Wall shattered at round ${state.chshRun.brokenAt}. After ${state.chshRun.rounds.toLocaleString()} rounds, the score hovers right around nature's 85.4% limit.`
+        : broken
+          ? `Wall shattered at round ${state.chshRun.brokenAt}! Less than a 1-in-a-million chance any hidden card did this by luck.`
+          : cracked
+            ? `Glass cracking at round ${state.chshRun.crackedAt} — luck ruled out past 1 in 1,000…`
+            : 'Firing entangled pairs through the tilted magnets…';
+
+      bodyHtml += `
         <div class="step-kicker">Step 6 · Breakthrough</div>
-        <h2 class="step-question">${broken ? '85.4% — past the impossible wall.' : 'Entangled pairs vs. the 75% wall.'}</h2>
+        <h2 class="step-question">${headline}</h2>
         <p class="step-sub">${statusText}</p>
 
-        <div class="tally-card">
+        <div class="tally-card compact">
           <div class="tally-header">
             <span>Entangled score</span>
             <span class="big-num gold-txt">${state.chshRun.rounds > 0 ? `${pct.toFixed(1)}%` : '—'}</span>
           </div>
-          <div class="bar-track">
+          <div class="bar-track spaced-ticks">
             <div class="bar-fill gold" style="width:${Math.min(100, pct)}%"></div>
-            <div class="bar-wall ${broken ? 'shattered' : cracked ? 'cracked' : ''}" style="left:75%"><span>75%</span></div>
-            <div class="bar-gold-mark ${broken ? 'lit' : ''}" style="left:85.36%"><span>85.4%</span></div>
+            <div class="bar-wall below-lbl ${broken ? 'shattered' : cracked ? 'cracked' : ''}" style="left:75%"><span>75%</span></div>
+            ${broken ? `<div class="bar-gold-mark lit" style="left:85.36%"><span>85.4%</span></div>` : ''}
           </div>
           <div class="tally-sub">
             ${state.chshRun.wins.toLocaleString()} / ${state.chshRun.rounds.toLocaleString()} wins
-            ${broken ? ' · Settled on nature\'s limit' : ''}
           </div>
+          <div class="luck-pill ${luckInfo.cls}">Proof against luck: ${luckInfo.label}</div>
         </div>
+
+        ${broken ? `
+          <div class="callout-box">
+            <strong>What nature just proved:</strong> no hidden card could ever do this. The particles truly wait until you measure.
+          </div>
+        ` : ''}
 
         <div class="inline-actions">
           <button class="btn-secondary" id="btn-refire-entangled" ${state.burstRunning ? 'disabled' : ''}>Run fresh 2,000 rounds</button>
         </div>
-
-        <div class="panel-footer">
-          <button class="btn-primary" data-next="7" ${state.burstRunning ? 'disabled' : ''}>Can Alice text Bob? →</button>
-          <button class="btn-depth" data-depth="breakthrough">How do we know? (See S &amp; maths)</button>
-        </div>
+      `;
+      footerHtml = `
+        <button class="btn-primary" data-next="7" ${state.burstRunning ? 'disabled' : ''}>Can Alice text Bob? →</button>
+        <button class="btn-depth" data-depth="breakthrough">How do we know?</button>
       `;
     } else if (state.step === 7) {
       const br = state.bobRun;
-      const pct0 = br.n0 > 0 ? ((br.b0WhenA0 / br.n0) * 100).toFixed(1) : '—';
-      const pct1 = br.n1 > 0 ? ((br.b0WhenA1 / br.n1) * 100).toFixed(1) : '—';
-      const pctOff = br.nOff > 0 ? ((br.b0WhenOff / br.nOff) * 100).toFixed(1) : '—';
-      const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : (br.n0 + br.n1 > 0 ? (((br.b0WhenA0 + br.b0WhenA1) / (br.n0 + br.n1)) * 100).toFixed(1) : '—');
+      const pct0 = br.n0 > 0 ? `${((br.b0WhenA0 / br.n0) * 100).toFixed(1)}%` : '—';
+      const pct1 = br.n1 > 0 ? `${((br.b0WhenA1 / br.n1) * 100).toFixed(1)}%` : '—';
+      const pctOff = br.nOff > 0 ? `${((br.b0WhenOff / br.nOff) * 100).toFixed(1)}%` : '—';
+      const curPct = state.alicePolicy === '0' ? pct0 : state.alicePolicy === '1' ? pct1 : state.alicePolicy === 'off' ? pctOff : (br.n0 + br.n1 > 0 ? `${(((br.b0WhenA0 + br.b0WhenA1) / (br.n0 + br.n1)) * 100).toFixed(1)}%` : '—');
       const winPct = br.total > 0 ? ((br.wins / br.total) * 100).toFixed(1) : '—';
 
-      html += `
+      bodyHtml += `
         <div class="step-kicker">Step 7 · No faster-than-light texting</div>
         <h2 class="step-question">Can Alice send Bob an instant message?</h2>
-        <p class="step-sub">Change what Alice does on her side, then watch Bob's lamp alone. Does his 50/50 stream ever budge?</p>
+        <p class="step-sub">Switch what Alice does behind the veil and watch Bob's lamp alone. Does his 50/50 coin flip ever change?</p>
 
-        <div class="dial-label">Alice's side</div>
+        <div class="dial-label">Alice's choice (hidden from Bob)</div>
         <div class="seg-group four">
           <button class="seg-btn ${state.alicePolicy === '0' ? 'active' : ''}" data-apol="0">Always 0</button>
           <button class="seg-btn ${state.alicePolicy === '1' ? 'active' : ''}" data-apol="1">Always 1</button>
@@ -830,61 +906,65 @@ export function createApp({ stage, audio, root }) {
 
         <div class="tally-card compact">
           <div class="tally-header">
-            <span>Bob's lamp alone (▲ share)</span>
-            <span class="big-num">${curPct === '—' ? '—' : `${curPct}%`}</span>
+            <span>Bob alone (▲ Coral share)</span>
+            <span class="big-num">${curPct}</span>
           </div>
           <div class="bar-track">
             <div class="bar-fill coral" style="width:${curPct === '—' ? 50 : parseFloat(curPct)}%"></div>
             <div class="bar-mark" style="left:50%"><span>50%</span></div>
           </div>
-          <div class="tally-sub">
-            Alice=0: <strong>${pct0 === '—' ? '—' : pct0 + '%'}</strong> · Alice=1: <strong>${pct1 === '—' ? '—' : pct1 + '%'}</strong> · Off: <strong>${pctOff === '—' ? '—' : pctOff + '%'}</strong>
+          <div class="bob-slots">
+            <div class="bob-slot ${br.n0 > 0 ? 'filled' : ''}"><span>Alice: 0</span><strong>${pct0}</strong></div>
+            <div class="bob-slot ${br.n1 > 0 ? 'filled' : ''}"><span>Alice: 1</span><strong>${pct1}</strong></div>
+            <div class="bob-slot ${br.nOff > 0 ? 'filled' : ''}"><span>Alice: Off</span><strong>${pctOff}</strong></div>
           </div>
         </div>
 
         ${br.compared ? `
-          <div class="compare-reveal">
-            <strong>Notes met at light speed:</strong> together they won <strong>${winPct}%</strong> — yet Bob alone only ever saw coin flips!
+          <div class="callout-box">
+            <strong>Notes met at normal speed:</strong> together they won <strong>${winPct}%</strong> — yet Bob alone only ever saw 50/50 coin flips.
           </div>
         ` : ''}
 
         <div class="inline-actions">
           <button class="btn-secondary" id="btn-fire-bob" ${state.burstRunning ? 'disabled' : ''}>Fire 1,000 rounds</button>
-          <button class="btn-secondary" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Compare notes (light speed)</button>
-        </div>
-
-        <div class="panel-footer">
-          <button class="btn-primary" data-next="8">Was this really tested? →</button>
-          <button class="btn-depth" data-depth="noSignal">How do we know?</button>
+          <button class="btn-secondary" id="btn-compare-notes" ${state.burstRunning ? 'disabled' : ''}>Bring notes together (normal speed)</button>
         </div>
       `;
+      footerHtml = `
+        <button class="btn-primary" data-next="8">Was this really tested? →</button>
+        <button class="btn-depth" data-depth="noSignal">How do we know?</button>
+      `;
     } else if (state.step === 8) {
-      html += `
+      bodyHtml += `
         <div class="step-kicker">Step 8 · Reality's strangest proven fact</div>
-        <h2 class="step-question">This isn't a thought experiment. Real labs proved it.</h2>
+        <h2 class="step-question">This isn't a trick. Real labs proved it.</h2>
         <div class="real-list">
           <div class="real-item">
             <span class="real-yr">1972 &amp; 1982</span>
-            <span>Clauser and Alain Aspect tested entangled light — Aspect's lab measured far past the 75% ceiling.</span>
+            <span>Clauser and Alain Aspect tested entangled light — shattering the 75% hidden-card ceiling.</span>
           </div>
           <div class="real-item">
             <span class="real-yr">2015</span>
             <span>Labs in Delft (1.3 km apart), Vienna, and NIST closed every major loophole at once — and entanglement won again.</span>
           </div>
           <div class="real-item">
-            <span class="real-yr">2022 Nobel</span>
+            <span class="real-yr">2022 Nobel Prize</span>
             <span>Awarded to Aspect, Clauser, and Zeilinger. Today, the same test powers quantum encryption that flags eavesdroppers.</span>
           </div>
         </div>
-        <div class="panel-footer">
-          <button class="btn-primary" id="btn-play-again">Play again from the start</button>
+        <div class="inline-actions">
           <button class="btn-secondary" id="btn-switch-teacher">${state.teacher ? 'Switch to Self-guided' : 'Try Teacher / Projector mode'}</button>
-          <button class="btn-depth" data-depth="realWorld">How do we know? (Numbers, loopholes &amp; myths)</button>
         </div>
+      `;
+      footerHtml = `
+        <button class="btn-primary" id="btn-play-again">Play again from the start</button>
+        <button class="btn-depth" data-depth="realWorld">How do we know?</button>
       `;
     }
 
-    elPanelBody.innerHTML = html;
+    elPanelScroll.innerHTML = bodyHtml;
+    elPanelFooter.innerHTML = footerHtml;
   }
 
   // ---- Event Delegation ----
@@ -894,12 +974,12 @@ export function createApp({ stage, audio, root }) {
     touchInteraction();
 
     if (t.id === 'btn-investigate') { audio.playDialClick(); goto(1); return; }
-    if (t.id === 'btn-skip-game') { audio.playDialClick(); goto(5); return; }
+    if (t.id === 'btn-skip-top') { audio.playDialClick(); goto(5); return; }
     if (t.id === 'btn-back') { audio.playDialClick(); goto(state.step - 1); return; }
     if (t.id === 'btn-reset' || t.id === 'btn-play-again') { audio.playDialClick(); resetAll(); return; }
     if (t.id === 'btn-sound') { audio.setMuted(!audio.isMuted()); if (!audio.isMuted()) audio.playDialClick(); renderTopBar(); return; }
-    if (t.id === 'mode-self') { state.teacher = false; audio.playDialClick(); render(); return; }
-    if (t.id === 'mode-teacher') { state.teacher = true; audio.playDialClick(); render(); return; }
+    if (t.id === 'mode-self') { state.teacher = false; audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
+    if (t.id === 'mode-teacher') { state.teacher = true; audio.playDialClick(); render(); requestAnimationFrame(() => stage.resize()); return; }
     if (t.id === 'btn-switch-teacher') { state.teacher = !state.teacher; audio.playDialClick(); goto(0); return; }
     if (t.id === 'depth-close') { state.depthKey = null; elDepthBackdrop.hidden = true; return; }
 
@@ -925,8 +1005,11 @@ export function createApp({ stage, audio, root }) {
     if (t.dataset.mcard !== undefined) {
       const idx = Number(t.dataset.mcard);
       state.merminCard[idx] = state.merminCard[idx] === 0 ? 1 : 0;
-      audio.playLampPair(state.merminCard[idx], state.merminCard[idx]);
-      stage.spawnMotePair({ colorA: state.merminCard[idx], colorB: state.merminCard[idx], entangled: false, duration: 0.3 });
+      stage.setCardStrip(state.merminCard);
+      const colA = state.merminCard[0];
+      const colB = state.merminCard[2];
+      audio.playLampPair(colA, colB);
+      stage.spawnMotePair({ colorA: colA, colorB: colB, entangled: false, duration: 0.34 });
       render();
       return;
     }
@@ -944,7 +1027,7 @@ export function createApp({ stage, audio, root }) {
       state.chshCard[k] = state.chshCard[k] === 0 ? 1 : 0;
       state.chshRun = createChshRun();
       stage.setWallState('intact');
-      stage.setArenaProgress(0, { isQuantum: false });
+      stage.setArenaProgress(0, { isQuantum: false, snap: true });
       audio.playDialClick();
       render();
       return;
@@ -960,7 +1043,7 @@ export function createApp({ stage, audio, root }) {
     if (t.id === 'btn-clear-chsh') {
       state.chshRun = createChshRun();
       stage.setWallState('intact');
-      stage.setArenaProgress(0, { isQuantum: false });
+      stage.setArenaProgress(0, { isQuantum: false, snap: true });
       audio.playDialClick();
       render();
       return;
@@ -973,13 +1056,7 @@ export function createApp({ stage, audio, root }) {
       return;
     }
 
-    if (t.id === 'btn-entangled-lever') {
-      audio.playDialClick();
-      triggerBreakthrough({ targetRounds: 2000 });
-      return;
-    }
-
-    if (t.id === 'btn-refire-entangled') {
+    if (t.id === 'btn-entangled-lever' || t.id === 'btn-refire-entangled') {
       audio.playDialClick();
       triggerBreakthrough({ targetRounds: 2000 });
       return;
@@ -1003,33 +1080,29 @@ export function createApp({ stage, audio, root }) {
     }
   });
 
-  // Keyboard shortcuts (great for Teacher projector mode + desktop accessibility)
   window.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !elDepthBackdrop.hidden) {
       elDepthBackdrop.hidden = true;
       return;
     }
-    if (e.key === 'ArrowRight' && state.step < STEP_COUNT - 1) {
-      goto(state.step + 1);
-    } else if (e.key === 'ArrowLeft' && state.step > 0) {
-      goto(state.step - 1);
-    } else if (e.key === 't' && (e.ctrlKey || e.metaKey)) {
+    if (e.key === 'ArrowRight' && state.step < STEP_COUNT - 1) goto(state.step + 1);
+    else if (e.key === 'ArrowLeft' && state.step > 0) goto(state.step - 1);
+    else if (e.key === 't' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       state.teacher = !state.teacher;
       render();
     }
   });
 
-  // Gentle 6s idle hint in Self-guided mode (never in Teacher mode)
   const HINTS = {
-    1: 'Tap "Fire 1 pair" or change either dial to test how the boxes agree.',
+    1: 'Tap "Fire 50 same-dial pairs" to see Alice and Bob agree every time.',
     2: 'Tap "Fire 1,000 random pairs" to see how often random dials match.',
-    3: 'Tap any of the 3 dial buttons to flip the hidden card colours.',
-    4: 'Tap a magnet angle (0°, 120°, 240°) to watch the magnet rotate inside.',
-    5: 'Tap "Test this card" to see the best plan hit the 75% glass wall.',
-    7: 'Switch Alice between "Always 0" and "Always 1", then tap "Compare notes".',
+    3: 'Tap any Dial button to flip the hidden card and watch the 3×3 grid.',
+    4: 'Tap 0°, 120°, or 240° to watch Alice or Bob\'s magnet rotate inside.',
+    5: 'Tap "Fire 1,000 rounds" to see the best hidden card hit the 75% glass wall.',
+    7: 'Switch Alice between "Always 0" and "Always 1" and watch Bob stay at 50%.',
   };
-  hintTimer = setInterval(() => {
+  setInterval(() => {
     if (state.teacher || state.burstRunning || state.depthKey) return;
     const h = HINTS[state.step];
     if (h && performance.now() - state.lastInteract > 6500 && !state.idleHint) {
@@ -1039,10 +1112,8 @@ export function createApp({ stage, audio, root }) {
     }
   }, 1000);
 
-  // Start at Step 0
   goto(0);
 
-  // Public automation / verification API (SPEC & G03 brief)
   return {
     goto,
     fire(n = 1) {
@@ -1061,43 +1132,24 @@ export function createApp({ stage, audio, root }) {
         fireBobAlone(n, { instant: true });
       }
     },
-    triggerBreakthrough({ instant = true, targetRounds = 2000, midShatter = false, settled = false } = {}) {
-      state.chshMode = 'entangled';
-      state.chshRun = createChshRun();
-      goto(6);
-      if (midShatter) {
-        stage.setWallState('intact');
-        for (let i = 0; i < 1500 && state.chshRun.brokenAt === null; i++) {
-          const r = sampleChshRound({ mode: 'entangled' });
-          recordChshRound(state.chshRun, r);
-        }
-        const st = computeChshS(state.chshRun);
-        stage.setWallState('shattered', { settled: false });
-        stage.setArenaProgress(st.winRate, { isQuantum: true, se: st.seWin, snap: true });
-        stage.bloomLampLeft(0);
-        stage.bloomLampRight(0);
-        render();
-      } else {
-        fireChsh(targetRounds, { instant });
-        if (settled) {
-          const st = computeChshS(state.chshRun);
-          stage.setWallState('shattered', { settled: true });
-          stage.setArenaProgress(st.winRate, { isQuantum: true, se: st.seWin, snap: true });
-        }
-      }
-    },
+    triggerBreakthrough,
     setTeacher(val) {
       state.teacher = !!val;
       render();
+      requestAnimationFrame(() => stage.resize());
     },
     setCard(card) {
-      if (Array.isArray(card)) state.merminCard = card.slice(0, 3);
-      else state.chshCard = { ...state.chshCard, ...card };
+      if (Array.isArray(card)) {
+        state.merminCard = card.slice(0, 3);
+        syncCardStageVisual();
+      } else {
+        state.chshCard = { ...state.chshCard, ...card };
+      }
       render();
     },
     peel(val) {
       state.peeled = !!val;
-      stage.setPeel(state.peeled);
+      stage.setPeel(state.peeled, { snap: true });
       render();
     },
     compareNotes() {

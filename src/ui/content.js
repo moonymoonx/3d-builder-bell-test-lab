@@ -25,8 +25,8 @@ export const DEPTH_DRAWERS = {
     ],
   },
   merminCard: {
-    title: 'How do we know? — The 5/9 instruction-card wall',
-    plain: 'To guarantee agreement whenever both dials match, both particles must carry the same 3-colour card — and every 3-colour card matches on at least 5 of the 9 dial pairs.',
+    title: 'How do we know? — Why every hidden card scores ≥ 5/9',
+    plain: 'To guarantee agreement whenever both dials match, both particles must carry the same 3-colour hidden card — and every 3-colour card matches on at least 5 of the 9 dial pairs.',
     detail: 'All-same cards (▲▲▲ or ●●●) match 9/9 (100%). Any 2-and-1 card (like ▲▲●) matches on 2² + 1² = 5 of 9 pairs (55.6%). Mixing cards at random only averages ≥ 55.6%.',
     math: '8 deterministic cards → matches ∈ {9/9, 5/9}. Any convex mixture obeys P(same) ≥ 5/9 ≈ 55.56% > 50%.',
     sources: [
@@ -44,9 +44,9 @@ export const DEPTH_DRAWERS = {
     ],
   },
   chshCard: {
-    title: 'How do we know? — Why no secret plan beats 75%',
-    plain: 'Any secret plan caps out at 75%; quantum entanglement reaches 85.4% — a hard limit in nature proven by Tsirelson.',
-    detail: 'A secret plan picks 4 answers: Alice for 0 or 1, Bob for 0 or 1. Winning all 4 cases requires 3 matches and 1 mismatch — impossible because matching 0-0, 0-1, and 1-0 forces 1-1 to match too.',
+    title: 'How do we know? — Why no hidden card beats 75%',
+    plain: 'Any hidden card caps out at 75%; quantum entanglement reaches 85.4% — a hard limit in nature proven by Tsirelson.',
+    detail: 'A hidden card picks 4 answers: Alice for 0 or 1, Bob for 0 or 1. Winning all 4 cases requires 3 matches and 1 mismatch — impossible because matching 0-0, 0-1, and 1-0 forces 1-1 to match too.',
     math: 'CHSH game: win iff a ⊕ b = x · y. Summing the 4 equations mod 2 gives 0 = 1. All 16 deterministic cards win 3/4 (8 cards) or 1/4 (8 cards); shared randomness cannot exceed 3/4 (S ≤ 2).',
     sources: [
       'Clauser, Horne, Shimony, & Holt, PRL 23, 880 (1969) — doi:10.1103/physrevlett.23.880',
@@ -55,7 +55,7 @@ export const DEPTH_DRAWERS = {
   },
   breakthrough: {
     title: 'How do we know? — Ruling out luck & measuring S',
-    plain: 'This shatter means less than a one-in-a-million chance any secret plan — even one adapting on the fly — reached here by luck.',
+    plain: 'This shatter means less than a one-in-a-million chance any hidden card — even one adapting on the fly — reached here by luck.',
     detail: 'Alice measures at 0° / 90° and Bob at 45° / −45° (photons use half: 0° / 45° and 22.5° / −22.5°). Each round updates an exact betting score: ×(2+√2)/3 per win, ×(2−√2) per loss. Under any local plan, expected multiplier ≤ 1, so Ville\'s inequality guarantees P(ever ≥ 10⁶) ≤ 10⁻⁶.',
     math: 'P_win = cos²(π/8) = (2+√2)/4 ≈ 85.36% · S = E₀₀+E₀₁+E₁₀−E₁₁ = 8·P_win − 4 · Classical S ≤ 2 · Tsirelson bound S ≤ 2√2 ≈ 2.828.',
     sources: [
@@ -66,7 +66,7 @@ export const DEPTH_DRAWERS = {
   noSignal: {
     title: 'How do we know? — Why no message outruns light',
     plain: 'No matter what Alice does to her particle, Bob\'s lamp stays a pure 50/50 coin flip — so no message can cross faster than light.',
-    detail: 'Measuring Alice\'s particle never alters Bob\'s local probabilities. The extra correlation only shows up when Alice sends her list of questions and answers to Bob through an ordinary light-speed channel.',
+    detail: 'Measuring Alice\'s particle never alters Bob\'s local probabilities. The extra correlation only shows up when Alice brings her list of questions and answers to Bob at normal (light-speed or slower) speed.',
     math: 'Reduced state ρ_B = Tr_A(|ψ⁻⟩⟨ψ⁻|) = I/2 ⇒ P(b = 0 | x, y) = 1/2 identically for all x, y.',
     sources: [
       'Ghirardi, Rimini, & Weber, Lett. Nuovo Cimento 27, 293 (1980) — doi:10.1007/bf02817189',
