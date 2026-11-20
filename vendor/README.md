@@ -1,0 +1,1 @@
+three.js r170 (MIT) copied from ../periodic-table/node_modules/three. addons/ = a subset of three/examples/jsm (MIT): OrbitControls, postprocessing, shaders, RoundedBoxGeometry, RoomEnvironment, BufferGeometryUtils. Import map: "three" -> ./vendor/three.module.min.js, "three/addons/" -> ./vendor/addons/
