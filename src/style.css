@@ -235,6 +235,7 @@ html.teacher-mode .st-ang { font-size: 15px; padding: 2px 7px; }
   transition: transform 90ms ease-out, background 150ms ease-out, border-color 150ms ease-out;
 }
 .icon-btn:hover { background: rgba(40, 50, 72, 0.96); border-color: rgba(244, 239, 230, 0.45); }
+.icon-btn.active { background: rgba(230, 182, 85, 0.22); border-color: rgba(230, 182, 85, 0.72); color: var(--gold); }
 .icon-btn:active { transform: scale(0.96); }
 .icon-btn.svg-only { padding: 0; width: 44px; }
 
@@ -283,6 +284,7 @@ html.teacher-mode .st-ang { font-size: 15px; padding: 2px 7px; }
 }
 #step-dots .dot.done { background: rgba(230, 182, 85, 0.6); }
 #step-dots .dot.active { width: 22px; border-radius: 999px; background: var(--gold); }
+.dot-myths { display: none; }
 
 /* Hero Step 0 Overlay */
 #hero-overlay {
@@ -822,6 +824,132 @@ html.teacher-mode .btn-clear { min-height: 54px; padding: 0 22px; font-size: 20p
 .bob-slot.filled { border-color: rgba(230, 182, 85, 0.52); }
 .bob-slot strong { font-size: 12.5px; color: var(--ivory); font-variant-numeric: tabular-nums; }
 
+/* Myth-buster mode UI (reuses exact stage palette & type scale) */
+.myth-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.myth-tab {
+  min-height: 40px;
+  padding: 6px 6px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out;
+}
+.myth-tab.active {
+  background: rgba(230, 182, 85, 0.22);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+html.teacher-mode .myth-tab { min-height: 48px; font-size: 18px; }
+
+.myth-msg-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.msg-slot {
+  min-height: 58px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(230, 182, 85, 0.48);
+  background: rgba(230, 182, 85, 0.12);
+  color: var(--ivory);
+  font-family: var(--sans);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+}
+.msg-slot.is-off {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--muted);
+}
+.ms-ltr { font-size: 11px; font-weight: 700; color: var(--muted); }
+.ms-val { font-size: 14px; font-weight: 800; color: var(--gold); }
+.msg-slot.is-off .ms-val { color: var(--muted); }
+
+.myth-tag {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(244, 239, 230, 0.12);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 800;
+}
+.myth-tag.gold { background: rgba(230, 182, 85, 0.22); color: var(--gold); }
+
+.ftl-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+.ftl-col {
+  padding: 8px 6px;
+  border-radius: 10px;
+  background: rgba(13, 16, 23, 0.68);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.ftl-col.decoded {
+  border-color: rgba(230, 182, 85, 0.72);
+  background: rgba(230, 182, 85, 0.14);
+}
+.ftl-lbl { font-size: 11px; font-weight: 700; color: var(--muted); }
+.ftl-rate { font-size: 14px; font-weight: 800; color: var(--ivory); font-variant-numeric: tabular-nums; }
+.ftl-mini-dots { display: flex; gap: 3px; }
+.m-dot { width: 7px; height: 7px; border-radius: 50%; }
+.m-dot.c0 { background: var(--coral); }
+.m-dot.c1 { background: var(--jade); }
+.ftl-noise { font-size: 11px; color: var(--muted); }
+.ftl-dec { font-size: 11.5px; font-weight: 800; color: var(--gold); }
+
+.cmp-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cmp-box {
+  padding: 10px 8px;
+  border-radius: 10px;
+  background: rgba(13, 16, 23, 0.64);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+.cmp-box.gold { border-color: rgba(230, 182, 85, 0.52); }
+.cmp-box span { font-size: 12px; font-weight: 700; color: var(--muted); }
+.cmp-box strong { font-size: 24px; font-weight: 800; color: var(--ivory); font-variant-numeric: tabular-nums; }
+.cmp-box strong.gold-txt { color: var(--gold); }
+.cmp-box small { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.tally-card.highlight-gold { border-color: rgba(230, 182, 85, 0.55); }
+.cmp-bars { display: flex; flex-direction: column; gap: 8px; }
+.cmp-bar-row { display: flex; flex-direction: column; gap: 3px; }
+.cmp-bar-lbl { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cmp-bar-lbl strong { color: var(--ivory); }
+.cmp-bar-lbl .gold-txt { color: var(--gold); }
+.bar-track.slim { height: 12px; margin: 2px 0; }
+.bar-fill.ivory { background: #DCE4F2; }
+
 /* Step 8 real-world list */
 .real-list { display: flex; flex-direction: column; gap: 10px; }
 .real-item {
@@ -980,7 +1108,7 @@ html.teacher-mode .btn-clear { min-height: 54px; padding: 0 22px; font-size: 20p
   .grid-micro { font-size: 10px; }
 
   #top-bar { padding: 8px 10px; gap: 6px; }
-  #btn-skip-top { display: none; }
+  #btn-skip-top, #btn-myths { display: none; }
   /* Slim phone step-progress bar cleanly seated below top chrome! */
   #step-dots {
     position: fixed;
@@ -995,6 +1123,21 @@ html.teacher-mode .btn-clear { min-height: 54px; padding: 0 22px; font-size: 20p
   #app.is-hero #step-dots { display: none; }
   #step-dots .dot { width: 6px; height: 6px; }
   #step-dots .dot.active { width: 16px; }
+  .dot-myths {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 5px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid rgba(244, 239, 230, 0.22);
+    background: rgba(31, 38, 54, 0.9);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 10.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .dot-myths.active { border-color: var(--gold); color: var(--gold); background: rgba(230, 182, 85, 0.2); }
   #app:not(.is-hero) .brand-mark { display: none; }
   .brand-mark { font-size: 13px; color: var(--ivory); }
   .top-left, .top-right { gap: 5px; }
@@ -1035,6 +1178,16 @@ html.teacher-mode .btn-clear { min-height: 54px; padding: 0 22px; font-size: 20p
   .h-dot { height: 15px; font-size: 8.5px; }
   .bob-slot { padding: 4px 2px; font-size: 10px; }
   .bob-slot strong { font-size: 11.5px; }
+  .myth-tab { min-height: 34px; font-size: 11.5px; padding: 4px; }
+  .msg-slot { min-height: 46px; padding: 4px; }
+  .ms-ltr { font-size: 9.5px; }
+  .ms-val { font-size: 12.5px; }
+  .ftl-col { padding: 5px 4px; gap: 2px; }
+  .ftl-rate { font-size: 12.5px; }
+  .ftl-dec, .ftl-noise { font-size: 10px; }
+  .cmp-box { padding: 6px; }
+  .cmp-box strong { font-size: 18px; }
+  .cmp-bar-lbl { font-size: 11.5px; }
   #idle-hint { left: 12px; right: 12px; bottom: 12px; text-align: center; font-size: 13px; }
 }
 

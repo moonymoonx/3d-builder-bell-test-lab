@@ -10,6 +10,9 @@ import {
   recordChshRound,
   computeChshS,
   cryptoInt,
+  sampleFtlMessage,
+  sampleGlovesVsEntangled,
+  sampleObserverVsRecorder,
 } from '../physics.js';
 import { STEP_COUNT, DEPTH_DRAWERS } from './content.js';
 
@@ -52,6 +55,23 @@ export function createApp({ stage, audio, root }) {
     depthKey: null,
     idleHint: '',
     lastInteract: performance.now(),
+    mythMode: false,
+    mythTab: 'ftl', // 'ftl' | 'gloves' | 'observer'
+    mythFtl: {
+      message: ['0', '1', '0'], // default S · O · S pattern
+      sent: false,
+      revealed: false,
+      result: null,
+    },
+    mythGloves: {
+      sameRes: null,
+      randRes: null,
+    },
+    mythObserver: {
+      humanRes: null,
+      recorderRes: null,
+      mode: 'human', // 'human' | 'recorder'
+    },
   };
 
   let idlePairTimer = null;
@@ -61,6 +81,7 @@ export function createApp({ stage, audio, root }) {
   const elBackBtn = root.querySelector('#btn-back');
   const elResetBtn = root.querySelector('#btn-reset');
   const elSkipTop = root.querySelector('#btn-skip-top');
+  const elMythsBtn = root.querySelector('#btn-myths');
   const elSoundBtn = root.querySelector('#btn-sound');
   const elModeSelf = root.querySelector('#mode-self');
   const elModeTeacher = root.querySelector('#mode-teacher');
@@ -154,10 +175,167 @@ export function createApp({ stage, audio, root }) {
     requestAnimationFrame(() => stage.resize());
   }
 
+  function openMyths(tab = 'ftl') {
+    stopTimers();
+    state.mythMode = true;
+    state.mythTab = tab;
+    state.bridgeOpen = false;
+    state.shatterBeat = false;
+    state.depthKey = null;
+    elDepthBackdrop.hidden = true;
+    state.idleHint = '';
+    elHintPill.hidden = true;
+
+    stage.setMythView(tab);
+    stage.setTeacherMode(state.teacher);
+
+    if (tab === 'ftl') {
+      stage.setAlicePartition(!state.mythFtl.revealed);
+      stage.setDial('left', state.mythFtl.message[0] === '1' ? 1 : 0, 'chsh');
+      stage.setDial('right', 1, 'chsh');
+      stage.bloomLampRight(0);
+    } else if (tab === 'gloves') {
+      const showEnt = !!state.mythGloves.randRes;
+      stage.setSourceEntangled(showEnt);
+      stage.setDial('left', 0, 'mermin');
+      stage.setDial('right', showEnt ? 2 : 0, 'mermin');
+      stage.bloomLampLeft(0);
+      stage.bloomLampRight(showEnt ? 1 : 0);
+    } else if (tab === 'observer') {
+      const useRec = state.mythObserver.mode === 'recorder' || !!state.mythObserver.recorderRes;
+      stage.setRecorderHoods(useRec);
+      const activeRes = useRec ? state.mythObserver.recorderRes : state.mythObserver.humanRes;
+      if (activeRes) {
+        stage.setWallState('shattered', { settled: true });
+        stage.setShowQuantumLabel(true);
+        stage.setArenaProgress(activeRes.winRate, { isQuantum: true, snap: true, rounds: activeRes.rounds });
+      } else {
+        stage.setWallState('intact');
+        stage.setArenaProgress(0, { isQuantum: true, snap: true, rounds: 0 });
+      }
+      if (!useRec) {
+        stage.bloomLampLeft(0);
+        stage.bloomLampRight(0);
+      }
+    }
+
+    render();
+    elPanelScroll.scrollTop = 0;
+    requestAnimationFrame(() => stage.resize());
+  }
+
+  function runMythFtlSend() {
+    touchInteraction();
+    state.mythFtl.result = sampleFtlMessage({ message: state.mythFtl.message, pairsPerLetter: 600 });
+    state.mythFtl.sent = true;
+    state.mythFtl.revealed = false;
+    stage.setAlicePartition(true);
+    const lastSlot = state.mythFtl.result.slots[state.mythFtl.result.slots.length - 1];
+    const lastB = lastSlot.bobStrip[lastSlot.bobStrip.length - 1] ?? 0;
+    stage.bloomLampRight(lastB);
+    stage.spawnMotePair({ colorA: 0, colorB: lastB, entangled: true, duration: 0.34 });
+    audio.playLampPair(lastB, lastB);
+    render();
+  }
+
+  function runMythFtlReveal({ instant = false } = {}) {
+    touchInteraction();
+    if (!state.mythFtl.sent) {
+      state.mythFtl.result = sampleFtlMessage({ message: state.mythFtl.message, pairsPerLetter: 600 });
+      state.mythFtl.sent = true;
+    }
+    const finish = () => {
+      state.mythFtl.revealed = true;
+      stage.setAlicePartition(false);
+      stage.bloomLampLeft(0);
+      stage.bloomLampRight(0);
+      audio.playCompareArrive();
+      render();
+    };
+    if (instant) {
+      finish();
+    } else {
+      stage.triggerComparePulse(finish);
+    }
+  }
+
+  function runMythGlovesSame() {
+    touchInteraction();
+    state.mythGloves.sameRes = sampleGlovesVsEntangled({ rounds: 1200, sameDial: true });
+    state.mythGloves.randRes = null;
+    stage.setSourceEntangled(false);
+    stage.setDial('left', 0, 'mermin');
+    stage.setDial('right', 0, 'mermin');
+    stage.bloomLampLeft(0);
+    stage.bloomLampRight(0);
+    stage.spawnMotePair({ colorA: 0, colorB: 0, entangled: false, duration: 0.35 });
+    audio.playLampPair(0, 0);
+    render();
+  }
+
+  function runMythGlovesRandom() {
+    touchInteraction();
+    if (!state.mythGloves.sameRes) {
+      state.mythGloves.sameRes = sampleGlovesVsEntangled({ rounds: 1200, sameDial: true });
+    }
+    state.mythGloves.randRes = sampleGlovesVsEntangled({ rounds: 2400, sameDial: false });
+    stage.setSourceEntangled(true);
+    const le = state.mythGloves.randRes.lastEnt;
+    stage.setDial('left', le.dialA, 'mermin');
+    stage.setDial('right', le.dialB, 'mermin');
+    stage.bloomLampLeft(le.colorA);
+    stage.bloomLampRight(le.colorB);
+    stage.spawnMotePair({ colorA: le.colorA, colorB: le.colorB, entangled: true, duration: 0.35 });
+    audio.playCompareArrive();
+    render();
+  }
+
+  function runMythObserverHuman() {
+    touchInteraction();
+    state.mythObserver.mode = 'human';
+    state.mythObserver.humanRes = sampleObserverVsRecorder({ rounds: 2000, detector: 'human' });
+    state.mythObserver.recorderRes = null;
+    stage.setRecorderHoods(false);
+    stage.setWallState('shattered', { settled: true });
+    stage.setShowQuantumLabel(true);
+    stage.setArenaProgress(state.mythObserver.humanRes.winRate, {
+      isQuantum: true,
+      snap: true,
+      rounds: state.mythObserver.humanRes.rounds,
+    });
+    const last = state.mythObserver.humanRes.last;
+    stage.setDial('left', last.x, 'chsh');
+    stage.setDial('right', last.y, 'chsh');
+    stage.bloomLampLeft(last.a);
+    stage.bloomLampRight(last.b);
+    audio.playLampPair(last.a, last.b);
+    render();
+  }
+
+  function runMythObserverRecorder() {
+    touchInteraction();
+    if (!state.mythObserver.humanRes) {
+      state.mythObserver.humanRes = sampleObserverVsRecorder({ rounds: 2000, detector: 'human' });
+    }
+    state.mythObserver.mode = 'recorder';
+    state.mythObserver.recorderRes = sampleObserverVsRecorder({ rounds: 2000, detector: 'recorder' });
+    stage.setRecorderHoods(true);
+    stage.setWallState('shattered', { settled: true });
+    stage.setShowQuantumLabel(true);
+    stage.setArenaProgress(state.mythObserver.recorderRes.winRate, {
+      isQuantum: true,
+      snap: true,
+      rounds: state.mythObserver.recorderRes.rounds,
+    });
+    audio.playCompareArrive();
+    render();
+  }
+
   function goto(nextStep) {
     const s = Math.max(0, Math.min(STEP_COUNT - 1, nextStep));
     stopTimers();
     state.step = s;
+    state.mythMode = false;
     state.bridgeOpen = false;
     state.shatterBeat = false;
     state.depthKey = null;
@@ -637,9 +815,14 @@ export function createApp({ stage, audio, root }) {
   }
 
   function renderTopBar() {
-    elBackBtn.hidden = state.step === 0;
-    elResetBtn.hidden = state.step === 0;
-    if (elSkipTop) elSkipTop.hidden = state.step === 0 || state.step >= 5;
+    elBackBtn.hidden = !state.mythMode && state.step === 0;
+    elResetBtn.hidden = !state.mythMode && state.step === 0;
+    if (elSkipTop) elSkipTop.hidden = state.mythMode || state.step === 0 || state.step >= 5;
+    if (elMythsBtn) {
+      elMythsBtn.hidden = !state.mythMode && state.step === 0;
+      elMythsBtn.classList.toggle('active', state.mythMode);
+      elMythsBtn.textContent = state.mythMode ? '← Story' : 'Myths';
+    }
     elModeSelf.classList.toggle('active', !state.teacher);
     elModeTeacher.classList.toggle('active', state.teacher);
     elSoundBtn.setAttribute('aria-pressed', String(!audio.isMuted()));
@@ -650,14 +833,202 @@ export function createApp({ stage, audio, root }) {
     stage.setTeacherMode(state.teacher);
 
     elStepDots.innerHTML = Array.from({ length: STEP_COUNT }, (_, i) => {
-      const cls = i === state.step ? 'dot active' : i < state.step ? 'dot done' : 'dot';
+      const cls = !state.mythMode && i === state.step ? 'dot active' : (!state.mythMode && i < state.step) ? 'dot done' : 'dot';
       return `<button class="${cls}" data-goto="${i}" aria-label="Step ${i + 1}"></button>`;
-    }).join('');
+    }).join('') + `<button class="dot-myths ${state.mythMode ? 'active' : ''}" id="btn-myths-mobile" aria-label="Myth-buster challenges">${state.mythMode ? 'Story' : 'Myths'}</button>`;
+  }
+
+  function renderMythPanel() {
+    const tab = state.mythTab;
+    const tabsHtml = `
+      <div class="myth-tabs" role="tablist" aria-label="Myth-buster challenges">
+        <button class="myth-tab ${tab === 'ftl' ? 'active' : ''}" data-mythtab="ftl" role="tab">1 · FTL Text</button>
+        <button class="myth-tab ${tab === 'gloves' ? 'active' : ''}" data-mythtab="gloves" role="tab">2 · Gloves</button>
+        <button class="myth-tab ${tab === 'observer' ? 'active' : ''}" data-mythtab="observer" role="tab">3 · Watcher</button>
+      </div>
+    `;
+    let bodyHtml = tabsHtml;
+    let footerHtml = '';
+
+    if (tab === 'ftl') {
+      const mf = state.mythFtl;
+      const slots = mf.result ? mf.result.slots : null;
+      const choiceLabel = c => (c === '0' ? 'Dial 0' : c === '1' ? 'Dial 1' : 'Box Off');
+      const letterLabel = (c, i) => (c === '0' ? 'S' : c === '1' ? 'O' : '—');
+      bodyHtml += `
+        <div class="step-kicker">Myth 1 · Faster-than-light texting</div>
+        <h2 class="step-question">Text Bob faster than light.</h2>
+        ${state.teacher && !mf.revealed ? `<div class="predict-banner">Predict first: when Alice taps S · O · S, can Bob read it from his lamp alone?</div>` : ''}
+        <p class="step-sub">Tap any slot to set Alice's message (0, 1, or Off), send it, and try reading Bob's lamp alone.</p>
+
+        <div class="myth-msg-row" aria-label="Alice's 3-slot message">
+          ${mf.message.map((c, idx) => `
+            <button class="msg-slot ${c === 'off' ? 'is-off' : ''}" data-ftlslot="${idx}">
+              <span class="ms-ltr">Letter ${idx + 1} (${letterLabel(c, idx)})</span>
+              <strong class="ms-val">${choiceLabel(c)}</strong>
+            </button>
+          `).join('')}
+        </div>
+
+        <div class="tally-card compact">
+          <div class="tally-header">
+            <span>${mf.revealed ? 'After notes meet at light speed' : 'Bob\'s lamp alone (600 pairs / slot)'}</span>
+            <span class="myth-tag ${mf.revealed ? 'gold' : ''}">${mf.revealed ? 'Decoded!' : mf.sent ? '50/50 noise' : 'Ready'}</span>
+          </div>
+          ${slots ? `
+            <div class="ftl-slots">
+              ${slots.map((s, idx) => `
+                <div class="ftl-col ${mf.revealed && s.decoded !== '—' ? 'decoded' : ''}">
+                  <div class="ftl-lbl">Slot ${idx + 1}</div>
+                  <div class="ftl-rate">${(s.bobCoralRate * 100).toFixed(1)}% ▲</div>
+                  <div class="ftl-mini-dots">
+                    ${s.bobStrip.slice(0, 6).map(b => `<span class="m-dot c${b}"></span>`).join('')}
+                  </div>
+                  ${mf.revealed ? `<div class="ftl-dec">${s.decoded === '—' ? 'No notes' : `Decoded: ${letterLabel(s.decoded)} (${s.decoded})`}</div>` : `<div class="ftl-noise">Can't tell</div>`}
+                </div>
+              `).join('')}
+            </div>
+          ` : `<div class="tally-sub">Tap "Send message" to fire 1,800 entangled pairs to Bob behind Alice's screen.</div>`}
+        </div>
+
+        ${mf.revealed ? `
+          <div class="callout-box">
+            <strong>Entanglement links results, not messages.</strong> Bob's local stream stayed ~50/50 on every letter; the pattern only appeared after Alice's notes arrived at light speed.
+          </div>
+        ` : ''}
+
+        <div class="inline-actions">
+          <button class="btn-secondary strong" id="btn-myth-ftl-send">${mf.sent ? 'Send fresh burst' : 'Send S · O · S'}</button>
+          ${mf.sent && !mf.revealed ? `<button class="btn-secondary reveal-outline" id="btn-myth-ftl-reveal">Bring notes together (light speed)</button>` : ''}
+        </div>
+      `;
+      footerHtml = `
+        ${!mf.sent
+          ? `<button class="btn-primary" id="btn-myth-ftl-send">Send S · O · S to Bob</button>`
+          : !mf.revealed
+            ? `<button class="btn-primary pulse-gold" id="btn-myth-ftl-reveal">Send Alice's notes at light speed →</button>`
+            : `<button class="btn-primary" data-mythtab="gloves">Next myth: Two gloves in two boxes →</button>`}
+        <button class="btn-depth" data-depth="mythFtl">How do we know?</button>
+      `;
+    } else if (tab === 'gloves') {
+      const mg = state.mythGloves;
+      const hasSame = !!mg.sameRes;
+      const hasRand = !!mg.randRes;
+      bodyHtml += `
+        <div class="step-kicker">Myth 2 · Pre-packed hidden instructions</div>
+        <h2 class="step-question">"It's just two gloves in two boxes."</h2>
+        ${state.teacher && !hasRand ? `<div class="predict-banner">Predict first: gloves match 100% on same dials — what happens on random dials?</div>` : ''}
+        <p class="step-sub">Compare random pre-packed glove cards against real entangled pairs in the 3-dial boxes.</p>
+
+        <div class="tally-card compact">
+          <div class="tally-header">
+            <span>1. Matching dials (1,200 pairs)</span>
+            <span class="myth-tag">${hasSame ? 'Identical!' : 'Step 1'}</span>
+          </div>
+          <div class="cmp-pair">
+            <div class="cmp-box"><span>Glove pairs</span><strong>${hasSame ? `${(mg.sameRes.gloveRate * 100).toFixed(1)}%` : '—'}</strong></div>
+            <div class="cmp-box gold"><span>Entangled</span><strong>${hasSame ? `${(mg.sameRes.entRate * 100).toFixed(1)}%` : '—'}</strong></div>
+          </div>
+        </div>
+
+        <div class="tally-card compact ${hasRand ? 'highlight-gold' : ''}">
+          <div class="tally-header">
+            <span>2. Random dials (2,400 pairs)</span>
+            <span class="myth-tag ${hasRand ? 'gold' : ''}">${hasRand ? 'Gap revealed!' : 'Step 2'}</span>
+          </div>
+          ${hasRand ? `
+            <div class="cmp-bars">
+              <div class="cmp-bar-row">
+                <div class="cmp-bar-lbl"><span>Glove pairs (≥ 55.6%)</span><strong>${(mg.randRes.gloveRate * 100).toFixed(1)}%</strong></div>
+                <div class="bar-track slim"><div class="bar-fill ivory" style="width:${mg.randRes.gloveRate * 100}%"></div><div class="bar-mark" style="left:55.56%"></div></div>
+              </div>
+              <div class="cmp-bar-row">
+                <div class="cmp-bar-lbl"><span class="gold-txt">Entangled (~50.0%)</span><strong class="gold-txt">${(mg.randRes.entRate * 100).toFixed(1)}%</strong></div>
+                <div class="bar-track slim"><div class="bar-fill gold" style="width:${mg.randRes.entRate * 100}%"></div><div class="bar-mark" style="left:55.56%"></div></div>
+              </div>
+            </div>
+          ` : `<div class="tally-sub">${hasSame ? 'On matching dials, gloves look perfect! Now test random dials.' : 'Test matching dials first to see why the glove myth sounds so convincing.'}</div>`}
+        </div>
+
+        ${hasRand ? `
+          <div class="callout-box">
+            <strong>Gloves carry instructions. Entangled pairs don't — and the numbers prove it.</strong>
+          </div>
+        ` : ''}
+
+        <div class="inline-actions">
+          <button class="btn-secondary" id="btn-myth-gloves-same">Test same dials</button>
+          <button class="btn-secondary reveal-outline" id="btn-myth-gloves-rand">Test random dials</button>
+        </div>
+      `;
+      footerHtml = `
+        ${!hasSame
+          ? `<button class="btn-primary" id="btn-myth-gloves-same">Test matching dials first</button>`
+          : !hasRand
+            ? `<button class="btn-primary pulse-gold" id="btn-myth-gloves-rand">Now test random dials →</button>`
+            : `<button class="btn-primary" data-mythtab="observer">Next myth: Someone has to be watching →</button>`}
+        <button class="btn-depth" data-depth="mythGloves">How do we know?</button>
+      `;
+    } else if (tab === 'observer') {
+      const mo = state.mythObserver;
+      const hasHuman = !!mo.humanRes;
+      const hasRec = !!mo.recorderRes;
+      bodyHtml += `
+        <div class="step-kicker">Myth 3 · Human consciousness</div>
+        <h2 class="step-question">"Someone has to be watching."</h2>
+        ${state.teacher && !hasRec ? `<div class="predict-banner">Predict first: if we seal both lamps under dark time-taggers with no human watching, will the score drop to 75%?</div>` : ''}
+        <p class="step-sub">Run 2,000 entangled rounds watched live, then cap both lamps with sealed electronic recorders and compare.</p>
+
+        <div class="tally-card compact">
+          <div class="cmp-pair">
+            <div class="cmp-box ${hasHuman ? 'filled' : ''}">
+              <span>Human watching</span>
+              <strong>${hasHuman ? `${(mo.humanRes.winRate * 100).toFixed(1)}%` : '—'}</strong>
+              <small>${hasHuman ? `${mo.humanRes.wins.toLocaleString()} / 2,000` : 'Open lamps'}</small>
+            </div>
+            <div class="cmp-box gold ${hasRec ? 'filled' : ''}">
+              <span>Sealed recorder</span>
+              <strong class="${hasRec ? 'gold-txt' : ''}">${hasRec ? `${(mo.recorderRes.winRate * 100).toFixed(1)}%` : '—'}</strong>
+              <small>${hasRec ? `${mo.recorderRes.wins.toLocaleString()} / 2,000` : 'No human eyes'}</small>
+            </div>
+          </div>
+          <div class="tally-sub">
+            ${hasRec
+              ? 'Both runs shatter 75% identically — real Bell tests log every click automatically with electronic time-taggers.'
+              : hasHuman
+                ? 'Watched live: ~85.4%. Now cap both lamps with sealed recorders and run unattended.'
+                : 'Start with open lamps watched live, then swap to sealed dark-box recorders.'}
+          </div>
+        </div>
+
+        ${hasRec ? `
+          <div class="callout-box">
+            <strong>Detectors log the same ~85.4% whether anyone is watching or not.</strong> No human consciousness is required.
+          </div>
+        ` : ''}
+
+        <div class="inline-actions">
+          <button class="btn-secondary ${mo.mode === 'human' && hasHuman ? 'strong' : ''}" id="btn-myth-obs-human">Human watching</button>
+          <button class="btn-secondary reveal-outline" id="btn-myth-obs-rec">Sealed recorder</button>
+        </div>
+      `;
+      footerHtml = `
+        ${!hasHuman
+          ? `<button class="btn-primary" id="btn-myth-obs-human">Run 2,000 (human watching)</button>`
+          : !hasRec
+            ? `<button class="btn-primary pulse-gold" id="btn-myth-obs-rec">Swap to sealed recorder →</button>`
+            : `<button class="btn-primary" id="btn-exit-myths">Back to the main story</button>`}
+        <button class="btn-depth" data-depth="mythObserver">How do we know?</button>
+      `;
+    }
+
+    elPanelScroll.innerHTML = bodyHtml;
+    elPanelFooter.innerHTML = footerHtml;
   }
 
   function render() {
     renderTopBar();
-    const isHero = state.step === 0;
+    const isHero = !state.mythMode && state.step === 0;
     root.classList.toggle('is-hero', isHero);
     root.classList.toggle('shatter-focus', state.shatterBeat);
     elHeroOverlay.hidden = !isHero;
@@ -670,6 +1041,11 @@ export function createApp({ stage, audio, root }) {
           <button class="btn-primary" id="btn-investigate">Investigate</button>
         </div>
       `;
+      return;
+    }
+
+    if (state.mythMode) {
+      renderMythPanel();
       return;
     }
 
@@ -1057,11 +1433,12 @@ export function createApp({ stage, audio, root }) {
           </div>
         </div>
         <div class="inline-actions">
-          <button class="btn-secondary" id="btn-switch-teacher">${state.teacher ? 'Switch to Self-guided' : 'Try Teacher / Projector mode'}</button>
+          <button class="btn-secondary" id="btn-play-again">Play again</button>
+          <button class="btn-secondary" id="btn-switch-teacher">${state.teacher ? 'Self-guided mode' : 'Teacher mode'}</button>
         </div>
       `;
       footerHtml = `
-        <button class="btn-primary" id="btn-play-again">Play again from the start</button>
+        <button class="btn-primary pulse-gold" id="btn-open-myths">Test 3 famous myths →</button>
         <button class="btn-depth" data-depth="realWorld">How do we know?</button>
       `;
     }
@@ -1077,9 +1454,38 @@ export function createApp({ stage, audio, root }) {
 
     if (t.id === 'btn-investigate') { audio.playDialClick(); goto(1); return; }
     if (t.id === 'btn-skip-top') { audio.playDialClick(); goto(5); return; }
+    if (t.id === 'btn-myths' || t.id === 'btn-myths-mobile') {
+      audio.playDialClick();
+      if (state.mythMode) goto(state.step || 8);
+      else openMyths(state.mythTab || 'ftl');
+      return;
+    }
+    if (t.id === 'btn-open-myths') { audio.playDialClick(); openMyths('ftl'); return; }
+    if (t.id === 'btn-exit-myths') { audio.playDialClick(); goto(8); return; }
+    if (t.dataset.mythtab) { audio.playDialClick(); openMyths(t.dataset.mythtab); return; }
+    if (t.dataset.ftlslot !== undefined) {
+      const idx = Number(t.dataset.ftlslot);
+      const order = ['0', '1', 'off'];
+      const next = order[(order.indexOf(state.mythFtl.message[idx]) + 1) % order.length];
+      state.mythFtl.message[idx] = next;
+      state.mythFtl.sent = false;
+      state.mythFtl.revealed = false;
+      state.mythFtl.result = null;
+      stage.setAlicePartition(true);
+      audio.playDialClick();
+      render();
+      return;
+    }
+    if (t.id === 'btn-myth-ftl-send') { runMythFtlSend(); return; }
+    if (t.id === 'btn-myth-ftl-reveal') { runMythFtlReveal(); return; }
+    if (t.id === 'btn-myth-gloves-same') { runMythGlovesSame(); return; }
+    if (t.id === 'btn-myth-gloves-rand') { runMythGlovesRandom(); return; }
+    if (t.id === 'btn-myth-obs-human') { runMythObserverHuman(); return; }
+    if (t.id === 'btn-myth-obs-rec') { runMythObserverRecorder(); return; }
     if (t.id === 'btn-back') {
       audio.playDialClick();
-      if (state.bridgeOpen) goto(4);
+      if (state.mythMode) goto(state.step || 8);
+      else if (state.bridgeOpen) goto(4);
       else if (state.step === 5) openBridge();
       else goto(state.step - 1);
       return;
@@ -1227,6 +1633,17 @@ export function createApp({ stage, audio, root }) {
   return {
     goto,
     openBridge,
+    openMyths,
+    runMythBefore() {
+      if (state.mythTab === 'ftl') runMythFtlSend();
+      else if (state.mythTab === 'gloves') runMythGlovesSame();
+      else if (state.mythTab === 'observer') runMythObserverHuman();
+    },
+    runMythReveal() {
+      if (state.mythTab === 'ftl') runMythFtlReveal({ instant: true });
+      else if (state.mythTab === 'gloves') runMythGlovesRandom();
+      else if (state.mythTab === 'observer') runMythObserverRecorder();
+    },
     fire(n = 1) {
       if (state.step === 1 || (state.step === 4 && !state.bridgeOpen)) {
         if (n === 1) fireMerminSingle(false);

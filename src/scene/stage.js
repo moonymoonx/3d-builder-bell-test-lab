@@ -1074,6 +1074,32 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     lampLight.position.set(0, 1.7, 0.35);
     group.add(lampLight);
 
+    // Myth 3: Sleek Brushed-Brass Sealed Time-Tagger Recorder Hood (caps lamp dome when "Sealed recorder" is active!)
+    const recorderHood = new THREE.Group();
+    recorderHood.position.set(0, 1.48, 0);
+    recorderHood.visible = false;
+    group.add(recorderHood);
+
+    const hoodCap = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.36, 32), darkMetalMat);
+    hoodCap.castShadow = true;
+    recorderHood.add(hoodCap);
+    const hoodRim = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.022, 12, 32), brassMat);
+    hoodRim.rotation.x = Math.PI / 2;
+    hoodRim.position.y = -0.17;
+    recorderHood.add(hoodRim);
+    const hoodTop = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.05, 32), brassMat);
+    hoodTop.position.y = 0.19;
+    recorderHood.add(hoodTop);
+    const recLedMat = new THREE.MeshStandardMaterial({
+      color: 0xff9a3c,
+      emissive: new THREE.Color(0xff7a22),
+      emissiveIntensity: 1.8,
+      roughness: 0.2,
+    });
+    const recLed = new THREE.Mesh(new THREE.SphereGeometry(0.036, 16, 16), recLedMat);
+    recLed.position.set(0, 0.04, 0.34);
+    recorderHood.add(recLed);
+
     // Perspective-grounded matte-brass angled museum easel nameplate (nudged cleanly forward of dial rim!)
     const plaqueGroup = new THREE.Group();
     plaqueGroup.position.set(0, 0.0, 1.15);
@@ -1120,6 +1146,8 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       lampHalo,
       lampSymbol,
       lampLight,
+      recorderHood,
+      recLedMat,
       plaqueGroup,
       targetDialRad: 0,
       currentDialRad: 0,
@@ -1534,6 +1562,7 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   let sourceEntangled = true;
   let showStationPlaques = false;
   let showLampBadges = false;
+  let recorderHoodsOn = false;
   let stepIndex = 0;
 
   // Adaptive quality guard for phones (disabled when ?shots / ?q=high!)
@@ -1683,6 +1712,14 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     boxRight.shellMat.color.setHex(teacherMode ? 0x2f3a50 : COL_BOX_SHELL);
   }
 
+  function setRecorderHoods(on) {
+    recorderHoodsOn = !!on;
+    boxLeft.recorderHood.visible = recorderHoodsOn;
+    boxRight.recorderHood.visible = recorderHoodsOn;
+    boxLeft.dimmed = recorderHoodsOn;
+    boxRight.dimmed = recorderHoodsOn;
+  }
+
   function setStep(step) {
     stepIndex = step;
     showStationPlaques = step >= 1;
@@ -1690,6 +1727,7 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
     arenaGroup.visible = step === 5 || step === 6;
     cardStandGroup.visible = step === 3;
     partitionGroup.visible = step === 7;
+    setRecorderHoods(false);
     if (step !== 6) {
       breakthroughZoom = 0;
       showQuantumLabel = false;
@@ -1703,6 +1741,44 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       camCurLook.copy(camTargetLook);
       camera.lookAt(camCurLook);
     }
+  }
+
+  function setMythView(mythId) {
+    // Reuse the exact same stage hardware cleanly for Myth-buster mode
+    showStationPlaques = true;
+    showLampBadges = true;
+    breakthroughZoom = 0;
+    setPeel(false, { snap: true });
+    setRecorderHoods(false);
+    boxLeft.dimmed = false;
+    boxRight.dimmed = false;
+
+    if (mythId === 'ftl') {
+      stepIndex = 7;
+      arenaGroup.visible = false;
+      cardStandGroup.visible = false;
+      partitionGroup.visible = true;
+      setLeverRevealed(false, { snap: true });
+      setDialMode('chsh');
+      setSourceEntangled(true);
+    } else if (mythId === 'gloves') {
+      stepIndex = 3;
+      arenaGroup.visible = false;
+      cardStandGroup.visible = true;
+      partitionGroup.visible = false;
+      setLeverRevealed(false, { snap: true });
+      setDialMode('mermin');
+      setSourceEntangled(false);
+    } else if (mythId === 'observer') {
+      stepIndex = 6;
+      arenaGroup.visible = true;
+      cardStandGroup.visible = false;
+      partitionGroup.visible = false;
+      setLeverRevealed(true, { snap: true });
+      setDialMode('chsh');
+      setSourceEntangled(true);
+    }
+    updateCameraTargets();
   }
 
   function setAlicePartition(raised) {
@@ -2035,6 +2111,11 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
       if (cardStandGroup.visible) {
         cardDisplay.rotation.y = Math.sin(elapsed * 1.1) * 0.08;
       }
+      if (recorderHoodsOn) {
+        const recPulse = 1.1 + 0.9 * (0.5 + 0.5 * Math.sin(elapsed * 4.5));
+        boxLeft.recLedMat.emissiveIntensity = recPulse;
+        boxRight.recLedMat.emissiveIntensity = recPulse;
+      }
     }
 
     // Teacher-mode concealed lever: truly hidden flush below stage until revealed, then smoothly rises!
@@ -2219,6 +2300,8 @@ export function createStage(container, { reducedMotion = false, highQuality = fa
   return {
     resize,
     setStep,
+    setMythView,
+    setRecorderHoods,
     setDial,
     setPeel,
     setCardStrip,

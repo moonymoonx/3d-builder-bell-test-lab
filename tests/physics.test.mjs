@@ -22,6 +22,9 @@ import {
   computeChshS,
   cryptoUniform,
   cryptoInt,
+  sampleFtlMessage,
+  sampleGlovesVsEntangled,
+  sampleObserverVsRecorder,
 } from '../src/physics.js';
 
 test('Singlet Born rule matches (1 - A*B*cos(Delta))/4 across 0-360° and marginals = 1/2', () => {
@@ -160,4 +163,38 @@ test('crypto.getRandomValues sampling works cleanly and S estimator agrees with 
   assert.ok(stats.winRate > 0.80 && stats.winRate < 0.90, `winRate=${stats.winRate}`);
   assert.ok(stats.S > 2.4 && stats.S < 3.2, `S=${stats.S}`);
   assert.ok(run.brokenAt !== null);
+});
+
+test('Myth 1 (FTL): Bob stays ~50% for 0, 1, and Off; comparing notes decodes Alice message cleanly', () => {
+  const res = sampleFtlMessage({ message: ['0', '1', 'off'], pairsPerLetter: 4000 });
+  assert.equal(res.slots.length, 3);
+  for (const s of res.slots) {
+    assert.ok(Math.abs(s.bobCoralRate - 0.5) < 0.03, `Bob coral rate ${s.bobCoralRate} near 0.5 for ${s.choice}`);
+  }
+  // Comparing notes recovers ~85.4% match on y=1 for '0', ~14.6% for '1', and '—' for 'off'
+  assert.ok(res.slots[0].y1MatchRate > 0.80, `slot 0 y1Match=${res.slots[0].y1MatchRate}`);
+  assert.ok(res.slots[1].y1MatchRate < 0.20, `slot 1 y1Match=${res.slots[1].y1MatchRate}`);
+  assert.equal(res.slots[0].decoded, '0');
+  assert.equal(res.slots[1].decoded, '1');
+  assert.equal(res.slots[2].decoded, '—');
+});
+
+test('Myth 2 (Gloves): same dial = 100% for both; random dials separate gloves (~55.6%) from entangled (~50%)', () => {
+  const same = sampleGlovesVsEntangled({ rounds: 1000, sameDial: true });
+  assert.equal(same.gloveRate, 1);
+  assert.equal(same.entRate, 1);
+
+  const rand = sampleGlovesVsEntangled({ rounds: 12000, sameDial: false });
+  assert.ok(Math.abs(rand.gloveRate - 5 / 9) < 0.02, `gloveRate=${rand.gloveRate} near 5/9`);
+  assert.ok(Math.abs(rand.entRate - 0.5) < 0.02, `entRate=${rand.entRate} near 0.5`);
+  assert.ok(rand.gloveRate > rand.entRate + 0.03, 'gloves exceed entangled on random dials');
+});
+
+test('Myth 3 (Observer vs sealed recorder): both violate S > 2 identically around 85.4%', () => {
+  const human = sampleObserverVsRecorder({ rounds: 3000, detector: 'human' });
+  const rec = sampleObserverVsRecorder({ rounds: 3000, detector: 'recorder' });
+  assert.ok(Math.abs(human.winRate - P_QUANTUM_OPT) < 0.025, `human=${human.winRate}`);
+  assert.ok(Math.abs(rec.winRate - P_QUANTUM_OPT) < 0.025, `rec=${rec.winRate}`);
+  assert.ok(human.S > 2.5 && rec.S > 2.5, `S_human=${human.S}, S_rec=${rec.S}`);
+  assert.ok(human.brokenAt !== null && rec.brokenAt !== null);
 });

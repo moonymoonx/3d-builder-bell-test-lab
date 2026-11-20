@@ -21,3 +21,6 @@
 - 03:33 R4 scores clarity 4, ease 4, beauty 4, smooth 4, delight 3.
 - 03:33 G07 fix brief sent (delight: shatter beat, teacher lever, phone hero, step 7 screen, 3 wording fixes).
 - 03:34 G08 myth-buster brief drafted (sent after G07 + R5 pass).
+- 03:45 G07 done (4103608, pushed). R5 cold review started (fresh session).
+- 03:45 G08 myth-buster build started in parallel with R5 review (R5 reads screenshots/r5 only).
+- 03:50 R5 scores: clarity 4, ease 4, beauty 4, smooth 4, delight 4 — all ≥ 4, polish loop stops. Remaining nits logged in ref/REVIEW-R5.md.

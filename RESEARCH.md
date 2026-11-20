@@ -94,3 +94,13 @@
 - **Sources:**
   - https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
   - https://www.w3.org/TR/webcrypto/
+
+### Q12 — Automated detectors & time-taggers in real Bell tests ("Someone has to be watching" myth)
+- **Verdict:** **CONFIRMED** (strictly experimental; avoids interpretation overclaims)
+- **Plain-language line (21 words):** "Real Bell tests record every click automatically with electronic detectors and time-taggers — no human watcher is needed for the ~85% score."
+- **Notes:** In loophole-free Bell tests, measurement outcomes are registered electronically by photodetectors, superconducting nanowire/transition-edge sensors, or spin-readout counters connected to local FPGAs and time-taggers, saved to local storage, and correlated offline later (Hensen et al. 2015 across 1.3 km in Delft, $S = 2.42 \pm 0.20$; Giustina et al. 2015 in Vienna, $p \le 3.74\times 10^{-31}$; Shalm et al. 2015 at NIST, $p = 5.9\times 10^{-9}$). Decoherence and irreversible physical detector interaction account for stable classical records without requiring human consciousness, while keeping wording strictly neutral on broader foundational interpretations of the measurement problem.
+- **Sources:**
+  - https://arxiv.org/abs/1508.05949 (Hensen et al. 2015, Delft loophole-free Bell test — local time-tagged event recording)
+  - https://arxiv.org/abs/1511.03190 (Giustina et al. 2015, Vienna) and https://arxiv.org/abs/1511.03189 (Shalm et al. 2015, NIST)
+  - https://www.nobelprize.org/prizes/physics/2022/advanced-information/ (Nobel Prize 2022 Scientific Background)
+  - https://plato.stanford.edu/entries/qm-decoherence/ (Stanford Encyclopedia of Philosophy, *"The Role of Decoherence in Quantum Mechanics"*)

@@ -84,4 +84,35 @@ export const DEPTH_DRAWERS = {
       'Ekert, PRL 67, 661 (1991) — doi:10.1103/physrevlett.67.661',
     ],
   },
+  mythFtl: {
+    title: 'How do we know? — Why no message outruns light',
+    plain: 'No matter whether Alice picks 0, 1, or switches her box off, Bob\'s local probabilities stay 50/50 — so no signal can ever cross faster than light.',
+    detail: 'This is the quantum No-Signalling Theorem (Ghirardi, Rimini, & Weber, 1980). When Alice picks 0, her outcomes match Bob\'s y=1 lamp ~85.4% of the time; when she picks 1, they differ ~85.4% of the time. That contrast decodes her message cleanly — but ONLY after Alice\'s list travels to Bob at light speed or slower.',
+    math: 'Reduced state ρ_B = Tr_A(|ψ⁻⟩⟨ψ⁻|) = I/2 ⇒ P(b = 0 | x, y) = 1/2 for x ∈ {0, 1, off}. Joint contrast on y = 1: P(a = b | x=0) = cos²(π/8) ≈ 85.4%, P(a = b | x=1) = sin²(π/8) ≈ 14.6%.',
+    sources: [
+      'Ghirardi, Rimini, & Weber, Lett. Nuovo Cimento 27, 293 (1980) — doi:10.1007/bf02817189',
+      'Brunner et al., Rev. Mod. Phys. 86, 419 (2014) — arxiv.org/abs/1303.2849',
+    ],
+  },
+  mythGloves: {
+    title: 'How do we know? — Why entanglement isn\'t two gloves',
+    plain: 'Pre-packed gloves (John Bell\'s "Bertlmann\'s socks") match 100% on equal dials, just like entanglement — but on random dials every glove card matches at least 55.6%, never 50%.',
+    detail: 'In 1981, John Bell contrasted ordinary everyday correlations (like opening one box to find a left glove and knowing the other holds a right glove) with quantum pairs tested at tilted angles. Any pre-packed instruction card for 3 dials matches on at least 5 of 9 dial pairs (55.6%), whereas entangled pairs hit 50.0%.',
+    math: 'Pre-set cards: P(same) ∈ {5/9, 9/9} ≥ 55.56%. Singlet at 0°/120°/240°: P(same) = (3/9)·1 + (6/9)·cos²(60°) = 1/2 = 50.0%.',
+    sources: [
+      'Bell, J. Phys. Colloq. 42, C2-41 (1981), "Bertlmann\'s Socks and the Nature of Reality" — doi:10.1051/jphyscol:1981202',
+      'Mermin, Am. J. Phys. 49, 940 (1981) — doi:10.1119/1.12594 · Nobel Prize 2022 Popular Info',
+    ],
+  },
+  mythObserver: {
+    title: 'How do we know? — Automated detectors, no human watcher needed',
+    plain: 'Real Bell tests record every outcome automatically with electronic detectors and time-taggers — no human mind or eyes need to watch the boxes.',
+    detail: 'In the 2015 loophole-free Bell tests (Delft, Vienna, and NIST), high-speed photodetectors and superconducting sensors logged time-stamped clicks straight onto local hard drives unattended, and physicists only compared the files later to confirm the ~85% / S > 2 violation. Broader foundational debates about quantum interpretations are separate from any claim that human consciousness is required.',
+    math: 'Delft 2015 (Hensen et al., 1.3 km): automated local FPGA time-taggers, S = 2.42 ± 0.20 (p = 0.039). Vienna 2015 (Giustina et al.): p ≤ 3.74×10⁻³¹. NIST 2015 (Shalm et al.): p = 5.9×10⁻⁹.',
+    sources: [
+      'Hensen et al., Nature 526, 682 (2015) — arxiv.org/abs/1508.05949',
+      'Giustina et al. (2015) — arxiv.org/abs/1511.03190 · Shalm et al. (2015) — arxiv.org/abs/1511.03189',
+      'SEP "The Role of Decoherence in Quantum Mechanics" — plato.stanford.edu/entries/qm-decoherence/',
+    ],
+  },
 };
